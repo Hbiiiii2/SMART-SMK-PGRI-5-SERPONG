@@ -121,18 +121,19 @@ class CacheService
 
         $data = Cache::remember("ks_dashboard_{$today}", 30, function () use ($today) {
             $totalGuru = Guru::count();
-            $guruHadir = \App\Models\AbsensiGuru::where('tanggal', $today)->whereIn('status', ['Hadir', 'Terlambat'])->count();
-            $guruTidakHadir = \App\Models\AbsensiGuru::where('tanggal', $today)->where('status', 'Alpha')->count();
-            $guruSakit = \App\Models\AbsensiGuru::where('tanggal', $today)->where('status', 'Sakit')->count();
-            $guruIzin = \App\Models\AbsensiGuru::where('tanggal', $today)->where('status', 'Izin')->count();
-            $guruRecorded = \App\Models\AbsensiGuru::where('tanggal', $today)->count();
+            $guruHadir = \App\Models\AbsensiGuru::whereDate('tanggal', $today)->whereIn('status', ['Hadir', 'Terlambat'])->count();
+            $guruTidakHadir = \App\Models\AbsensiGuru::whereDate('tanggal', $today)->where('status', 'Alpha')->count();
+            $guruSakit = \App\Models\AbsensiGuru::whereDate('tanggal', $today)->where('status', 'Sakit')->count();
+            $guruIzin = \App\Models\AbsensiGuru::whereDate('tanggal', $today)->where('status', 'Izin')->count();
+            $guruRecorded = \App\Models\AbsensiGuru::whereDate('tanggal', $today)->count();
             $guruBelumAbsen = max(0, $totalGuru - $guruRecorded);
 
             $guruList = Guru::with('user')
                 ->leftJoin('absensi_guru', function ($join) use ($today) {
                     $join->on('guru.id', '=', 'absensi_guru.guru_id')
-                        ->where('absensi_guru.tanggal', '=', $today);
+                        ->whereDate('absensi_guru.tanggal', $today);
                 })
+                ->leftJoin('lokasi', 'absensi_guru.lokasi_id', '=', 'lokasi.id')
                 ->select(
                     'guru.*',
                     'absensi_guru.id as absensi_id',
@@ -141,7 +142,8 @@ class CacheService
                     'absensi_guru.jam_keluar',
                     'absensi_guru.latitude',
                     'absensi_guru.longitude',
-                    'absensi_guru.foto_lokasi'
+                    'absensi_guru.foto_lokasi',
+                    'lokasi.nama as nama_lokasi'
                 )
                 ->orderByRaw("CASE WHEN absensi_guru.status IS NULL THEN 0 ELSE 1 END ASC, guru.nama_lengkap ASC")
                 ->get()
@@ -153,7 +155,7 @@ class CacheService
             $totalSiswa = Siswa::count();
 
             $firstAbsensiSubquery = \App\Models\AbsensiSiswa::select('siswa_id', \Illuminate\Support\Facades\DB::raw('MIN(id) as first_id'))
-                ->where('tanggal', $today)
+                ->whereDate('tanggal', $today)
                 ->groupBy('siswa_id');
 
             $dailyAbsensiBase = \App\Models\AbsensiSiswa::joinSub($firstAbsensiSubquery, 'first_absensi', function ($join) {
@@ -166,16 +168,19 @@ class CacheService
             $siswaIzin = (clone $dailyAbsensiBase)->where('status', 'Izin')->count();
             $siswaTerlambat = (clone $dailyAbsensiBase)->where('status', 'Terlambat')->count();
 
-            $rekapPerKelas = \App\Models\AbsensiSiswa::joinSub($firstAbsensiSubquery, 'first_absensi', function ($join) {
-                    $join->on('absensi_siswa.id', '=', 'first_absensi.first_id');
+            $rekapPerKelas = Siswa::leftJoinSub($firstAbsensiSubquery, 'first_absensi', function ($join) {
+                    $join->on('siswa.id', '=', 'first_absensi.siswa_id');
                 })
-                ->join('siswa', 'absensi_siswa.siswa_id', '=', 'siswa.id')
+                ->leftJoin('absensi_siswa', function ($join) {
+                    $join->on('first_absensi.first_id', '=', 'absensi_siswa.id');
+                })
                 ->selectRaw("siswa.kelas,
                     COUNT(CASE WHEN absensi_siswa.status IN ('Hadir','Terlambat') THEN 1 END) as hadir,
                     COUNT(CASE WHEN absensi_siswa.status = 'Terlambat' THEN 1 END) as terlambat,
                     COUNT(CASE WHEN absensi_siswa.status = 'Alfa' THEN 1 END) as alfa,
                     COUNT(CASE WHEN absensi_siswa.status = 'Sakit' THEN 1 END) as sakit,
                     COUNT(CASE WHEN absensi_siswa.status = 'Izin' THEN 1 END) as izin,
+                    COUNT(CASE WHEN absensi_siswa.id IS NULL THEN 1 END) as belum_absen,
                     COUNT(*) as total")
                 ->groupBy('siswa.kelas')
                 ->orderBy('siswa.kelas')
@@ -196,32 +201,46 @@ class CacheService
                 'siswaIzin' => $siswaIzin,
                 'siswaTerlambat' => $siswaTerlambat,
                 'rekapPerKelas' => $rekapPerKelas,
+                'lokasiSekolah' => self::lokasiList(),
             ], self::dashboardAdmin($today));
         });
 
         $firstAbsensiSubquery = \App\Models\AbsensiSiswa::select('siswa_id', \Illuminate\Support\Facades\DB::raw('MIN(id) as first_id'))
-            ->where('tanggal', $today)
+            ->whereDate('tanggal', $today)
             ->groupBy('siswa_id');
 
-        $allSiswaHariIni = Siswa::with('user')
+        $siswaList = Siswa::with('user')
             ->leftJoinSub($firstAbsensiSubquery, 'first_absensi', function ($join) {
                 $join->on('siswa.id', '=', 'first_absensi.siswa_id');
             })
             ->leftJoin('absensi_siswa', function ($join) {
                 $join->on('first_absensi.first_id', '=', 'absensi_siswa.id');
             })
+            ->leftJoin('lokasi', 'absensi_siswa.lokasi_id', '=', 'lokasi.id')
             ->select(
                 'siswa.id as siswa_id',
                 'siswa.nama_lengkap',
                 'siswa.nisn',
                 'siswa.kelas',
+                'siswa.foto',
                 'absensi_siswa.status',
-                'absensi_siswa.jam_masuk'
+                'absensi_siswa.jam_masuk',
+                'absensi_siswa.jam_keluar',
+                'absensi_siswa.latitude',
+                'absensi_siswa.longitude',
+                'absensi_siswa.foto_lokasi',
+                'lokasi.nama as nama_lokasi'
             )
             ->orderBy('siswa.kelas')
             ->orderBy('siswa.nama_lengkap')
             ->get()
-            ->groupBy('kelas');
+            ->map(function ($s) {
+                $s->status_tampil = $s->status ?? 'Belum Absen';
+                return $s;
+            });
+
+        $data['siswaList'] = $siswaList;
+        $allSiswaHariIni = $siswaList->groupBy('kelas');
 
         $pengaturan = \App\Models\PengaturanSekolah::current();
 

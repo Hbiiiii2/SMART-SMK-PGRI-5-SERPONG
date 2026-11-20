@@ -223,15 +223,159 @@
         @endif
     </div>
 
-    <!-- Peta Lokasi Absensi Hari Ini -->
-    @if(isset($pengaturan) && in_array(strtolower($pengaturan->metode_absensi_guru ?? ''), ['zonasi', 'hybrid']))
+    <!-- Peta Lokasi Absensi GPS (Guru & Siswa) -->
+    @php
+        $guruListData = collect($data['guruList'] ?? []);
+        $siswaListData = collect($data['siswaList'] ?? []);
+        $lokasiSekolahData = collect($data['lokasiSekolah'] ?? []);
+        $guruGps = $guruListData->filter(fn($g) => !empty($g->latitude) && !empty($g->longitude))->values();
+        $siswaGps = $siswaListData->filter(fn($s) => !empty($s->latitude) && !empty($s->longitude))->values();
+        $siswaSorted = $siswaListData->sortBy(fn($s) => [empty($s->status) ? 1 : 0, $s->kelas ?? '', $s->nama_lengkap ?? ''])->values();
+    @endphp
     <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-        <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">Peta Sebaran Absensi Guru</h3>
-        <div id="ks-map" class="h-[500px] w-full rounded-xl border border-gray-200 dark:border-gray-700 z-10"></div>
-    </div>
-    @endif
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Peta Sebaran Lokasi Absensi GPS (Guru &amp; Siswa)</h3>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    Pantau titik koordinat check-in GPS Guru (<span class="font-semibold" style="color: #16a34a;">Hijau</span>) dan Siswa (<span class="font-semibold" style="color: #2563eb;">Biru</span>) hari ini.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button type="button" data-map-filter="all" class="map-filter-btn inline-flex items-center gap-1.5 rounded-lg border border-brand-500 bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white transition">
+                    Semua ({{ $guruGps->count() + $siswaGps->count() }})
+                </button>
+                <button type="button" data-map-filter="guru" class="map-filter-btn inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                    <span class="inline-block h-2.5 w-2.5 rounded-full" style="background-color: #16a34a;"></span>
+                    Guru ({{ $guruGps->count() }})
+                </button>
+                <button type="button" data-map-filter="siswa" class="map-filter-btn inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                    <span class="inline-block h-2.5 w-2.5 rounded-full" style="background-color: #2563eb;"></span>
+                    Siswa ({{ $siswaGps->count() }})
+                </button>
+            </div>
+        </div>
 
-    @if($data['rekapPerKelas']->isNotEmpty())
+        <div id="ks-map" class="h-[460px] w-full rounded-xl border border-gray-200 dark:border-gray-700 z-10"></div>
+
+        <div class="mt-4">
+            @if($guruGps->isEmpty() && $siswaGps->isEmpty())
+                <div class="rounded-xl border border-dashed border-gray-200 bg-gray-50 p-4 text-center text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-800/40 dark:text-gray-400">
+                    Belum ada titik absensi GPS Guru maupun Siswa yang terekam hari ini. Marker akan muncul otomatis (<span class="font-semibold" style="color: #16a34a;">#16a34a Hijau untuk Guru</span>, <span class="font-semibold" style="color: #2563eb;">#2563eb Biru untuk Siswa</span>) saat check-in GPS tercatat.
+                </div>
+            @else
+                <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Daftar Check-In GPS Hari Ini (Klik untuk fokus peta)</h4>
+                <div class="grid max-h-56 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($guruGps as $g)
+                    <div class="flex items-center justify-between rounded-xl border border-green-200 bg-green-50/50 p-3 dark:border-green-500/20 dark:bg-green-500/5">
+                        <button type="button" onclick="window.focusAttendanceMarker && window.focusAttendanceMarker('guru-{{ $g->id }}')" class="text-left">
+                            <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-800 dark:text-white/90">
+                                <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: #16a34a;"></span>
+                                {{ $g->nama_lengkap }}
+                            </div>
+                            <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                Guru &bull; {{ $g->jam_masuk ? \Carbon\Carbon::parse($g->jam_masuk)->format('H:i') : '-' }}
+                                @if(!empty($g->nama_lokasi)) &bull; {{ $g->nama_lokasi }} @endif
+                            </div>
+                            <div class="mt-0.5 font-mono text-[11px] text-gray-500 dark:text-gray-400">
+                                {{ number_format((float) $g->latitude, 5) }}, {{ number_format((float) $g->longitude, 5) }}
+                            </div>
+                        </button>
+                        <a href="https://maps.google.com/?q={{ $g->latitude }},{{ $g->longitude }}" target="_blank" rel="noopener" class="ml-2 shrink-0 rounded-lg border border-green-300 bg-white px-2 py-1 text-[11px] font-medium text-green-700 hover:bg-green-50 dark:border-green-700 dark:bg-gray-800 dark:text-green-400">
+                            Maps
+                        </a>
+                    </div>
+                    @endforeach
+                    @foreach($siswaGps as $s)
+                    <div class="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-500/20 dark:bg-blue-500/5">
+                        <button type="button" onclick="window.focusAttendanceMarker && window.focusAttendanceMarker('siswa-{{ $s->siswa_id }}')" class="text-left">
+                            <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-800 dark:text-white/90">
+                                <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: #2563eb;"></span>
+                                {{ $s->nama_lengkap }}
+                            </div>
+                            <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                Siswa ({{ $s->kelas }}) &bull; {{ $s->jam_masuk ? \Carbon\Carbon::parse($s->jam_masuk)->format('H:i') : '-' }}
+                                @if(!empty($s->nama_lokasi)) &bull; {{ $s->nama_lokasi }} @endif
+                            </div>
+                            <div class="mt-0.5 font-mono text-[11px] text-gray-500 dark:text-gray-400">
+                                {{ number_format((float) $s->latitude, 5) }}, {{ number_format((float) $s->longitude, 5) }}
+                            </div>
+                        </button>
+                        <a href="https://maps.google.com/?q={{ $s->latitude }},{{ $s->longitude }}" target="_blank" rel="noopener" class="ml-2 shrink-0 rounded-lg border border-blue-300 bg-white px-2 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:bg-gray-800 dark:text-blue-400">
+                            Maps
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Monitoring Kehadiran Siswa Hari Ini (Always Visible) -->
+    <div class="mb-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Monitoring Kehadiran Siswa Hari Ini</h3>
+            <a href="{{ route('ks.monitoring-siswa') }}" class="text-xs font-semibold text-brand-500 hover:text-brand-600">Kelola Monitoring Siswa &rarr;</a>
+        </div>
+        <div class="max-h-[420px] overflow-x-auto overflow-y-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-900">
+                    <tr class="border-b border-gray-100 dark:border-gray-800/50">
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">No</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">NISN</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Nama Siswa</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Kelas</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Status</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Jam Masuk</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Jam Keluar</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Lokasi GPS</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50">
+                    @forelse($siswaSorted as $i => $s)
+                    <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
+                        <td class="px-6 py-3 text-gray-500 dark:text-gray-400">{{ $i + 1 }}</td>
+                        <td class="px-6 py-3 font-mono text-xs text-gray-600 dark:text-gray-400">{{ $s->nisn }}</td>
+                        <td class="px-6 py-3 font-medium text-gray-800 dark:text-white/90">
+                            <a href="{{ route('ks.detail-siswa', $s->siswa_id) }}" class="text-brand-600 hover:underline dark:text-brand-400">{{ $s->nama_lengkap }}</a>
+                        </td>
+                        <td class="px-6 py-3 text-gray-600 dark:text-gray-400">{{ $s->kelas }}</td>
+                        <td class="px-6 py-3">
+                            @php
+                                $sBadge = match($s->status_tampil) {
+                                    'Hadir' => 'bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400',
+                                    'Terlambat' => 'bg-warning-50 text-warning-700 dark:bg-warning-500/10 dark:text-warning-400',
+                                    'Alfa' => 'bg-error-50 text-error-700 dark:bg-error-500/10 dark:text-error-400',
+                                    'Sakit' => 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400',
+                                    'Izin' => 'bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400',
+                                    default => 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+                                };
+                            @endphp
+                            <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium {{ $sBadge }}">{{ $s->status_tampil }}</span>
+                        </td>
+                        <td class="px-6 py-3 text-gray-600 dark:text-gray-400">{{ $s->jam_masuk ? \Carbon\Carbon::parse($s->jam_masuk)->format('H:i') : '-' }}</td>
+                        <td class="px-6 py-3 text-gray-600 dark:text-gray-400">{{ $s->jam_keluar ? \Carbon\Carbon::parse($s->jam_keluar)->format('H:i') : '-' }}</td>
+                        <td class="px-6 py-3 text-xs">
+                            @if(!empty($s->latitude) && !empty($s->longitude))
+                                <a href="https://maps.google.com/?q={{ $s->latitude }},{{ $s->longitude }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-medium text-blue-600 hover:underline dark:text-blue-400">
+                                    <span class="inline-block h-2 w-2 rounded-full" style="background-color: #2563eb;"></span>
+                                    {{ $s->nama_lokasi ?: (number_format((float) $s->latitude, 4) . ', ' . number_format((float) $s->longitude, 4)) }}
+                                </a>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Belum ada data siswa.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Rekap Kehadiran Siswa Per Kelas (Always Visible) -->
     <div class="mb-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="border-b border-gray-200 px-6 py-4 dark:border-gray-800">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Rekap Kehadiran Siswa Per Kelas</h3>
@@ -247,11 +391,12 @@
                         <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Alfa</th>
                         <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Sakit</th>
                         <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Izin</th>
+                        <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">Belum Absen</th>
                         <th class="px-6 py-3 font-medium text-gray-500 dark:text-gray-400">% Kehadiran</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50">
-                    @foreach($data['rekapPerKelas'] as $rekap)
+                    @forelse($data['rekapPerKelas'] as $rekap)
                     @php $persentase = $rekap->total > 0 ? round(($rekap->hadir / $rekap->total) * 100, 1) : 0; @endphp
                     <tr class="hover:bg-gray-50 dark:hover:bg-white/[0.02]">
                         <td class="px-6 py-3 font-medium text-gray-800 dark:text-white/90">{{ $rekap->kelas }}</td>
@@ -261,6 +406,7 @@
                         <td class="px-6 py-3 text-error-600">{{ $rekap->alfa }}</td>
                         <td class="px-6 py-3 text-blue-600">{{ $rekap->sakit }}</td>
                         <td class="px-6 py-3 text-purple-600">{{ $rekap->izin }}</td>
+                        <td class="px-6 py-3 text-gray-500 dark:text-gray-400">{{ $rekap->belum_absen ?? 0 }}</td>
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-2">
                                 <div class="h-2 w-24 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
@@ -270,21 +416,24 @@
                             </div>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="9" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Belum ada data kelas siswa.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
-    @endif
 
-    @if($allSiswaHariIni->isNotEmpty())
+    <!-- Detail Kehadiran Siswa Per Kelas (Always Visible) -->
     <div class="mb-6 rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-800">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Detail Kehadiran Siswa Per Kelas</h3>
             <a href="{{ route('ks.monitoring-siswa') }}" class="text-xs font-semibold text-brand-500 hover:text-brand-600">Kelola Monitoring Siswa &rarr;</a>
         </div>
-        <div class="p-6">
-            @foreach($allSiswaHariIni as $kelas => $siswas)
+        <div class="max-h-[520px] overflow-y-auto p-6">
+            @forelse($allSiswaHariIni as $kelas => $siswas)
             <div class="mb-6 last:mb-0">
                 <h4 class="mb-3 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kelas {{ $kelas }}</h4>
                 <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -310,17 +459,23 @@
                     <a href="{{ route('ks.detail-siswa', $s->siswa_id) }}" class="flex items-center justify-between rounded-xl border p-3 transition hover:shadow-md {{ $statusColor }}">
                         <div>
                             <div class="font-medium text-gray-800 dark:text-white/90 text-sm">{{ $s->nama_lengkap }}</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400">{{ $s->nisn }} | {{ $s->jam_masuk ? \Carbon\Carbon::parse($s->jam_masuk)->format('H:i') : '-' }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">
+                                {{ $s->nisn }} | {{ $s->jam_masuk ? \Carbon\Carbon::parse($s->jam_masuk)->format('H:i') : '-' }}
+                                @if(!empty($s->latitude) && !empty($s->longitude))
+                                    | <span class="font-medium text-blue-600 dark:text-blue-400">GPS</span>
+                                @endif
+                            </div>
                         </div>
-                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold {{ $statusBadge }}">{{ $s->status ?? 'Absen' }}</span>
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-bold {{ $statusBadge }}">{{ $s->status ?? 'Belum Absen' }}</span>
                     </a>
                     @endforeach
                 </div>
             </div>
-            @endforeach
+            @empty
+            <p class="py-4 text-center text-sm text-gray-500 dark:text-gray-400">Belum ada data detail siswa per kelas.</p>
+            @endforelse
         </div>
     </div>
-    @endif
 
     @if($isAdminDashboard && isset($data['absensi_siswa_terbaru']) && $data['absensi_siswa_terbaru']->isNotEmpty())
     <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
@@ -367,66 +522,219 @@
     @endif
 </div>
 
-@if(isset($pengaturan) && in_array(strtolower($pengaturan->metode_absensi_guru ?? ''), ['zonasi', 'hybrid']))
-<!-- Leaflet JS for monitoring -->
+<!-- Leaflet JS for monitoring Guru (Hijau #16a34a) & Siswa (Biru #2563eb) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const guruList = @json($data['guruList']);
+        const guruList = @json($data['guruList'] ?? []);
+        const siswaList = @json($data['siswaList'] ?? []);
+        const lokasiSekolah = @json($data['lokasiSekolah'] ?? []);
 
-        if (!document.getElementById('ks-map')) return;
+        const mapEl = document.getElementById('ks-map');
+        if (!mapEl || typeof L === 'undefined') return;
 
-        let map = L.map('ks-map').setView([-6.3021, 106.6522], 12);
+        const escapeHtml = (value) => String(value ?? '-')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        let defaultLat = -6.3021;
+        let defaultLng = 106.6522;
+        if (lokasiSekolah.length > 0 && lokasiSekolah[0].latitude && lokasiSekolah[0].longitude) {
+            defaultLat = parseFloat(lokasiSekolah[0].latitude);
+            defaultLng = parseFloat(lokasiSekolah[0].longitude);
+        }
+
+        const map = L.map('ks-map').setView([defaultLat, defaultLng], 15);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        let markers = [];
+        const zoneLayer = L.layerGroup().addTo(map);
+        const guruLayer = L.layerGroup().addTo(map);
+        const siswaLayer = L.layerGroup().addTo(map);
 
-        guruList.forEach(guru => {
-            if (guru.latitude && guru.longitude) {
-                let statusColor = guru.status_tampil === 'Hadir' ? 'green' : (guru.status_tampil === 'Terlambat' ? 'orange' : 'red');
-                if (guru.status_tampil === 'Izin' || guru.status_tampil === 'Sakit') statusColor = 'blue';
+        const placedCoords = [];
+        const zoneCoords = [];
+        const markerRegistry = {};
 
-                let lat = parseFloat(guru.latitude);
-                let lng = parseFloat(guru.longitude);
-
-                let isOverlap = markers.some(m => Math.abs(m[0] - lat) < 0.00005 && Math.abs(m[1] - lng) < 0.00005);
-                if (isOverlap) {
-                    lat += (Math.random() - 0.5) * 0.0002;
-                    lng += (Math.random() - 0.5) * 0.0002;
+        lokasiSekolah.forEach((loc) => {
+            if (loc.latitude && loc.longitude) {
+                const lat = parseFloat(loc.latitude);
+                const lng = parseFloat(loc.longitude);
+                const radius = parseInt(loc.radius || 100, 10);
+                if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
+                    L.circle([lat, lng], {
+                        radius: radius,
+                        color: '#6b7280',
+                        fillColor: '#9ca3af',
+                        fillOpacity: 0.12,
+                        weight: 1.5,
+                        dashArray: '4 4'
+                    }).bindPopup(`<strong>Zona Sekolah: ${escapeHtml(loc.nama)}</strong><br>Radius: ${radius} meter`).addTo(zoneLayer);
+                    zoneCoords.push([lat, lng]);
                 }
-
-                let marker = L.circleMarker([lat, lng], {
-                    radius: 8,
-                    fillColor: statusColor,
-                    color: '#fff',
-                    weight: 1,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                }).addTo(map);
-
-                let photoHtml = guru.foto_lokasi ? `<br><img src="/storage/${guru.foto_lokasi}" class="mt-2 h-24 w-auto rounded">` : '';
-
-                marker.bindPopup(`
-                    <strong>${guru.nama_lengkap}</strong><br>
-                    NIP: ${guru.nip || '-'}<br>
-                    Status: ${guru.status_tampil}<br>
-                    Masuk: ${guru.jam_masuk || '-'}<br>
-                    ${photoHtml}
-                `);
-
-                markers.push([lat, lng]);
             }
         });
 
-        if (markers.length > 0) {
-            map.fitBounds(markers, { padding: [50, 50] });
-        }
+        const jitterIfOverlap = (lat, lng) => {
+            const overlaps = placedCoords.some(c => Math.abs(c[0] - lat) < 0.00005 && Math.abs(c[1] - lng) < 0.00005);
+            if (overlaps) {
+                return [
+                    lat + (Math.random() - 0.5) * 0.0002,
+                    lng + (Math.random() - 0.5) * 0.0002
+                ];
+            }
+            return [lat, lng];
+        };
+
+        guruList.forEach((guru) => {
+            if (guru.latitude && guru.longitude) {
+                let lat = parseFloat(guru.latitude);
+                let lng = parseFloat(guru.longitude);
+                if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+                const rawLat = lat;
+                const rawLng = lng;
+                [lat, lng] = jitterIfOverlap(lat, lng);
+                placedCoords.push([lat, lng]);
+
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 8,
+                    fillColor: '#16a34a',
+                    color: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(guruLayer);
+
+                const photoHtml = guru.foto_lokasi
+                    ? `<br><img src="/storage/${encodeURI(guru.foto_lokasi)}" class="mt-2 h-24 w-auto rounded" alt="Foto Lokasi">`
+                    : '';
+
+                marker.bindPopup(`
+                    <div class="text-xs leading-relaxed">
+                        <span style="display:inline-block;padding:2px 6px;border-radius:9999px;background:#dcfce7;color:#15803d;font-weight:700;margin-bottom:4px;">GURU</span><br>
+                        <strong>${escapeHtml(guru.nama_lengkap)}</strong><br>
+                        NIP: ${escapeHtml(guru.nip)}<br>
+                        Status: ${escapeHtml(guru.status_tampil)}<br>
+                        Masuk: ${escapeHtml(guru.jam_masuk)}<br>
+                        ${guru.nama_lokasi ? `Zona: ${escapeHtml(guru.nama_lokasi)}<br>` : ''}
+                        <a href="https://maps.google.com/?q=${rawLat},${rawLng}" target="_blank" rel="noopener" style="color:#16a34a;text-decoration:underline;">Buka di Google Maps</a>
+                        ${photoHtml}
+                    </div>
+                `);
+
+                markerRegistry[`guru-${guru.id}`] = { marker, lat, lng, group: 'guru' };
+            }
+        });
+
+        siswaList.forEach((siswa) => {
+            if (siswa.latitude && siswa.longitude) {
+                let lat = parseFloat(siswa.latitude);
+                let lng = parseFloat(siswa.longitude);
+                if (Number.isNaN(lat) || Number.isNaN(lng)) return;
+
+                const rawLat = lat;
+                const rawLng = lng;
+                [lat, lng] = jitterIfOverlap(lat, lng);
+                placedCoords.push([lat, lng]);
+
+                const marker = L.circleMarker([lat, lng], {
+                    radius: 8,
+                    fillColor: '#2563eb',
+                    color: '#ffffff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                }).addTo(siswaLayer);
+
+                const photoHtml = siswa.foto_lokasi
+                    ? `<br><img src="/storage/${encodeURI(siswa.foto_lokasi)}" class="mt-2 h-24 w-auto rounded" alt="Foto Lokasi">`
+                    : '';
+
+                marker.bindPopup(`
+                    <div class="text-xs leading-relaxed">
+                        <span style="display:inline-block;padding:2px 6px;border-radius:9999px;background:#dbeafe;color:#1d4ed8;font-weight:700;margin-bottom:4px;">SISWA</span><br>
+                        <strong>${escapeHtml(siswa.nama_lengkap)}</strong><br>
+                        NISN: ${escapeHtml(siswa.nisn)} (${escapeHtml(siswa.kelas)})<br>
+                        Status: ${escapeHtml(siswa.status_tampil)}<br>
+                        Masuk: ${escapeHtml(siswa.jam_masuk)}<br>
+                        ${siswa.nama_lokasi ? `Zona: ${escapeHtml(siswa.nama_lokasi)}<br>` : ''}
+                        <a href="https://maps.google.com/?q=${rawLat},${rawLng}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">Buka di Google Maps</a>
+                        ${photoHtml}
+                    </div>
+                `);
+
+                markerRegistry[`siswa-${siswa.siswa_id}`] = { marker, lat, lng, group: 'siswa' };
+            }
+        });
+
+        const fitActiveBounds = (filter) => {
+            const pts = [];
+            Object.values(markerRegistry).forEach((entry) => {
+                if (filter === 'all' || entry.group === filter) {
+                    pts.push([entry.lat, entry.lng]);
+                }
+            });
+            if (pts.length > 0) {
+                map.fitBounds(pts, { padding: [50, 50], maxZoom: 17 });
+            } else if (zoneCoords.length > 0) {
+                map.fitBounds(zoneCoords, { padding: [50, 50], maxZoom: 16 });
+            }
+        };
+
+        fitActiveBounds('all');
+
+        const filterButtons = document.querySelectorAll('.map-filter-btn');
+        const applyFilter = (filter) => {
+            if (filter === 'all') {
+                if (!map.hasLayer(guruLayer)) map.addLayer(guruLayer);
+                if (!map.hasLayer(siswaLayer)) map.addLayer(siswaLayer);
+            } else if (filter === 'guru') {
+                if (!map.hasLayer(guruLayer)) map.addLayer(guruLayer);
+                if (map.hasLayer(siswaLayer)) map.removeLayer(siswaLayer);
+            } else if (filter === 'siswa') {
+                if (map.hasLayer(guruLayer)) map.removeLayer(guruLayer);
+                if (!map.hasLayer(siswaLayer)) map.addLayer(siswaLayer);
+            }
+
+            filterButtons.forEach((btn) => {
+                const active = btn.dataset.mapFilter === filter;
+                btn.classList.toggle('bg-brand-500', active);
+                btn.classList.toggle('dark:bg-brand-500', active);
+                btn.classList.toggle('border-brand-500', active);
+                btn.classList.toggle('dark:border-brand-500', active);
+                btn.classList.toggle('text-white', active);
+                btn.classList.toggle('dark:text-white', active);
+                btn.classList.toggle('bg-white', !active);
+                btn.classList.toggle('dark:bg-gray-800', !active);
+                btn.classList.toggle('border-gray-200', !active);
+                btn.classList.toggle('dark:border-gray-700', !active);
+                btn.classList.toggle('text-gray-700', !active);
+                btn.classList.toggle('dark:text-gray-200', !active);
+            });
+
+            fitActiveBounds(filter);
+        };
+
+        filterButtons.forEach((btn) => {
+            btn.addEventListener('click', () => applyFilter(btn.dataset.mapFilter || 'all'));
+        });
+
+        window.focusAttendanceMarker = (key) => {
+            const entry = markerRegistry[key];
+            if (!entry) return;
+            applyFilter('all');
+            map.setView([entry.lat, entry.lng], 17, { animate: true });
+            entry.marker.openPopup();
+            mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
     });
 </script>
-@endif
 
 <!-- Modal Update KPI -->
 <div x-data="{ open: false, id: '', nama: '', target: 0 }"
