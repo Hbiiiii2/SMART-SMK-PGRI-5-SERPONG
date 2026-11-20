@@ -20,11 +20,11 @@
     }
 }" @click.away="closeDropdown()">
     <button
-        class="flex items-center text-gray-700 dark:text-gray-400"
+        class="flex items-center rounded-xl py-1 pr-1 pl-1 text-gray-700 transition-colors duration-150 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#166EE1] sm:pr-2 dark:text-gray-300 dark:hover:bg-gray-800"
         @click.prevent="toggleDropdown()"
         type="button"
     >
-        <span class="mr-3 flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/10">
+        <span class="mr-0 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-[#EBF3FF] text-xs font-bold text-[#166EE1] ring-1 ring-inset ring-[#166EE1]/20 sm:mr-2.5 sm:h-10 sm:w-10 dark:bg-[#166EE1]/20 dark:text-[#4EA8FF]">
             {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 2)) }}
         </span>
 

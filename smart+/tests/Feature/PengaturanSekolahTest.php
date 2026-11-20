@@ -583,6 +583,10 @@ class PengaturanSekolahTest extends TestCase
             ->assertSee('Rafi Akbar Pratama')
             ->assertSee('Navigasi cepat mobile')
             ->assertSee('Pemrograman Web')
+            ->assertSee('#166EE1', false)
+            ->assertSee('Tampilan Tabel')
+            ->assertSee('$store.theme.toggle()', false)
+            ->assertDontSee('toggleApplicationMenu', false)
             ->assertDontSee('from-brand-500 to-indigo-600')
             ->assertDontSee('Yey!');
 
