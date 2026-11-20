@@ -132,7 +132,7 @@ class AuthenticationTest extends TestCase
         $loginPage->assertStatus(200)
             ->assertSee('id="remember"', false)
             ->assertSee('x-model="checked"', false)
-            ->assertSee('peer-checked:bg-brand-500', false);
+            ->assertSee('peer-checked:bg-[#1b61c9]', false);
 
         $user = User::factory()->create([
             'role' => 'siswa',
@@ -151,38 +151,80 @@ class AuthenticationTest extends TestCase
         $this->assertNotNull($user->fresh()->remember_token);
     }
 
-    public function test_dedicated_login_pages_for_akademik_elearning_and_ujian_have_distinct_headings_and_descriptions(): void
+    public function test_akademik_and_elearning_login_pages_are_completely_separate_without_portal_switcher(): void
     {
         $this->get(route('landing'))
             ->assertStatus(200)
             ->assertSee('/login/akademik', false)
             ->assertSee('/login/elearning', false)
-            ->assertSee('/login/ujian', false);
+            ->assertSee('https://cbt.smkpgri5serpong.sch.id/login', false);
 
+        // Akademik: khusus admin akademik, pakai Airtable blue tokens, tanpa quick switcher
         $this->get('/login/akademik')
             ->assertStatus(200)
-            ->assertSee('<title>Login Manajemen Akademik | SMART+</title>', false)
-            ->assertSee('Manajemen Akademik &amp; Presensi', false)
-            ->assertSee('Pusat kendali presensi RFID');
+            ->assertSee('Portal Admin Akademik | SMART+')
+            ->assertSee('Masuk Manajemen Akademik')
+            ->assertSee('#1b61c9', false)
+            ->assertDontSee('Pilih portal login')
+            ->assertDontSee('/login/elearning', false)
+            ->assertDontSee('/login/ujian', false);
 
+        // Subdomain akademik otomatis menampilkan halaman login Akademik
+        $this->get('http://akademik.smkpgri5serpong.sch.id/')
+            ->assertRedirect(route('login', [], false) ?: '/login');
+
+        $this->get('http://akademik.smkpgri5serpong.sch.id/login')
+            ->assertStatus(200)
+            ->assertSee('Masuk Manajemen Akademik')
+            ->assertDontSee('Masuk ke Portal E-Learning');
+
+        // E-Learning: khusus LMS Siswa & Guru, tanpa quick switcher
         $this->get('/login/elearning')
             ->assertStatus(200)
-            ->assertSee('<title>Login E-Learning &amp; LMS | SMART+</title>', false)
-            ->assertSee('Ruang Belajar &amp; E-Learning', false)
-            ->assertSee('Akses materi pembelajaran digital');
+            ->assertSee('Portal E-Learning &amp; LMS | SMART+', false)
+            ->assertSee('Masuk ke Portal E-Learning')
+            ->assertSee('Workspace Siswa')
+            ->assertSee('Workspace Guru Pengampu')
+            ->assertDontSee('Pilih portal login')
+            ->assertDontSee('/login/akademik', false)
+            ->assertDontSee('/login/ujian', false);
 
-        $this->get('/login/ujian')
-            ->assertStatus(200)
-            ->assertSee('<title>Login Portal Ujian (CBT) | SMART+</title>', false)
-            ->assertSee('Portal Ujian Berbasis Komputer')
-            ->assertSee('Pelaksanaan ujian sekolah, penilaian tengah semester');
+        // Subdomain elearning otomatis menampilkan halaman login E-Learning
+        $this->get('http://elearning.smkpgri5serpong.sch.id/')
+            ->assertRedirect(route('login', [], false) ?: '/login');
 
         $this->get('http://elearning.smkpgri5serpong.sch.id/login')
             ->assertStatus(200)
-            ->assertSee('<title>Login E-Learning &amp; LMS | SMART+</title>', false)
-            ->assertSee('Ruang Belajar &amp; E-Learning', false);
+            ->assertSee('Masuk ke Portal E-Learning')
+            ->assertDontSee('Masuk Manajemen Akademik');
 
-        $this->get('http://elearning.smkpgri5serpong.sch.id/')
-            ->assertRedirect(route('login.elearning', [], false) ?: '/login/elearning');
+        // Portal Ujian (CBT) terpisah keluar ke aplikasi CBT tersendiri
+        $this->get('/login/ujian')
+            ->assertRedirect('https://cbt.smkpgri5serpong.sch.id/login');
+
+        // Logout di subdomain elearning tetap kembali ke /login (subdomain elearning)
+        $guruUser = User::factory()->create([
+            'role' => 'guru',
+            'is_active' => true,
+        ]);
+
+        $this->post('http://elearning.smkpgri5serpong.sch.id/login', [
+            'email' => $guruUser->email,
+            'password' => 'password',
+            'portal' => 'elearning',
+        ])->assertRedirect('http://elearning.smkpgri5serpong.sch.id/guru/dashboard');
+
+        $this->post('http://elearning.smkpgri5serpong.sch.id/logout')
+            ->assertRedirect('http://elearning.smkpgri5serpong.sch.id/login');
+
+        // Login via path /login/elearning di host utama lalu logout kembali ke /login/elearning
+        $this->post('http://smart.smkpgri5serpong.sch.id/login', [
+            'email' => $guruUser->email,
+            'password' => 'password',
+            'portal' => 'elearning',
+        ])->assertRedirect('http://smart.smkpgri5serpong.sch.id/guru/dashboard');
+
+        $this->post('http://smart.smkpgri5serpong.sch.id/logout')
+            ->assertRedirect('http://smart.smkpgri5serpong.sch.id/login/elearning');
     }
 }

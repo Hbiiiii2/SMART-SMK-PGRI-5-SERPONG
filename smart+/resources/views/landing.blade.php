@@ -10,6 +10,9 @@
     $waNumber = '6285122502293';
     $waText = urlencode('Halo SMART+ / Aybisa Studio, saya ingin menjadwalkan demo dan konsultasi implementasi sistem presensi SMART+ untuk sekolah kami.');
     $waUrl = "https://wa.me/{$waNumber}?text={$waText}";
+    $akademikLoginUrl = config('services.portals.akademik_url') ?: route('login.akademik');
+    $elearningLoginUrl = config('services.portals.elearning_url') ?: route('login.elearning');
+    $cbtLoginUrl = rtrim((string) config('services.cbt.public_url', 'https://cbt.smkpgri5serpong.sch.id'), '/') . '/login';
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="scroll-smooth">
@@ -233,16 +236,16 @@
                             <svg class="ml-1.5 w-4 h-4 transition-transform" :class="portalMenu ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                         </button>
                         <div x-show="portalMenu" x-transition style="display: none;" class="absolute right-0 mt-2 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl z-50">
-                            <a href="{{ route('login.akademik') }}" class="flex flex-col rounded-xl px-3.5 py-2.5 hover:bg-blue-50 transition-colors">
-                                <span class="text-xs font-bold text-[#166EE1]">Manajemen Akademik</span>
+                            <a href="{{ $akademikLoginUrl }}" class="flex flex-col rounded-xl px-3.5 py-2.5 hover:bg-blue-50 transition-colors">
+                                <span class="text-xs font-bold text-[#1b61c9]">Manajemen Akademik</span>
                                 <span class="text-[11px] text-slate-500">Presensi, E-Rapor &amp; Monitoring</span>
                             </a>
-                            <a href="{{ route('login.elearning') }}" class="flex flex-col rounded-xl px-3.5 py-2.5 hover:bg-emerald-50 transition-colors">
-                                <span class="text-xs font-bold text-emerald-700">Portal E-Learning</span>
+                            <a href="{{ $elearningLoginUrl }}" class="flex flex-col rounded-xl px-3.5 py-2.5 hover:bg-emerald-50 transition-colors">
+                                <span class="text-xs font-bold text-[#0b6e35]">Portal E-Learning</span>
                                 <span class="text-[11px] text-slate-500">Materi, Tugas &amp; Jadwal Belajar</span>
                             </a>
-                            <a href="{{ route('login.ujian') }}" class="flex flex-col rounded-xl px-3.5 py-2.5 hover:bg-purple-50 transition-colors">
-                                <span class="text-xs font-bold text-[#5D2BC2]">Portal Ujian (CBT)</span>
+                            <a href="{{ $cbtLoginUrl }}" class="flex flex-col rounded-xl px-3.5 py-2.5 hover:bg-amber-50 transition-colors">
+                                <span class="text-xs font-bold text-[#92400e]">Portal Ujian (CBT)</span>
                                 <span class="text-[11px] text-slate-500">Ujian Online &amp; Evaluasi Siswa</span>
                             </a>
                         </div>
@@ -254,7 +257,7 @@
                     <a href="{{ $waUrl }}" target="_blank" class="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
                         Demo
                     </a>
-                    <a href="{{ route('login.akademik') }}" class="inline-flex items-center justify-center rounded-lg bg-aybisa-blue px-3.5 py-2 text-xs font-bold text-white">
+                    <a href="{{ $akademikLoginUrl }}" class="inline-flex items-center justify-center rounded-lg bg-aybisa-blue px-3.5 py-2 text-xs font-bold text-white">
                         Sign In
                     </a>
                     <button @click="mobileMenuOpen = !mobileMenuOpen" type="button" class="inline-flex items-center justify-center p-2 rounded-lg text-aybisa-gray hover:text-aybisa-navy hover:bg-slate-100 focus:outline-none" aria-label="Toggle Menu">
@@ -285,13 +288,13 @@
                 <a href="{{ route('kiosk.index') }}" class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-blue-200 bg-aybisa-pale py-2.5 text-xs font-bold text-aybisa-blue">
                     Buka Kiosk Mode
                 </a>
-                <a href="{{ route('login.akademik') }}" class="w-full inline-flex items-center justify-center rounded-xl bg-[#166EE1] py-2.5 text-xs font-bold text-white shadow-sm">
+                <a href="{{ $akademikLoginUrl }}" class="w-full inline-flex items-center justify-center rounded-xl bg-[#1b61c9] py-2.5 text-xs font-bold text-white shadow-sm">
                     Login Manajemen Akademik
                 </a>
-                <a href="{{ route('login.elearning') }}" class="w-full inline-flex items-center justify-center rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm">
+                <a href="{{ $elearningLoginUrl }}" class="w-full inline-flex items-center justify-center rounded-xl bg-[#0b6e35] py-2.5 text-xs font-bold text-white shadow-sm">
                     Login E-Learning
                 </a>
-                <a href="{{ route('login.ujian') }}" class="w-full inline-flex items-center justify-center rounded-xl bg-[#5D2BC2] py-2.5 text-xs font-bold text-white shadow-sm">
+                <a href="{{ $cbtLoginUrl }}" class="w-full inline-flex items-center justify-center rounded-xl bg-[#181d26] py-2.5 text-xs font-bold text-white shadow-sm">
                     Login Portal Ujian (CBT)
                 </a>
             </div>
@@ -353,7 +356,7 @@
                     <!-- CTAs with 3 Dedicated Portal Logins -->
                     <div class="flex flex-col sm:flex-row justify-center items-center gap-4 mb-6">
                         <!-- Primary Login -->
-                        <a href="{{ route('login.akademik') }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-2xl bg-aybisa-blue px-8 py-4 text-base font-bold text-white shadow-lg shadow-aybisa-blue/30 hover:bg-aybisa-blue-hover hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                        <a href="{{ $akademikLoginUrl }}" class="w-full sm:w-auto inline-flex items-center justify-center rounded-2xl bg-aybisa-blue px-8 py-4 text-base font-bold text-white shadow-lg shadow-aybisa-blue/30 hover:bg-aybisa-blue-hover hover:shadow-xl hover:-translate-y-0.5 transition-all">
                             Sign In Portal Akademik
                             <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </a>
@@ -372,26 +375,26 @@
 
                     <!-- Dedicated Portal Login Cards for Landing Navigation -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-3xl mx-auto mb-10 text-left">
-                        <a href="{{ route('login.akademik') }}" class="flex items-center justify-between gap-3 rounded-2xl border border-blue-200 bg-white p-3.5 shadow-2xs hover:border-[#166EE1] hover:bg-[#EBF3FF]/40 transition-colors">
+                        <a href="{{ $akademikLoginUrl }}" class="flex items-center justify-between gap-3 rounded-2xl border border-blue-200 bg-white p-3.5 shadow-2xs hover:border-[#1b61c9] hover:bg-[#EBF3FF]/40 transition-colors">
                             <div>
-                                <span class="block text-xs font-bold text-[#166EE1]">Login Manajemen Akademik</span>
+                                <span class="block text-xs font-bold text-[#1b61c9]">Login Manajemen Akademik</span>
                                 <span class="text-[11px] text-slate-500">Presensi, E-Rapor &amp; Monitoring</span>
                             </div>
                             <span class="rounded-lg bg-[#EBF3FF] px-2.5 py-1 text-[11px] font-bold text-[#0D52AC]">Masuk</span>
                         </a>
-                        <a href="{{ route('login.elearning') }}" class="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-white p-3.5 shadow-2xs hover:border-emerald-600 hover:bg-emerald-50/50 transition-colors">
+                        <a href="{{ $elearningLoginUrl }}" class="flex items-center justify-between gap-3 rounded-2xl border border-emerald-200 bg-white p-3.5 shadow-2xs hover:border-[#0b6e35] hover:bg-emerald-50/50 transition-colors">
                             <div>
-                                <span class="block text-xs font-bold text-emerald-700">Login E-Learning</span>
+                                <span class="block text-xs font-bold text-[#0b6e35]">Login E-Learning</span>
                                 <span class="text-[11px] text-slate-500">Materi, Tugas &amp; Absensi Kelas</span>
                             </div>
-                            <span class="rounded-lg bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-800">Masuk</span>
+                            <span class="rounded-lg bg-emerald-100 px-2.5 py-1 text-[11px] font-bold text-[#006400]">Masuk</span>
                         </a>
-                        <a href="{{ route('login.ujian') }}" class="flex items-center justify-between gap-3 rounded-2xl border border-purple-200 bg-white p-3.5 shadow-2xs hover:border-[#5D2BC2] hover:bg-[#F1E9FF]/50 transition-colors">
+                        <a href="{{ $cbtLoginUrl }}" class="flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-white p-3.5 shadow-2xs hover:border-[#181d26] hover:bg-amber-50/50 transition-colors">
                             <div>
-                                <span class="block text-xs font-bold text-[#5D2BC2]">Login Portal Ujian</span>
-                                <span class="text-[11px] text-slate-500">CBT STS, SAS &amp; Token Ujian</span>
+                                <span class="block text-xs font-bold text-[#181d26]">Login Portal Ujian (CBT)</span>
+                                <span class="text-[11px] text-slate-500">Ujian STS, SAS &amp; Token Ujian</span>
                             </div>
-                            <span class="rounded-lg bg-[#F1E9FF] px-2.5 py-1 text-[11px] font-bold text-[#5D2BC2]">Masuk</span>
+                            <span class="rounded-lg bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-[#92400e]">Masuk</span>
                         </a>
                     </div>
 
@@ -1348,13 +1351,13 @@
                                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.107.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.173.086.275.072.376-.044.101-.116.433-.506.549-.68.116-.174.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.043.073.043.419-.101.825z"/></svg>
                                 WhatsApp Demo (+62 851-2250-2293)
                             </a>
-                            <a href="{{ route('login.akademik') }}" class="inline-flex items-center justify-center rounded-xl bg-aybisa-blue px-6 py-4 text-sm font-bold text-white shadow-md hover:bg-aybisa-blue-hover transition-all">
+                            <a href="{{ $akademikLoginUrl }}" class="inline-flex items-center justify-center rounded-xl bg-aybisa-blue px-6 py-4 text-sm font-bold text-white shadow-md hover:bg-aybisa-blue-hover transition-all">
                                 Portal Akademik
                             </a>
-                            <a href="{{ route('login.elearning') }}" class="inline-flex items-center justify-center rounded-xl bg-white/10 border border-white/20 px-5 py-4 text-sm font-bold text-white hover:bg-white/20 transition-all">
+                            <a href="{{ $elearningLoginUrl }}" class="inline-flex items-center justify-center rounded-xl bg-white/10 border border-white/20 px-5 py-4 text-sm font-bold text-white hover:bg-white/20 transition-all">
                                 Portal E-Learning
                             </a>
-                            <a href="{{ route('login.ujian') }}" class="inline-flex items-center justify-center rounded-xl bg-[#5D2BC2] px-5 py-4 text-sm font-bold text-white shadow-md hover:bg-[#4A1FA3] transition-all">
+                            <a href="{{ $cbtLoginUrl }}" class="inline-flex items-center justify-center rounded-xl bg-[#f4b41b] px-5 py-4 text-sm font-bold text-[#181d26] shadow-md hover:bg-[#eab308] transition-all">
                                 Portal Ujian (CBT)
                             </a>
                         </div>
@@ -1437,9 +1440,9 @@
                                 WhatsApp: +62 851-2250-2293 &rarr;
                             </a>
                         </li>
-                        <li><a href="{{ route('login.akademik') }}" class="text-aybisa-blue font-bold hover:underline">Login Manajemen Akademik &rarr;</a></li>
-                        <li><a href="{{ route('login.elearning') }}" class="text-emerald-700 font-bold hover:underline">Login E-Learning &amp; LMS &rarr;</a></li>
-                        <li><a href="{{ route('login.ujian') }}" class="text-[#5D2BC2] font-bold hover:underline">Login Portal Ujian (CBT) &rarr;</a></li>
+                        <li><a href="{{ $akademikLoginUrl }}" class="text-aybisa-blue font-bold hover:underline">Login Manajemen Akademik &rarr;</a></li>
+                        <li><a href="{{ $elearningLoginUrl }}" class="text-[#0b6e35] font-bold hover:underline">Login E-Learning &amp; LMS &rarr;</a></li>
+                        <li><a href="{{ $cbtLoginUrl }}" class="text-[#92400e] font-bold hover:underline">Login Portal Ujian (CBT) &rarr;</a></li>
                         <li><a href="{{ route('kiosk.index') }}" target="_blank" class="hover:text-aybisa-blue transition-colors">Buka Terminal Kiosk Mode &rarr;</a></li>
                         <li class="pt-2 text-slate-500 text-[11px] leading-relaxed">
                             Live School Implementation: <strong class="text-aybisa-navy">{{ $namaSekolah }}</strong><br>

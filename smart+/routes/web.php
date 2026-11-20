@@ -38,13 +38,15 @@ use App\Http\Controllers\CutiController;
 Route::get('/', function (Request $request) {
     $host = strtolower($request->getHost());
 
-    // Jika diakses melalui subdomain khusus portal, langsung arahkan ke login portal terkait
-    if (str_contains($host, 'elearning')) {
-        return redirect()->route('login.elearning');
+    // Setiap subdomain portal langsung menuju halaman login khusus portalnya masing-masing
+    if (str_contains($host, 'elearning') || str_contains($host, 'akademik')) {
+        return auth()->check()
+            ? redirect()->route('dashboard')
+            : redirect()->route('login');
     }
 
     if (str_contains($host, 'cbt') || str_contains($host, 'ujian')) {
-        return redirect()->route('login.ujian');
+        return redirect()->away(rtrim((string) config('services.cbt.public_url', 'https://cbt.smkpgri5serpong.sch.id'), '/') . '/login');
     }
 
     return view('landing');
@@ -57,7 +59,9 @@ Route::get('/kiosk/recent', [KioskController::class, 'recentActivities'])->name(
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::get('/login/akademik', [AuthController::class, 'showLoginAkademik'])->name('login.akademik');
 Route::get('/login/elearning', [AuthController::class, 'showLoginElearning'])->name('login.elearning');
-Route::get('/login/ujian', [AuthController::class, 'showLoginUjian'])->name('login.ujian');
+Route::get('/login/ujian', function () {
+    return redirect()->away(rtrim((string) config('services.cbt.public_url', 'https://cbt.smkpgri5serpong.sch.id'), '/') . '/login');
+})->name('login.ujian');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

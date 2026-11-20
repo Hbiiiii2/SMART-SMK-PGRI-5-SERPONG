@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>Login Portal Ujian (CBT) | {{ config('app.name', 'SMART CBT') }}</title>
+        <title>{{ config('app.name', 'SMART CBT') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -13,41 +13,40 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        <style>
+            :root {
+                --at-bg: #ffffff;
+                --at-canvas: #f8fafc;
+                --at-fg: #181d26;
+                --at-fg-2: #333333;
+                --at-muted: rgba(4, 14, 32, 0.69);
+                --at-border: #e0e2e6;
+                --at-accent: #1b61c9;
+                --at-elev-raised:
+                    0 0 1px rgba(0, 0, 0, 0.32),
+                    0 0 2px rgba(0, 0, 0, 0.08),
+                    0 1px 3px rgba(45, 127, 249, 0.28),
+                    inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+            }
+        </style>
     </head>
-    <body class="font-sans text-slate-900 antialiased">
-        <div class="min-h-screen bg-slate-50">
-            <div class="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
-                <div class="w-full space-y-4">
-                    <!-- Top 3-Portal Switcher -->
-                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                        <a href="https://smart.smkpgri5serpong.sch.id/" class="inline-flex items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-                            </svg>
-                            <span>Kembali ke Beranda</span>
-                        </a>
-
-                        <nav aria-label="Pilih portal login" class="grid grid-cols-3 gap-1 rounded-xl bg-slate-200/80 p-1 ring-1 ring-inset ring-slate-300/60 sm:inline-flex">
-                            <a href="https://smart.smkpgri5serpong.sch.id/login/akademik"
-                                class="inline-flex min-h-[38px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-semibold text-slate-600 hover:text-slate-900">
-                                Manajemen Akademik
-                            </a>
-                            <a href="https://elearning.smkpgri5serpong.sch.id/login"
-                                class="inline-flex min-h-[38px] items-center justify-center rounded-lg px-3 py-1.5 text-center text-xs font-semibold text-slate-600 hover:text-slate-900">
-                                E-Learning
-                            </a>
-                            <a href="{{ route('login') }}"
-                                class="inline-flex min-h-[38px] items-center justify-center rounded-lg bg-white px-3 py-1.5 text-center text-xs font-semibold text-[#5D2BC2] shadow-sm ring-1 ring-purple-200">
-                                Portal Ujian
-                            </a>
-                        </nav>
+    <body class="font-sans antialiased bg-[#f8fafc] text-[#181d26]">
+        <div class="flex min-h-[100dvh] flex-col items-center justify-center px-4 py-8 sm:px-6">
+            <div class="mb-6 flex items-center gap-3">
+                <a href="{{ route('login') }}" class="flex items-center gap-3">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#181d26] text-[#f4b41b] shadow-sm">
+                        <x-application-logo class="h-6 w-6 fill-current" />
                     </div>
-
-                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.10)]">
-                        <div class="h-1.5 w-full bg-[#5D2BC2]"></div>
-                        {{ $slot }}
+                    <div>
+                        <p class="text-sm font-bold text-[#181d26]">SMART CBT</p>
+                        <p class="text-xs text-[rgba(4,14,32,0.69)]">Portal Evaluasi SMK PGRI 5 Serpong</p>
                     </div>
-                </div>
+                </a>
+            </div>
+
+            <div class="w-full max-w-md overflow-hidden rounded-[16px] border border-[#e0e2e6] bg-white px-6 py-6" style="box-shadow: var(--at-elev-raised);">
+                {{ $slot }}
             </div>
         </div>
     </body>

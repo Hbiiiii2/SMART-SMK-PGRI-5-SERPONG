@@ -44,6 +44,13 @@ return [
     'cbt' => [
         'base_url' => env('CBT_API_BASE_URL', 'http://smart-cbt-web/api/v1'),
         'token' => env('CBT_API_TOKEN', 'cbt_secret_token_almadinah_2026'),
+        'public_url' => env('CBT_PUBLIC_URL', 'https://cbt.smkpgri5serpong.sch.id'),
+    ],
+
+    'portals' => [
+        'akademik_url' => env('PORTAL_AKADEMIK_URL'),
+        'elearning_url' => env('PORTAL_ELEARNING_URL'),
+        'cbt_url' => env('CBT_PUBLIC_URL', 'https://cbt.smkpgri5serpong.sch.id'),
     ],
 
 ];
