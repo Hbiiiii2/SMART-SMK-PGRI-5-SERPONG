@@ -143,6 +143,9 @@ class CacheService
                     'absensi_guru.latitude',
                     'absensi_guru.longitude',
                     'absensi_guru.foto_lokasi',
+                    'absensi_guru.gps_accuracy',
+                    'absensi_guru.is_mock_suspect',
+                    'absensi_guru.mock_gps_reason',
                     'lokasi.nama as nama_lokasi'
                 )
                 ->orderByRaw("CASE WHEN absensi_guru.status IS NULL THEN 0 ELSE 1 END ASC, guru.nama_lengkap ASC")
@@ -229,6 +232,9 @@ class CacheService
                 'absensi_siswa.latitude',
                 'absensi_siswa.longitude',
                 'absensi_siswa.foto_lokasi',
+                'absensi_siswa.gps_accuracy',
+                'absensi_siswa.is_mock_suspect',
+                'absensi_siswa.mock_gps_reason',
                 'lokasi.nama as nama_lokasi'
             )
             ->orderBy('siswa.kelas')

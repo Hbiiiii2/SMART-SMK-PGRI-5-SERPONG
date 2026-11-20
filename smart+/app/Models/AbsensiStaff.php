@@ -22,12 +22,18 @@ class AbsensiStaff extends Model
         'latitude',
         'longitude',
         'foto_lokasi',
+        'gps_accuracy',
+        'device_token',
+        'is_mock_suspect',
+        'mock_gps_reason',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
         'waktu_check_in' => 'datetime',
         'waktu_check_out' => 'datetime',
+        'gps_accuracy' => 'float',
+        'is_mock_suspect' => 'boolean',
     ];
 
     public function staff()

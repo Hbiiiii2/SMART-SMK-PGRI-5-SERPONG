@@ -66,6 +66,16 @@ class AttendanceGpsController extends Controller
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
             'foto' => $wajibFoto ? 'required|string' : 'nullable|string',
+            'accuracy' => 'nullable|numeric|min:0',
+            'altitude' => 'nullable|numeric',
+            'altitude_accuracy' => 'nullable|numeric',
+            'speed' => 'nullable|numeric',
+            'heading' => 'nullable|numeric',
+            'gps_timestamp' => 'nullable|numeric',
+            'client_timestamp' => 'nullable|numeric',
+            'samples' => 'nullable|array|max:10',
+            'device_token' => 'nullable|string|max:64',
+            'is_mock' => 'nullable|boolean',
         ]);
 
         $now = Carbon::now('Asia/Jakarta');
@@ -127,6 +137,15 @@ class AttendanceGpsController extends Controller
 
         $recordedLocation = $validLocation ?? $nearestLocation;
 
+        // 3b. Evaluasi Integritas GPS (Telemetri Mock GPS & Perangkat Bersama)
+        $integrity = $this->evaluateGpsIntegrity($request, $user, $pengaturan, $today);
+        if ($integrity['blocked']) {
+            return response()->json([
+                'success' => false,
+                'message' => $integrity['message'],
+            ], 400);
+        }
+
         // 4. Proses Foto (wajib atau opsional sesuai pengaturan sekolah)
         $fileName = null;
         if ($request->filled('foto')) {
@@ -152,17 +171,129 @@ class AttendanceGpsController extends Controller
 
         // 5. Simpan Data Absensi berdasarkan role
         if ($user->isSiswa()) {
-            return $this->saveSiswaAttendance($user, $today, $now, $recordedLocation, $fileName, $pengaturan, $type, $userLat, $userLng);
+            return $this->saveSiswaAttendance($user, $today, $now, $recordedLocation, $fileName, $pengaturan, $type, $userLat, $userLng, $integrity);
         }
 
         if ($user->isGuru()) {
-            return $this->saveGuruAttendance($user, $today, $now, $recordedLocation, $fileName, $pengaturan, $type, $userLat, $userLng);
+            return $this->saveGuruAttendance($user, $today, $now, $recordedLocation, $fileName, $pengaturan, $type, $userLat, $userLng, $integrity);
         }
 
-        return $this->saveStaffAttendance($user, $today, $now, $recordedLocation, $fileName, $pengaturan, $type, $userLat, $userLng);
+        return $this->saveStaffAttendance($user, $today, $now, $recordedLocation, $fileName, $pengaturan, $type, $userLat, $userLng, $integrity);
     }
 
-    private function saveSiswaAttendance($user, string $today, Carbon $now, $lokasi, ?string $fotoPath, PengaturanSekolah $pengaturan, string $type, float $lat, float $lng): JsonResponse
+    private function evaluateGpsIntegrity(Request $request, $user, PengaturanSekolah $pengaturan, string $today): array
+    {
+        $modeMock = $pengaturan->mode_anti_mock_gps ?? 'peringatan';
+        $maksAkurasi = max(10, (int) ($pengaturan->maks_akurasi_gps_meter ?? 100));
+        $mockReasons = [];
+        $accuracy = $request->filled('accuracy') ? (float) $request->accuracy : null;
+
+        if ($modeMock !== 'nonaktif') {
+            if ($request->boolean('is_mock')) {
+                $mockReasons[] = 'Terdeteksi flag Mock Location Provider';
+            }
+
+            if ($accuracy !== null) {
+                if ($accuracy > $maksAkurasi) {
+                    $mockReasons[] = 'Akurasi GPS rendah (±' . round($accuracy) . 'm > batas ' . $maksAkurasi . 'm)';
+                } elseif ($accuracy <= 1.0) {
+                    $mockReasons[] = 'Indikasi Mock GPS: nilai akurasi terlalu sempurna/tidak wajar (±' . $accuracy . 'm)';
+                }
+            }
+
+            if (is_array($request->samples) && count($request->samples) >= 3) {
+                $coords = [];
+                foreach ($request->samples as $sample) {
+                    if (is_array($sample) && isset($sample['lat'], $sample['lng'])) {
+                        $coords[] = round((float) $sample['lat'], 7) . ',' . round((float) $sample['lng'], 7);
+                    }
+                }
+                if (count($coords) >= 3 && count(array_unique($coords)) === 1) {
+                    $mockReasons[] = 'Indikasi Mock GPS: koordinat multi-sampel statis tanpa micro-drift sensor';
+                }
+            }
+
+            if ($request->filled('gps_timestamp') && $request->filled('client_timestamp')) {
+                $diffMs = abs((float) $request->client_timestamp - (float) $request->gps_timestamp);
+                if ($diffMs > 300000) {
+                    $mockReasons[] = 'Indikasi Mock GPS: timestamp sensor GPS tidak sinkron';
+                }
+            }
+
+            if (!empty($mockReasons) && $modeMock === 'ketat') {
+                return [
+                    'blocked' => true,
+                    'message' => 'Absensi GPS ditolak karena terindikasi Mock GPS / sinyal tidak valid: ' . implode('; ', $mockReasons),
+                ];
+            }
+        }
+
+        $modeDevice = $pengaturan->mode_deteksi_perangkat_bersama ?? 'tandai';
+        $deviceToken = $request->filled('device_token') ? trim((string) $request->device_token) : null;
+        $deviceReasons = [];
+
+        if ($modeDevice !== 'nonaktif' && !empty($deviceToken)) {
+            $siswaCount = AbsensiSiswa::whereDate('tanggal', $today)
+                ->where('device_token', $deviceToken)
+                ->when($user->isSiswa() && $user->siswa, fn ($q) => $q->where('siswa_id', '!=', $user->siswa->id))
+                ->distinct()
+                ->count('siswa_id');
+
+            $guruCount = AbsensiGuru::whereDate('tanggal', $today)
+                ->where('device_token', $deviceToken)
+                ->when($user->isGuru() && $user->guru, fn ($q) => $q->where('guru_id', '!=', $user->guru->id))
+                ->distinct()
+                ->count('guru_id');
+
+            $isStaffLike = !$user->isSiswa() && !$user->isGuru();
+            $staffCount = AbsensiStaff::whereDate('tanggal', $today)
+                ->where('device_token', $deviceToken)
+                ->when($isStaffLike && $user->staff_akademik, fn ($q) => $q->where('staff_akademik_id', '!=', $user->staff_akademik->id))
+                ->distinct()
+                ->count('staff_akademik_id');
+
+            $otherAccountsCount = $siswaCount + $guruCount + $staffCount;
+            $totalAccountsOnDevice = $otherAccountsCount + 1;
+            $batas = max(2, (int) ($pengaturan->batas_akun_per_perangkat ?? 2));
+
+            if ($totalAccountsOnDevice >= $batas) {
+                $deviceReasons[] = "Perangkat bersama ({$totalAccountsOnDevice} akun absen dari HP yang sama hari ini)";
+
+                if ($modeDevice === 'blokir') {
+                    return [
+                        'blocked' => true,
+                        'message' => "Absensi ditolak: Perangkat ini sudah digunakan oleh {$otherAccountsCount} akun lain hari ini (batas kebijakan sekolah: maksimal " . ($batas - 1) . ' akun per HP).',
+                    ];
+                }
+            }
+        }
+
+        $allReasons = array_values(array_unique(array_merge($mockReasons, $deviceReasons)));
+
+        return [
+            'blocked' => false,
+            'gps_accuracy' => $accuracy !== null ? round($accuracy, 2) : null,
+            'device_token' => $deviceToken ?: null,
+            'is_mock_suspect' => !empty($allReasons),
+            'mock_gps_reason' => !empty($allReasons) ? mb_substr(implode('; ', $allReasons), 0, 500) : null,
+        ];
+    }
+
+    private function mergeIntegrityReasons(?string $existingReason, ?string $newReason): ?string
+    {
+        $parts = array_filter(array_map('trim', array_merge(
+            $existingReason ? explode(';', $existingReason) : [],
+            $newReason ? explode(';', $newReason) : []
+        )));
+
+        if (empty($parts)) {
+            return null;
+        }
+
+        return mb_substr(implode('; ', array_values(array_unique($parts))), 0, 500);
+    }
+
+    private function saveSiswaAttendance($user, string $today, Carbon $now, $lokasi, ?string $fotoPath, PengaturanSekolah $pengaturan, string $type, float $lat, float $lng, array $integrity): JsonResponse
     {
         $siswa = $user->siswa;
         if (!$siswa) {
@@ -208,6 +339,10 @@ class AttendanceGpsController extends Controller
                         'latitude' => $lat,
                         'longitude' => $lng,
                         'foto_lokasi' => $fotoPath,
+                        'gps_accuracy' => $integrity['gps_accuracy'],
+                        'device_token' => $integrity['device_token'],
+                        'is_mock_suspect' => $integrity['is_mock_suspect'],
+                        'mock_gps_reason' => $integrity['mock_gps_reason'],
                         'keterangan' => $idx === 0 ? 'Absensi GPS Lokasi' : 'Otomatis mengikuti absen GPS pertama',
                     ];
 
@@ -241,6 +376,10 @@ class AttendanceGpsController extends Controller
                     'latitude' => $lat,
                     'longitude' => $lng,
                     'foto_lokasi' => $fotoPath,
+                    'gps_accuracy' => $integrity['gps_accuracy'],
+                    'device_token' => $integrity['device_token'],
+                    'is_mock_suspect' => $integrity['is_mock_suspect'],
+                    'mock_gps_reason' => $integrity['mock_gps_reason'],
                     'keterangan' => 'Absensi GPS Harian (Tanpa Jadwal)',
                 ];
 
@@ -256,6 +395,7 @@ class AttendanceGpsController extends Controller
             }
 
             Cache::forget('live_stats_' . $today);
+            Cache::forget('ks_dashboard_' . $today);
 
             return response()->json([
                 'success' => true,
@@ -290,10 +430,15 @@ class AttendanceGpsController extends Controller
                 'latitude' => $lat,
                 'longitude' => $lng,
                 'foto_lokasi' => $fotoPath ?? $rec->foto_lokasi,
+                'gps_accuracy' => $integrity['gps_accuracy'] ?? $rec->gps_accuracy,
+                'device_token' => $integrity['device_token'] ?? $rec->device_token,
+                'is_mock_suspect' => (bool) ($rec->is_mock_suspect || $integrity['is_mock_suspect']),
+                'mock_gps_reason' => $this->mergeIntegrityReasons($rec->mock_gps_reason, $integrity['mock_gps_reason']),
             ]);
         }
 
         Cache::forget('live_stats_' . $today);
+        Cache::forget('ks_dashboard_' . $today);
 
         return response()->json([
             'success' => true,
@@ -302,7 +447,7 @@ class AttendanceGpsController extends Controller
         ]);
     }
 
-    private function saveGuruAttendance($user, string $today, Carbon $now, $lokasi, ?string $fotoPath, PengaturanSekolah $pengaturan, string $type, float $lat, float $lng): JsonResponse
+    private function saveGuruAttendance($user, string $today, Carbon $now, $lokasi, ?string $fotoPath, PengaturanSekolah $pengaturan, string $type, float $lat, float $lng, array $integrity): JsonResponse
     {
         $guru = $user->guru;
         if (!$guru) {
@@ -336,14 +481,19 @@ class AttendanceGpsController extends Controller
         if ($fotoPath) {
             $absensi->foto_lokasi = $fotoPath;
         }
+        $absensi->gps_accuracy = $integrity['gps_accuracy'] ?? $absensi->gps_accuracy;
+        $absensi->device_token = $integrity['device_token'] ?? $absensi->device_token;
+        $absensi->is_mock_suspect = (bool) ($absensi->is_mock_suspect || $integrity['is_mock_suspect']);
+        $absensi->mock_gps_reason = $this->mergeIntegrityReasons($absensi->mock_gps_reason, $integrity['mock_gps_reason']);
         $absensi->save();
 
         Cache::forget('live_stats_' . $today);
+        Cache::forget('ks_dashboard_' . $today);
 
         return response()->json(['success' => true, 'message' => 'Absensi berhasil dicatat.', 'status' => $absensi->status]);
     }
 
-    private function saveStaffAttendance($user, string $today, Carbon $now, $lokasi, ?string $fotoPath, PengaturanSekolah $pengaturan, string $type, float $lat, float $lng): JsonResponse
+    private function saveStaffAttendance($user, string $today, Carbon $now, $lokasi, ?string $fotoPath, PengaturanSekolah $pengaturan, string $type, float $lat, float $lng, array $integrity): JsonResponse
     {
         $staff = $user->staff_akademik;
         if (!$staff) {
@@ -382,9 +532,14 @@ class AttendanceGpsController extends Controller
         if ($fotoPath) {
             $absensi->foto_lokasi = $fotoPath;
         }
+        $absensi->gps_accuracy = $integrity['gps_accuracy'] ?? $absensi->gps_accuracy;
+        $absensi->device_token = $integrity['device_token'] ?? $absensi->device_token;
+        $absensi->is_mock_suspect = (bool) ($absensi->is_mock_suspect || $integrity['is_mock_suspect']);
+        $absensi->mock_gps_reason = $this->mergeIntegrityReasons($absensi->mock_gps_reason, $integrity['mock_gps_reason']);
         $absensi->save();
 
         Cache::forget('live_stats_' . $today);
+        Cache::forget('ks_dashboard_' . $today);
 
         return response()->json(['success' => true, 'message' => 'Absensi berhasil dicatat.', 'status' => $absensi->status]);
     }

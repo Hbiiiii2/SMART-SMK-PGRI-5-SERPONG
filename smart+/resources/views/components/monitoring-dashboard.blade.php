@@ -230,6 +230,7 @@
         $lokasiSekolahData = collect($data['lokasiSekolah'] ?? []);
         $guruGps = $guruListData->filter(fn($g) => !empty($g->latitude) && !empty($g->longitude))->values();
         $siswaGps = $siswaListData->filter(fn($s) => !empty($s->latitude) && !empty($s->longitude))->values();
+        $suspectCount = $guruGps->where('is_mock_suspect', true)->count() + $siswaGps->where('is_mock_suspect', true)->count();
         $siswaSorted = $siswaListData->sortBy(fn($s) => [empty($s->status) ? 1 : 0, $s->kelas ?? '', $s->nama_lengkap ?? ''])->values();
     @endphp
     <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -241,6 +242,11 @@
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+                @if($suspectCount > 0)
+                    <span class="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 dark:border-amber-600/40 dark:bg-amber-500/10 dark:text-amber-300">
+                        &#9888;&#65039; {{ $suspectCount }} Indikasi Mock / Perangkat Bersama
+                    </span>
+                @endif
                 <button type="button" data-map-filter="all" class="map-filter-btn inline-flex items-center gap-1.5 rounded-lg border border-brand-500 bg-brand-500 px-3 py-1.5 text-xs font-semibold text-white transition">
                     Semua ({{ $guruGps->count() + $siswaGps->count() }})
                 </button>
@@ -266,7 +272,7 @@
                 <h4 class="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Daftar Check-In GPS Hari Ini (Klik untuk fokus peta)</h4>
                 <div class="grid max-h-56 grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach($guruGps as $g)
-                    <div class="flex items-center justify-between rounded-xl border border-green-200 bg-green-50/50 p-3 dark:border-green-500/20 dark:bg-green-500/5">
+                    <div class="flex items-center justify-between rounded-xl border {{ !empty($g->is_mock_suspect) ? 'border-red-300 bg-red-50/40 dark:border-red-500/40 dark:bg-red-500/10' : 'border-green-200 bg-green-50/50 dark:border-green-500/20 dark:bg-green-500/5' }} p-3">
                         <button type="button" onclick="window.focusAttendanceMarker && window.focusAttendanceMarker('guru-{{ $g->id }}')" class="text-left">
                             <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-800 dark:text-white/90">
                                 <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: #16a34a;"></span>
@@ -275,10 +281,16 @@
                             <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                                 Guru &bull; {{ $g->jam_masuk ? \Carbon\Carbon::parse($g->jam_masuk)->format('H:i') : '-' }}
                                 @if(!empty($g->nama_lokasi)) &bull; {{ $g->nama_lokasi }} @endif
+                                @if(!is_null($g->gps_accuracy)) &bull; &plusmn;{{ round((float) $g->gps_accuracy) }}m @endif
                             </div>
                             <div class="mt-0.5 font-mono text-[11px] text-gray-500 dark:text-gray-400">
                                 {{ number_format((float) $g->latitude, 5) }}, {{ number_format((float) $g->longitude, 5) }}
                             </div>
+                            @if(!empty($g->is_mock_suspect) && !empty($g->mock_gps_reason))
+                                <div class="mt-1 inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                                    &#9888;&#65039; {{ $g->mock_gps_reason }}
+                                </div>
+                            @endif
                         </button>
                         <a href="https://maps.google.com/?q={{ $g->latitude }},{{ $g->longitude }}" target="_blank" rel="noopener" class="ml-2 shrink-0 rounded-lg border border-green-300 bg-white px-2 py-1 text-[11px] font-medium text-green-700 hover:bg-green-50 dark:border-green-700 dark:bg-gray-800 dark:text-green-400">
                             Maps
@@ -286,7 +298,7 @@
                     </div>
                     @endforeach
                     @foreach($siswaGps as $s)
-                    <div class="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-500/20 dark:bg-blue-500/5">
+                    <div class="flex items-center justify-between rounded-xl border {{ !empty($s->is_mock_suspect) ? 'border-red-300 bg-red-50/40 dark:border-red-500/40 dark:bg-red-500/10' : 'border-blue-200 bg-blue-50/50 dark:border-blue-500/20 dark:bg-blue-500/5' }} p-3">
                         <button type="button" onclick="window.focusAttendanceMarker && window.focusAttendanceMarker('siswa-{{ $s->siswa_id }}')" class="text-left">
                             <div class="flex items-center gap-1.5 text-sm font-semibold text-gray-800 dark:text-white/90">
                                 <span class="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style="background-color: #2563eb;"></span>
@@ -295,10 +307,16 @@
                             <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                                 Siswa ({{ $s->kelas }}) &bull; {{ $s->jam_masuk ? \Carbon\Carbon::parse($s->jam_masuk)->format('H:i') : '-' }}
                                 @if(!empty($s->nama_lokasi)) &bull; {{ $s->nama_lokasi }} @endif
+                                @if(!is_null($s->gps_accuracy)) &bull; &plusmn;{{ round((float) $s->gps_accuracy) }}m @endif
                             </div>
                             <div class="mt-0.5 font-mono text-[11px] text-gray-500 dark:text-gray-400">
                                 {{ number_format((float) $s->latitude, 5) }}, {{ number_format((float) $s->longitude, 5) }}
                             </div>
+                            @if(!empty($s->is_mock_suspect) && !empty($s->mock_gps_reason))
+                                <div class="mt-1 inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                                    &#9888;&#65039; {{ $s->mock_gps_reason }}
+                                </div>
+                            @endif
                         </button>
                         <a href="https://maps.google.com/?q={{ $s->latitude }},{{ $s->longitude }}" target="_blank" rel="noopener" class="ml-2 shrink-0 rounded-lg border border-blue-300 bg-white px-2 py-1 text-[11px] font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:bg-gray-800 dark:text-blue-400">
                             Maps
@@ -359,7 +377,15 @@
                                 <a href="https://maps.google.com/?q={{ $s->latitude }},{{ $s->longitude }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-medium text-blue-600 hover:underline dark:text-blue-400">
                                     <span class="inline-block h-2 w-2 rounded-full" style="background-color: #2563eb;"></span>
                                     {{ $s->nama_lokasi ?: (number_format((float) $s->latitude, 4) . ', ' . number_format((float) $s->longitude, 4)) }}
+                                    @if(!is_null($s->gps_accuracy))
+                                        <span class="text-gray-400">(&plusmn;{{ round((float) $s->gps_accuracy) }}m)</span>
+                                    @endif
                                 </a>
+                                @if(!empty($s->is_mock_suspect) && !empty($s->mock_gps_reason))
+                                    <div class="mt-1 inline-flex items-center rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                                        &#9888;&#65039; {{ $s->mock_gps_reason }}
+                                    </div>
+                                @endif
                             @else
                                 <span class="text-gray-400">-</span>
                             @endif
@@ -602,17 +628,25 @@
                 [lat, lng] = jitterIfOverlap(lat, lng);
                 placedCoords.push([lat, lng]);
 
+                const isSuspect = Boolean(guru.is_mock_suspect);
+
                 const marker = L.circleMarker([lat, lng], {
-                    radius: 8,
+                    radius: isSuspect ? 10 : 8,
                     fillColor: '#16a34a',
-                    color: '#ffffff',
-                    weight: 2,
+                    color: isSuspect ? '#dc2626' : '#ffffff',
+                    weight: isSuspect ? 3 : 2,
                     opacity: 1,
                     fillOpacity: 0.9
                 }).addTo(guruLayer);
 
                 const photoHtml = guru.foto_lokasi
                     ? `<br><img src="/storage/${encodeURI(guru.foto_lokasi)}" class="mt-2 h-24 w-auto rounded" alt="Foto Lokasi">`
+                    : '';
+                const accHtml = guru.gps_accuracy !== null && guru.gps_accuracy !== undefined
+                    ? `Akurasi: &plusmn;${Math.round(Number(guru.gps_accuracy))}m<br>`
+                    : '';
+                const warningHtml = isSuspect && guru.mock_gps_reason
+                    ? `<div style="margin-top:4px;padding:3px 6px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:600;">&#9888;&#65039; ${escapeHtml(guru.mock_gps_reason)}</div>`
                     : '';
 
                 marker.bindPopup(`
@@ -623,6 +657,8 @@
                         Status: ${escapeHtml(guru.status_tampil)}<br>
                         Masuk: ${escapeHtml(guru.jam_masuk)}<br>
                         ${guru.nama_lokasi ? `Zona: ${escapeHtml(guru.nama_lokasi)}<br>` : ''}
+                        ${accHtml}
+                        ${warningHtml}
                         <a href="https://maps.google.com/?q=${rawLat},${rawLng}" target="_blank" rel="noopener" style="color:#16a34a;text-decoration:underline;">Buka di Google Maps</a>
                         ${photoHtml}
                     </div>
@@ -643,17 +679,25 @@
                 [lat, lng] = jitterIfOverlap(lat, lng);
                 placedCoords.push([lat, lng]);
 
+                const isSuspect = Boolean(siswa.is_mock_suspect);
+
                 const marker = L.circleMarker([lat, lng], {
-                    radius: 8,
+                    radius: isSuspect ? 10 : 8,
                     fillColor: '#2563eb',
-                    color: '#ffffff',
-                    weight: 2,
+                    color: isSuspect ? '#dc2626' : '#ffffff',
+                    weight: isSuspect ? 3 : 2,
                     opacity: 1,
                     fillOpacity: 0.9
                 }).addTo(siswaLayer);
 
                 const photoHtml = siswa.foto_lokasi
                     ? `<br><img src="/storage/${encodeURI(siswa.foto_lokasi)}" class="mt-2 h-24 w-auto rounded" alt="Foto Lokasi">`
+                    : '';
+                const accHtml = siswa.gps_accuracy !== null && siswa.gps_accuracy !== undefined
+                    ? `Akurasi: &plusmn;${Math.round(Number(siswa.gps_accuracy))}m<br>`
+                    : '';
+                const warningHtml = isSuspect && siswa.mock_gps_reason
+                    ? `<div style="margin-top:4px;padding:3px 6px;border-radius:4px;background:#fef3c7;color:#92400e;font-weight:600;">&#9888;&#65039; ${escapeHtml(siswa.mock_gps_reason)}</div>`
                     : '';
 
                 marker.bindPopup(`
@@ -664,6 +708,8 @@
                         Status: ${escapeHtml(siswa.status_tampil)}<br>
                         Masuk: ${escapeHtml(siswa.jam_masuk)}<br>
                         ${siswa.nama_lokasi ? `Zona: ${escapeHtml(siswa.nama_lokasi)}<br>` : ''}
+                        ${accHtml}
+                        ${warningHtml}
                         <a href="https://maps.google.com/?q=${rawLat},${rawLng}" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">Buka di Google Maps</a>
                         ${photoHtml}
                     </div>

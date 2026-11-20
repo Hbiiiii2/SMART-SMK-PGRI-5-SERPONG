@@ -31,6 +31,10 @@ class PengaturanSekolahController extends Controller
             'izinkan_absen_tanpa_jadwal' => true,
             'absensi_hari_sabtu' => false,
             'absensi_hari_minggu' => false,
+            'mode_anti_mock_gps' => 'peringatan',
+            'maks_akurasi_gps_meter' => 100,
+            'mode_deteksi_perangkat_bersama' => 'tandai',
+            'batas_akun_per_perangkat' => 2,
         ]);
 
         return view('pages.admin.pengaturan-sekolah.edit', [

@@ -32,6 +32,10 @@ class PengaturanSekolah extends Model
         'izinkan_absen_tanpa_jadwal',
         'absensi_hari_sabtu',
         'absensi_hari_minggu',
+        'mode_anti_mock_gps',
+        'maks_akurasi_gps_meter',
+        'mode_deteksi_perangkat_bersama',
+        'batas_akun_per_perangkat',
     ];
 
     protected $casts = [
@@ -43,6 +47,8 @@ class PengaturanSekolah extends Model
         'izinkan_absen_tanpa_jadwal' => 'boolean',
         'absensi_hari_sabtu' => 'boolean',
         'absensi_hari_minggu' => 'boolean',
+        'maks_akurasi_gps_meter' => 'integer',
+        'batas_akun_per_perangkat' => 'integer',
     ];
 
     public static function current(): self
@@ -63,6 +69,10 @@ class PengaturanSekolah extends Model
             'izinkan_absen_tanpa_jadwal' => true,
             'absensi_hari_sabtu' => false,
             'absensi_hari_minggu' => false,
+            'mode_anti_mock_gps' => 'peringatan',
+            'maks_akurasi_gps_meter' => 100,
+            'mode_deteksi_perangkat_bersama' => 'tandai',
+            'batas_akun_per_perangkat' => 2,
         ]);
     }
 

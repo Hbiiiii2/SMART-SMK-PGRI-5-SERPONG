@@ -137,6 +137,7 @@
             const wajibFoto = @json($wajibFoto);
             const validasiRadius = @json($validasiRadius);
             const defaultRadius = @json($defaultRadius);
+            const currentUserLabel = @json((auth()->user()?->name ?? 'Pengguna') . ' (' . strtoupper(auth()->user()?->role ?? '') . ')');
 
             const initialCenter = (allowedLocations.length > 0 && allowedLocations[0].latitude && allowedLocations[0].longitude)
                 ? [allowedLocations[0].latitude, allowedLocations[0].longitude]
@@ -152,10 +153,63 @@
             }
 
             let userMarker = null;
+            let accuracyCircle = null;
             let userLat = null;
             let userLng = null;
+            let userAccuracy = null;
+            let userAltitude = null;
+            let userAltitudeAccuracy = null;
+            let userSpeed = null;
+            let userHeading = null;
+            let gpsTimestamp = null;
+            const gpsSamples = [];
+            let gpsWatchId = null;
+            let hasInitialCenter = false;
             let locationValid = false;
             let photoData = null;
+
+            function getOrCreateDeviceToken() {
+                const storageKey = 'smart_device_token';
+                let token = null;
+                try {
+                    token = localStorage.getItem(storageKey);
+                } catch (err) {}
+
+                if (!token) {
+                    const match = document.cookie.match(/(?:^|;\s*)smart_device_token=([^;]+)/);
+                    if (match) {
+                        token = decodeURIComponent(match[1]);
+                    }
+                }
+
+                if (!token) {
+                    const rawFp = [
+                        screen?.width || 0,
+                        screen?.height || 0,
+                        navigator?.hardwareConcurrency || 0,
+                        navigator?.maxTouchPoints || 0,
+                        Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone || ''
+                    ].join('|');
+                    let fpHash = 0;
+                    for (let i = 0; i < rawFp.length; i++) {
+                        fpHash = ((fpHash << 5) - fpHash) + rawFp.charCodeAt(i);
+                        fpHash |= 0;
+                    }
+                    const randPart = (window.crypto && typeof window.crypto.randomUUID === 'function')
+                        ? window.crypto.randomUUID().replace(/-/g, '')
+                        : (Date.now().toString(36) + Math.random().toString(36).slice(2, 14));
+                    token = (randPart + '-' + Math.abs(fpHash).toString(36)).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 60);
+                }
+
+                try {
+                    localStorage.setItem(storageKey, token);
+                } catch (err) {}
+                try {
+                    document.cookie = `smart_device_token=${encodeURIComponent(token)}; max-age=31536000; path=/; SameSite=Lax`;
+                } catch (err) {}
+
+                return token;
+            }
 
             // Draw allowed locations circles
             allowedLocations.forEach(loc => {
@@ -173,6 +227,108 @@
             const btnCheckin = document.getElementById('btn-checkin');
             const btnCheckout = document.getElementById('btn-checkout');
 
+            function applyGpsPosition(position, recenter = false) {
+                userLat = position.coords.latitude;
+                userLng = position.coords.longitude;
+                userAccuracy = Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : null;
+                userAltitude = Number.isFinite(position.coords.altitude) ? position.coords.altitude : null;
+                userAltitudeAccuracy = Number.isFinite(position.coords.altitudeAccuracy) ? position.coords.altitudeAccuracy : null;
+                userSpeed = Number.isFinite(position.coords.speed) ? position.coords.speed : null;
+                userHeading = Number.isFinite(position.coords.heading) ? position.coords.heading : null;
+                gpsTimestamp = position.timestamp || Date.now();
+
+                gpsSamples.push({
+                    lat: userLat,
+                    lng: userLng,
+                    accuracy: userAccuracy,
+                    timestamp: gpsTimestamp
+                });
+                if (gpsSamples.length > 6) {
+                    gpsSamples.shift();
+                }
+
+                if (userMarker) {
+                    userMarker.setLatLng([userLat, userLng]);
+                } else {
+                    userMarker = L.marker([userLat, userLng]).addTo(map).bindPopup("Lokasi Anda").openPopup();
+                }
+
+                if (userAccuracy !== null && userAccuracy > 0 && userAccuracy < 2000) {
+                    if (accuracyCircle) {
+                        accuracyCircle.setLatLng([userLat, userLng]);
+                        accuracyCircle.setRadius(userAccuracy);
+                    } else {
+                        accuracyCircle = L.circle([userLat, userLng], {
+                            radius: userAccuracy,
+                            color: '#3b82f6',
+                            fillColor: '#60a5fa',
+                            fillOpacity: 0.12,
+                            weight: 1
+                        }).addTo(map);
+                    }
+                }
+
+                if (recenter || !hasInitialCenter) {
+                    map.setView([userLat, userLng], 16);
+                    hasInitialCenter = true;
+                }
+
+                let isWithinRadius = false;
+                let nearestDistance = null;
+                allowedLocations.forEach(loc => {
+                    if (loc.latitude && loc.longitude) {
+                        let dist = map.distance([userLat, userLng], [loc.latitude, loc.longitude]);
+                        if (nearestDistance === null || dist < nearestDistance) {
+                            nearestDistance = dist;
+                        }
+                        if (dist <= (loc.radius || defaultRadius)) {
+                            isWithinRadius = true;
+                        }
+                    }
+                });
+
+                const accText = userAccuracy !== null ? ` &bull; Akurasi: &plusmn;${Math.round(userAccuracy)} m` : '';
+
+                if (!validasiRadius) {
+                    locationValid = true;
+                    locationStatus.innerHTML = `<span class="text-success-600">Lokasi GPS tercatat (Mode Bebas Radius${accText}).</span>`;
+                } else if (isWithinRadius) {
+                    locationValid = true;
+                    locationStatus.innerHTML = `<span class="text-success-600">Lokasi valid (di dalam zona sekolah${accText}).</span>`;
+                } else {
+                    locationValid = false;
+                    const distInfo = nearestDistance !== null ? ` (jarak terdekat ~${Math.round(nearestDistance)} m${accText})` : accText;
+                    locationStatus.innerHTML = `<span class="text-error-600">Anda berada di luar zona absensi${distInfo}.</span>`;
+                }
+                checkEnableButtons();
+            }
+
+            function handleGpsError(error) {
+                locationValid = false;
+                let errMsg = 'Gagal mendapatkan lokasi GPS.';
+                if (error.code === 1) {
+                    errMsg = 'Izin lokasi ditolak oleh browser. Silakan klik ikon gembok di sebelah URL bar dan izinkan akses Lokasi (Location).';
+                    alert(errMsg);
+                } else if (error.code === 2) {
+                    errMsg = 'Sinyal GPS tidak ditemukan.';
+                } else if (error.code === 3) {
+                    errMsg = 'Waktu permintaan lokasi habis (timeout).';
+                }
+                locationStatus.innerHTML = '<span class="text-error-600">' + errMsg + '</span>';
+                checkEnableButtons();
+            }
+
+            function startGpsWatch() {
+                if (!navigator.geolocation || gpsWatchId !== null) return;
+                try {
+                    gpsWatchId = navigator.geolocation.watchPosition(
+                        (pos) => applyGpsPosition(pos, false),
+                        () => {},
+                        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+                    );
+                } catch (err) {}
+            }
+
             function updateLocation() {
                 locationStatus.textContent = 'Mencari lokasi...';
                 locationValid = false;
@@ -181,58 +337,10 @@
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                         function(position) {
-                            userLat = position.coords.latitude;
-                            userLng = position.coords.longitude;
-
-                            if (userMarker) {
-                                userMarker.setLatLng([userLat, userLng]);
-                            } else {
-                                userMarker = L.marker([userLat, userLng]).addTo(map).bindPopup("Lokasi Anda").openPopup();
-                            }
-
-                            map.setView([userLat, userLng], 16);
-
-                            let isWithinRadius = false;
-                            let nearestDistance = null;
-                            allowedLocations.forEach(loc => {
-                                if (loc.latitude && loc.longitude) {
-                                    let dist = map.distance([userLat, userLng], [loc.latitude, loc.longitude]);
-                                    if (nearestDistance === null || dist < nearestDistance) {
-                                        nearestDistance = dist;
-                                    }
-                                    if (dist <= (loc.radius || defaultRadius)) {
-                                        isWithinRadius = true;
-                                    }
-                                }
-                            });
-
-                            if (!validasiRadius) {
-                                locationValid = true;
-                                locationStatus.innerHTML = '<span class="text-success-600">Lokasi GPS tercatat (Mode Bebas Radius).</span>';
-                            } else if (isWithinRadius) {
-                                locationValid = true;
-                                locationStatus.innerHTML = '<span class="text-success-600">Lokasi valid (di dalam zona sekolah).</span>';
-                            } else {
-                                locationValid = false;
-                                const distInfo = nearestDistance !== null ? ` (jarak terdekat ~${Math.round(nearestDistance)} m)` : '';
-                                locationStatus.innerHTML = `<span class="text-error-600">Anda berada di luar zona absensi${distInfo}.</span>`;
-                            }
-                            checkEnableButtons();
+                            applyGpsPosition(position, true);
+                            startGpsWatch();
                         },
-                        function(error) {
-                            locationValid = false;
-                            let errMsg = 'Gagal mendapatkan lokasi GPS.';
-                            if (error.code === 1) {
-                                errMsg = 'Izin lokasi ditolak oleh browser. Silakan klik ikon gembok di sebelah URL bar dan izinkan akses Lokasi (Location).';
-                                alert(errMsg);
-                            } else if (error.code === 2) {
-                                errMsg = 'Sinyal GPS tidak ditemukan.';
-                            } else if (error.code === 3) {
-                                errMsg = 'Waktu permintaan lokasi habis (timeout).';
-                            }
-                            locationStatus.innerHTML = '<span class="text-error-600">' + errMsg + '</span>';
-                            checkEnableButtons();
-                        },
+                        handleGpsError,
                         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                     );
                 } else {
@@ -343,13 +451,32 @@
 
                         context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-                        context.fillStyle = "rgba(0, 0, 0, 0.5)";
-                        context.fillRect(canvas.width - 250, canvas.height - 40, 240, 30);
-                        context.font = "16px Arial";
-                        context.fillStyle = "white";
-                        context.fillText(timestampOverlay.textContent, canvas.width - 240, canvas.height - 20);
+                        const fontSize = Math.max(12, Math.round(canvas.width * 0.025));
+                        const lineHeight = Math.round(fontSize * 1.35);
+                        const padX = Math.max(10, Math.round(fontSize * 0.75));
+                        const padY = Math.max(8, Math.round(fontSize * 0.6));
+                        const boxHeight = (lineHeight * 3) + (padY * 2);
 
-                        photoData = canvas.toDataURL('image/jpeg');
+                        context.fillStyle = "rgba(0, 0, 0, 0.65)";
+                        context.fillRect(0, canvas.height - boxHeight, canvas.width, boxHeight);
+
+                        context.font = `600 ${fontSize}px Arial, sans-serif`;
+                        context.fillStyle = "#ffffff";
+
+                        const coordStr = (userLat !== null && userLng !== null)
+                            ? `${userLat.toFixed(6)}, ${userLng.toFixed(6)}`
+                            : '-';
+                        const accStr = userAccuracy !== null ? `±${Math.round(userAccuracy)}m` : '±-';
+                        const waktuStr = (timestampOverlay && timestampOverlay.textContent)
+                            ? timestampOverlay.textContent
+                            : new Date().toLocaleString('id-ID');
+
+                        const startY = canvas.height - boxHeight + padY + fontSize;
+                        context.fillText(`SMART+ LIVE | ${currentUserLabel}`, padX, startY);
+                        context.fillText(`GPS: ${coordStr} (${accStr})`, padX, startY + lineHeight);
+                        context.fillText(`Waktu: ${waktuStr}`, padX, startY + (lineHeight * 2));
+
+                        photoData = canvas.toDataURL('image/jpeg', 0.88);
 
                         video.classList.add('hidden');
                         canvas.classList.remove('hidden');
@@ -391,7 +518,16 @@
                     body: JSON.stringify({
                         latitude: userLat,
                         longitude: userLng,
-                        foto: photoData
+                        foto: photoData,
+                        accuracy: userAccuracy,
+                        altitude: userAltitude,
+                        altitude_accuracy: userAltitudeAccuracy,
+                        speed: userSpeed,
+                        heading: userHeading,
+                        gps_timestamp: gpsTimestamp,
+                        client_timestamp: Date.now(),
+                        samples: gpsSamples,
+                        device_token: getOrCreateDeviceToken()
                     })
                 })
                 .then(response => response.json())

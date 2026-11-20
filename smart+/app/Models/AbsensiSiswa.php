@@ -25,6 +25,10 @@ class AbsensiSiswa extends Model
         'latitude',
         'longitude',
         'foto_lokasi',
+        'gps_accuracy',
+        'device_token',
+        'is_mock_suspect',
+        'mock_gps_reason',
     ];
 
     protected $casts = [
@@ -33,6 +37,8 @@ class AbsensiSiswa extends Model
         'jam_keluar' => 'datetime:H:i',
         'latitude' => 'float',
         'longitude' => 'float',
+        'gps_accuracy' => 'float',
+        'is_mock_suspect' => 'boolean',
     ];
 
     public function siswa()

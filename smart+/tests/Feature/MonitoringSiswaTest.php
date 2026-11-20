@@ -123,6 +123,9 @@ class MonitoringSiswaTest extends TestCase
             'status' => 'Hadir',
             'latitude' => -6.30240,
             'longitude' => 106.65250,
+            'gps_accuracy' => 14.0,
+            'is_mock_suspect' => true,
+            'mock_gps_reason' => 'Perangkat bersama (2 akun absen dari HP yang sama hari ini)',
         ]);
 
         $siswaBelumAbsen = Siswa::factory()->create([
@@ -143,6 +146,7 @@ class MonitoringSiswaTest extends TestCase
             ->assertSee('-6.30215')
             ->assertSee('Andi Pratama Siswa')
             ->assertSee('-6.30240')
+            ->assertSee('Perangkat bersama (2 akun absen dari HP yang sama hari ini)')
             ->assertSee('Citra Dewi Belum Absen')
             ->assertSee('X RPL 1')
             ->assertSee('XI TKJ 2')

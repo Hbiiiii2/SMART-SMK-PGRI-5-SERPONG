@@ -320,4 +320,138 @@ class PengaturanSekolahTest extends TestCase
             'lokasi_id' => $lokasi->id,
         ]);
     }
+
+    public function test_anti_mock_gps_soft_flag_allows_borrowing_phone_and_marks_suspect_while_strict_mode_blocks()
+    {
+        Carbon::setTestNow(Carbon::parse('2026-11-02 07:10:00', 'Asia/Jakarta'));
+
+        $lokasi = Lokasi::factory()->create([
+            'nama' => 'Kampus Utama',
+            'latitude' => -6.3021000,
+            'longitude' => 106.6522000,
+            'radius' => 100,
+        ]);
+
+        $pengaturan = PengaturanSekolah::first();
+        $pengaturan->update([
+            'metode_absensi_siswa' => 'Zonasi',
+            'mode_lokasi_gps' => 'semua_lokasi',
+            'validasi_radius_gps' => true,
+            'wajib_foto_gps' => false,
+            'izinkan_absen_tanpa_jadwal' => true,
+            'mode_anti_mock_gps' => 'peringatan',
+            'maks_akurasi_gps_meter' => 100,
+            'mode_deteksi_perangkat_bersama' => 'tandai',
+            'batas_akun_per_perangkat' => 2,
+        ]);
+
+        $ta = TahunAjaran::factory()->aktif()->create();
+        $siswa1User = User::factory()->siswa()->create(['is_active' => true]);
+        $siswa1 = Siswa::factory()->create([
+            'user_id' => $siswa1User->id,
+            'kelas' => 'X-RPL-1',
+            'tahun_ajaran_id' => $ta->id,
+        ]);
+
+        $siswa2User = User::factory()->siswa()->create(['is_active' => true]);
+        $siswa2 = Siswa::factory()->create([
+            'user_id' => $siswa2User->id,
+            'kelas' => 'X-RPL-1',
+            'tahun_ajaran_id' => $ta->id,
+        ]);
+
+        $siswa3User = User::factory()->siswa()->create(['is_active' => true]);
+        $siswa3 = Siswa::factory()->create([
+            'user_id' => $siswa3User->id,
+            'kelas' => 'X-RPL-1',
+            'tahun_ajaran_id' => $ta->id,
+        ]);
+
+        $sharedToken = 'device-hp-teman-abc123';
+
+        // Siswa 1 normal GPS on device -> clean (not suspect)
+        $this->actingAs($siswa1User)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 18.5,
+                'device_token' => $sharedToken,
+                'samples' => [
+                    ['lat' => -6.3021001, 'lng' => 106.6522001, 'accuracy' => 19],
+                    ['lat' => -6.3021005, 'lng' => 106.6522003, 'accuracy' => 18.5],
+                    ['lat' => -6.3021000, 'lng' => 106.6522000, 'accuracy' => 18.5],
+                ],
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $abs1 = AbsensiSiswa::where('siswa_id', $siswa1->id)->first();
+        $this->assertFalse($abs1->is_mock_suspect);
+        $this->assertEquals(18.5, $abs1->gps_accuracy);
+
+        // Siswa 2 borrows Siswa 1's phone + has mock accuracy 0.5m in default soft-flag mode -> ALLOWED & flagged
+        $this->actingAs($siswa2User)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 0.5,
+                'device_token' => $sharedToken,
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $abs2 = AbsensiSiswa::where('siswa_id', $siswa2->id)->first();
+        $this->assertTrue($abs2->is_mock_suspect);
+        $this->assertStringContainsString('Perangkat bersama', $abs2->mock_gps_reason);
+        $this->assertStringContainsString('Indikasi Mock GPS', $abs2->mock_gps_reason);
+
+        // Switch to strict mode (ketat) -> mock accuracy 0.5m is BLOCKED
+        $pengaturan->update([
+            'mode_anti_mock_gps' => 'ketat',
+        ]);
+
+        $this->actingAs($siswa3User)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 0.5,
+                'device_token' => 'other-device-xyz',
+            ])
+            ->assertStatus(400)
+            ->assertJson(['success' => false]);
+
+        // Poor accuracy (> 100m) is also blocked in ketat mode
+        $this->actingAs($siswa3User)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 185,
+                'device_token' => 'other-device-xyz',
+            ])
+            ->assertStatus(400)
+            ->assertJson(['success' => false]);
+
+        // Enable shared device block mode -> Siswa 3 with same sharedToken is BLOCKED
+        $pengaturan->update([
+            'mode_anti_mock_gps' => 'peringatan',
+            'mode_deteksi_perangkat_bersama' => 'blokir',
+            'batas_akun_per_perangkat' => 2,
+        ]);
+
+        $this->actingAs($siswa3User)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 15,
+                'device_token' => $sharedToken,
+            ])
+            ->assertStatus(400)
+            ->assertJson(['success' => false]);
+
+        $this->assertDatabaseHas('pengaturan_sekolah', [
+            'mode_deteksi_perangkat_bersama' => 'blokir',
+            'batas_akun_per_perangkat' => 2,
+        ]);
+        $this->assertDatabaseHas('lokasi', ['id' => $lokasi->id]);
+    }
 }

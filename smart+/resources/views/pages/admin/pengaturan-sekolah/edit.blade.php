@@ -236,6 +236,71 @@
                             </label>
                         </div>
                     </div>
+
+                    <div class="md:col-span-2 mt-2 border-t border-gray-200 pt-4 dark:border-gray-800">
+                        <h4 class="text-sm font-semibold text-gray-800 dark:text-white/90">Mitigasi Fake / Mock GPS &amp; Kebijakan Pinjam HP</h4>
+                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Pemeriksaan sinyal GPS (akurasi, micro-drift, timestamp) dan deteksi perangkat bersama yang tetap ramah bagi siswa yang lupa bawa HP / habis kuota.</p>
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Mode Mitigasi Mock GPS</label>
+                        <select name="mode_anti_mock_gps"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                            <option value="peringatan" {{ old('mode_anti_mock_gps', $pengaturan->mode_anti_mock_gps ?? 'peringatan') == 'peringatan' ? 'selected' : '' }}>
+                                Peringatan / Soft-Flag (Tetap Simpan &amp; Tandai di Dashboard)
+                            </option>
+                            <option value="ketat" {{ old('mode_anti_mock_gps', $pengaturan->mode_anti_mock_gps ?? 'peringatan') == 'ketat' ? 'selected' : '' }}>
+                                Ketat (Tolak Otomatis jika Terindikasi Mock GPS / Akurasi Buruk)
+                            </option>
+                            <option value="nonaktif" {{ old('mode_anti_mock_gps', $pengaturan->mode_anti_mock_gps ?? 'peringatan') == 'nonaktif' ? 'selected' : '' }}>
+                                Nonaktif
+                            </option>
+                        </select>
+                        @error('mode_anti_mock_gps')
+                            <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Batas Maksimal Akurasi GPS (meter)</label>
+                        <input type="number" name="maks_akurasi_gps_meter" min="10" max="1000"
+                            value="{{ old('maks_akurasi_gps_meter', $pengaturan->maks_akurasi_gps_meter ?? 100) }}"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        <p class="mt-1 text-xs text-gray-400">Jika error akurasi sinyal GPS melebihi batas ini, sistem menandai/menolak (sesuai mode di sebelah kiri).</p>
+                        @error('maks_akurasi_gps_meter')
+                            <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Mode Deteksi Perangkat Bersama (1 HP Banyak Akun)</label>
+                        <select name="mode_deteksi_perangkat_bersama"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                            <option value="tandai" {{ old('mode_deteksi_perangkat_bersama', $pengaturan->mode_deteksi_perangkat_bersama ?? 'tandai') == 'tandai' ? 'selected' : '' }}>
+                                Tandai Saja / Ramah Pinjam HP (Izinkan Absen &amp; Beri Catatan di Dashboard)
+                            </option>
+                            <option value="blokir" {{ old('mode_deteksi_perangkat_bersama', $pengaturan->mode_deteksi_perangkat_bersama ?? 'tandai') == 'blokir' ? 'selected' : '' }}>
+                                Blokir jika Melebihi Batas Akun per HP
+                            </option>
+                            <option value="nonaktif" {{ old('mode_deteksi_perangkat_bersama', $pengaturan->mode_deteksi_perangkat_bersama ?? 'tandai') == 'nonaktif' ? 'selected' : '' }}>
+                                Nonaktif
+                            </option>
+                        </select>
+                        @error('mode_deteksi_perangkat_bersama')
+                            <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Batas Akun Berbeda per HP per Hari</label>
+                        <input type="number" name="batas_akun_per_perangkat" min="2" max="10"
+                            value="{{ old('batas_akun_per_perangkat', $pengaturan->batas_akun_per_perangkat ?? 2) }}"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        <p class="mt-1 text-xs text-gray-400">Jumlah minimal akun berbeda di 1 HP dalam hari yang sama yang memicu penandaan/blokir (contoh: 2 = tandai sejak akun ke-2).</p>
+                        @error('batas_akun_per_perangkat')
+                            <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 

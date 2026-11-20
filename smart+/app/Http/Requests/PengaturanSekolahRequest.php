@@ -33,6 +33,10 @@ class PengaturanSekolahRequest extends FormRequest
             'izinkan_absen_tanpa_jadwal' => 'nullable|boolean',
             'absensi_hari_sabtu' => 'nullable|boolean',
             'absensi_hari_minggu' => 'nullable|boolean',
+            'mode_anti_mock_gps' => 'sometimes|required|in:nonaktif,peringatan,ketat',
+            'maks_akurasi_gps_meter' => 'sometimes|required|integer|min:10|max:1000',
+            'mode_deteksi_perangkat_bersama' => 'sometimes|required|in:nonaktif,tandai,blokir',
+            'batas_akun_per_perangkat' => 'sometimes|required|integer|min:2|max:10',
         ];
     }
 
