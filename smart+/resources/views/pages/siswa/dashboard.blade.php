@@ -69,11 +69,20 @@
         selectedDay: 'semua',
         tugasFilter: 'semua',
         scheduleView: 'grid',
-        switchTab(tab) {
+        switchTab(tab, shouldScroll = false) {
             this.activeTab = tab;
             const url = new URL(window.location.href);
             url.searchParams.set('tab', tab);
             window.history.replaceState({}, '', url);
+            if (shouldScroll) {
+                this.$nextTick(() => {
+                    const el = document.getElementById('siswa-section-' + tab);
+                    if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        el.focus({ preventScroll: true });
+                    }
+                });
+            }
         }
     }"
 >
@@ -116,7 +125,7 @@
                 <div class="shrink-0">
                     <button
                         type="button"
-                        @click="switchTab('absensi')"
+                        @click="switchTab('absensi', true)"
                         class="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#166EE1] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors duration-150 hover:bg-[#0D52AC] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#166EE1] sm:w-auto"
                     >
                         <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -294,7 +303,7 @@
     </div>
 
     <!-- TAB 1: JADWAL PELAJARAN -->
-    <section x-show="activeTab === 'jadwal'" aria-label="Jadwal pelajaran siswa">
+    <section id="siswa-section-jadwal" tabindex="-1" x-show="activeTab === 'jadwal'" aria-label="Jadwal pelajaran siswa" class="scroll-mt-20 focus:outline-none">
         <!-- Today's Schedule Priority Cards -->
         <div class="mb-8">
             <div class="mb-3 flex items-center justify-between">
@@ -548,7 +557,7 @@
     </section>
 
     <!-- TAB 2: TUGAS TERBARU -->
-    <section x-show="activeTab === 'tugas'" style="display: none;" aria-label="Daftar tugas siswa">
+    <section id="siswa-section-tugas" tabindex="-1" x-show="activeTab === 'tugas'" style="display: none;" aria-label="Daftar tugas siswa" class="scroll-mt-20 focus:outline-none">
         <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 class="text-base font-bold text-gray-900 dark:text-white">Daftar Tugas Kelas {{ $siswa->kelas }}</h2>
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar" role="group" aria-label="Filter status tugas">
@@ -666,7 +675,7 @@
     </section>
 
     <!-- TAB 3: ABSENSI SAYA -->
-    <section x-show="activeTab === 'absensi'" style="display: none;" aria-label="Absensi dan rekap kehadiran siswa">
+    <section id="siswa-section-absensi" tabindex="-1" x-show="activeTab === 'absensi'" style="display: none;" aria-label="Absensi dan rekap kehadiran siswa" class="scroll-mt-20 focus:outline-none">
         <!-- 3-Stage Cutoff Rules Summary Cards -->
         <div class="mb-6 rounded-xl border border-gray-200/90 bg-white p-4 shadow-[0_1px_3px_rgba(16,24,40,0.06)] sm:p-5 dark:border-gray-800 dark:bg-gray-900">
             <h2 class="text-sm font-bold text-gray-900 dark:text-white">Ketentuan Jam Kehadiran Sekolah</h2>
@@ -842,7 +851,7 @@
         <div class="grid grid-cols-4 gap-1">
             <button
                 type="button"
-                @click="switchTab('jadwal'); window.scrollTo({ top: 0, behavior: 'smooth' })"
+                @click="switchTab('jadwal', true)"
                 :class="activeTab === 'jadwal' ? 'bg-[#EBF3FF] text-[#166EE1] dark:bg-[#166EE1]/20 dark:text-[#4EA8FF]' : 'text-gray-500 dark:text-gray-400'"
                 class="flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#166EE1]"
             >
@@ -855,7 +864,7 @@
 
             <button
                 type="button"
-                @click="switchTab('tugas'); window.scrollTo({ top: 0, behavior: 'smooth' })"
+                @click="switchTab('tugas', true)"
                 :class="activeTab === 'tugas' ? 'bg-[#EBF3FF] text-[#166EE1] dark:bg-[#166EE1]/20 dark:text-[#4EA8FF]' : 'text-gray-500 dark:text-gray-400'"
                 class="relative flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#166EE1]"
             >
@@ -874,7 +883,7 @@
 
             <button
                 type="button"
-                @click="switchTab('absensi'); window.scrollTo({ top: 0, behavior: 'smooth' })"
+                @click="switchTab('absensi', true)"
                 :class="activeTab === 'absensi' ? 'bg-[#EBF3FF] text-[#166EE1] dark:bg-[#166EE1]/20 dark:text-[#4EA8FF]' : 'text-gray-500 dark:text-gray-400'"
                 class="flex min-h-[48px] flex-col items-center justify-center gap-0.5 rounded-xl text-[11px] font-semibold transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[#166EE1]"
             >
