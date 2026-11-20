@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -123,5 +124,30 @@ class AuthenticationTest extends TestCase
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
         $response->assertHeader('X-XSS-Protection', '1; mode=block');
+    }
+
+    public function test_user_can_login_with_remember_me_checkbox(): void
+    {
+        $loginPage = $this->get('/login');
+        $loginPage->assertStatus(200)
+            ->assertSee('id="remember"', false)
+            ->assertSee('x-model="checked"', false)
+            ->assertSee('peer-checked:bg-brand-500', false);
+
+        $user = User::factory()->create([
+            'role' => 'siswa',
+            'is_active' => true,
+        ]);
+
+        $response = $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+            'remember' => '1',
+        ]);
+
+        $response->assertRedirect('/siswa/dashboard');
+        $response->assertCookie(Auth::guard()->getRecallerName());
+        $this->assertAuthenticatedAs($user);
+        $this->assertNotNull($user->fresh()->remember_token);
     }
 }

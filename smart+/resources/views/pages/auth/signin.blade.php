@@ -62,17 +62,15 @@
                 </div>
 
                 <div class="flex items-center justify-between">
-                    <label class="flex cursor-pointer items-center text-sm font-normal text-gray-700 select-none dark:text-gray-400">
-                        <div x-data="{ checked: false }" class="relative mr-3">
-                            <input type="checkbox" name="remember" class="sr-only" />
-                            <div :class="checked ? 'border-brand-500 bg-brand-500' : 'bg-transparent border-gray-300 dark:border-gray-700'"
-                                class="flex h-5 w-5 items-center justify-center rounded-md border-[1.25px]">
-                                <span :class="checked ? '' : 'opacity-0'">
-                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                                        <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="white" stroke-width="1.94437" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                </span>
-                            </div>
+                    <label for="remember" x-data="{ checked: {{ old('remember') ? 'true' : 'false' }} }" class="relative flex cursor-pointer items-center text-sm font-normal text-gray-700 select-none dark:text-gray-400">
+                        <input type="checkbox" id="remember" name="remember" value="1" x-model="checked" {{ old('remember') ? 'checked' : '' }} class="peer sr-only" />
+                        <div :class="checked ? 'border-brand-500 bg-brand-500 text-white' : 'bg-transparent border-gray-300 text-transparent dark:border-gray-700'"
+                            class="mr-3 flex h-5 w-5 items-center justify-center rounded-md border-[1.25px] transition-colors duration-150 peer-checked:border-brand-500 peer-checked:bg-brand-500 peer-checked:text-white peer-checked:[&>span]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-brand-500/30">
+                            <span :class="checked ? 'opacity-100' : 'opacity-0'" class="transition-opacity duration-150">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M11.6666 3.5L5.24992 9.91667L2.33325 7" stroke="currentColor" stroke-width="1.94437" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
                         </div>
                         Ingat saya
                     </label>
