@@ -312,8 +312,6 @@ class AttendanceGpsController extends Controller
                 return response()->json(['success' => false, 'message' => 'Anda sudah melakukan Check-In hari ini.'], 400);
             }
 
-            $status = $this->determineStatus($now, $pengaturan);
-
             $dayName = match ($now->dayOfWeek) {
                 0 => 'Minggu', 1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu',
                 4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', default => 'Senin',
@@ -324,6 +322,68 @@ class AttendanceGpsController extends Controller
                 ->when($siswa->tahun_ajaran_id, fn ($q) => $q->where('tahun_ajaran_id', $siswa->tahun_ajaran_id))
                 ->orderBy('jam_mulai')
                 ->get();
+
+            $batasAlpha = $this->getBatasAlpha($now, $pengaturan);
+            if ($now->greaterThan($batasAlpha)) {
+                $keteranganAlfa = 'Otomatis Alfa (Melewati batas waktu absen GPS ' . $batasAlpha->format('H:i') . ')';
+
+                if ($jadwalsToday->isNotEmpty()) {
+                    foreach ($jadwalsToday as $jadwal) {
+                        $existing = AbsensiSiswa::where('siswa_id', $siswa->id)
+                            ->where('jadwal_id', $jadwal->id)
+                            ->whereDate('tanggal', $today)
+                            ->first();
+
+                        if (!$existing) {
+                            AbsensiSiswa::create([
+                                'siswa_id' => $siswa->id,
+                                'jadwal_id' => $jadwal->id,
+                                'tanggal' => $today,
+                                'status' => 'Alfa',
+                                'jam_masuk' => null,
+                                'keterangan' => $keteranganAlfa,
+                            ]);
+                        } elseif ($existing->jam_masuk === null) {
+                            $existing->update([
+                                'status' => 'Alfa',
+                                'keterangan' => $keteranganAlfa,
+                            ]);
+                        }
+                    }
+                } else {
+                    $daily = AbsensiSiswa::where('siswa_id', $siswa->id)
+                        ->whereNull('jadwal_id')
+                        ->whereDate('tanggal', $today)
+                        ->first();
+
+                    if (!$daily) {
+                        AbsensiSiswa::create([
+                            'siswa_id' => $siswa->id,
+                            'jadwal_id' => null,
+                            'tanggal' => $today,
+                            'status' => 'Alfa',
+                            'jam_masuk' => null,
+                            'keterangan' => $keteranganAlfa,
+                        ]);
+                    } elseif ($daily->jam_masuk === null) {
+                        $daily->update([
+                            'status' => 'Alfa',
+                            'keterangan' => $keteranganAlfa,
+                        ]);
+                    }
+                }
+
+                Cache::forget('live_stats_' . $today);
+                Cache::forget('ks_dashboard_' . $today);
+
+                return response()->json([
+                    'success' => false,
+                    'status' => 'Alfa',
+                    'message' => 'Batas waktu Check-In GPS telah berakhir (lewat pukul ' . $batasAlpha->format('H:i') . '). Status kehadiran Anda otomatis tercatat Alfa.',
+                ], 400);
+            }
+
+            $status = $this->determineStatus($now, $pengaturan);
 
             if ($jadwalsToday->isNotEmpty()) {
                 foreach ($jadwalsToday as $idx => $jadwal) {
@@ -463,6 +523,25 @@ class AttendanceGpsController extends Controller
             if ($absensi->exists && $absensi->jam_masuk) {
                 return response()->json(['success' => false, 'message' => 'Anda sudah melakukan Check-In hari ini.'], 400);
             }
+
+            $batasAlpha = $this->getBatasAlpha($now, $pengaturan);
+            if ($now->greaterThan($batasAlpha)) {
+                if (!$absensi->exists || !$absensi->jam_masuk) {
+                    $absensi->status = 'Alpha';
+                    $absensi->jam_masuk = null;
+                    $absensi->keterangan = 'Otomatis Alpha (Melewati batas waktu absen GPS ' . $batasAlpha->format('H:i') . ')';
+                    $absensi->save();
+                    Cache::forget('live_stats_' . $today);
+                    Cache::forget('ks_dashboard_' . $today);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'status' => 'Alfa',
+                    'message' => 'Batas waktu Check-In GPS telah berakhir (lewat pukul ' . $batasAlpha->format('H:i') . '). Status kehadiran Anda otomatis tercatat Alfa.',
+                ], 400);
+            }
+
             $absensi->jam_masuk = $now->format('H:i:s');
             $absensi->status = $this->determineStatus($now, $pengaturan);
             $absensi->lokasi_id = $lokasi?->id;
@@ -514,6 +593,24 @@ class AttendanceGpsController extends Controller
             if ($absensi->exists && $absensi->waktu_check_in) {
                 return response()->json(['success' => false, 'message' => 'Anda sudah melakukan Check-In hari ini.'], 400);
             }
+
+            $batasAlpha = $this->getBatasAlpha($now, $pengaturan);
+            if ($now->greaterThan($batasAlpha)) {
+                if (!$absensi->exists) {
+                    $absensi->status = 'Alpha';
+                    $absensi->waktu_check_in = null;
+                    $absensi->save();
+                    Cache::forget('live_stats_' . $today);
+                    Cache::forget('ks_dashboard_' . $today);
+                }
+
+                return response()->json([
+                    'success' => false,
+                    'status' => 'Alfa',
+                    'message' => 'Batas waktu Check-In GPS telah berakhir (lewat pukul ' . $batasAlpha->format('H:i') . '). Status kehadiran Anda otomatis tercatat Alfa.',
+                ], 400);
+            }
+
             $absensi->waktu_check_in = $now;
             $absensi->status = $this->determineStatus($now, $pengaturan);
             $absensi->lokasi_id = $lokasi?->id;
@@ -544,10 +641,26 @@ class AttendanceGpsController extends Controller
         return response()->json(['success' => true, 'message' => 'Absensi berhasil dicatat.', 'status' => $absensi->status]);
     }
 
+    private function getBatasTerlambat(Carbon $now, PengaturanSekolah $pengaturan): Carbon
+    {
+        $jamMasuk = Carbon::parse($now->toDateString() . ' ' . ($pengaturan->jam_masuk ?: '07:00:00'), 'Asia/Jakarta');
+
+        return $jamMasuk->copy()->addMinutes((int) ($pengaturan->toleransi_terlambat_menit ?? 15));
+    }
+
+    private function getBatasAlpha(Carbon $now, PengaturanSekolah $pengaturan): Carbon
+    {
+        $terlambatMenit = (int) ($pengaturan->toleransi_terlambat_menit ?? 15);
+        $alphaRaw = (int) ($pengaturan->toleransi_alpha_menit ?? 30);
+        $alphaMenit = $alphaRaw > $terlambatMenit ? $alphaRaw : ($terlambatMenit + max(15, $alphaRaw));
+
+        return Carbon::parse($now->toDateString() . ' ' . ($pengaturan->jam_masuk ?: '07:00:00'), 'Asia/Jakarta')
+            ->addMinutes($alphaMenit);
+    }
+
     private function determineStatus(Carbon $now, PengaturanSekolah $pengaturan): string
     {
-        $jamMasuk = Carbon::parse($now->toDateString() . ' ' . $pengaturan->jam_masuk, 'Asia/Jakarta');
-        $batasToleransi = $jamMasuk->copy()->addMinutes($pengaturan->toleransi_terlambat_menit);
+        $batasToleransi = $this->getBatasTerlambat($now, $pengaturan);
 
         if ($now->lessThanOrEqualTo($batasToleransi)) {
             return 'Hadir';

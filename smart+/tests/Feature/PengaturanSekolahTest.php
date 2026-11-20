@@ -6,11 +6,15 @@ use App\Models\AbsensiGuru;
 use App\Models\AbsensiSiswa;
 use App\Models\AbsensiStaff;
 use App\Models\Guru;
+use App\Models\Jadwal;
 use App\Models\Lokasi;
+use App\Models\MataPelajaran;
+use App\Models\Materi;
 use App\Models\PengaturanSekolah;
 use App\Models\Siswa;
 use App\Models\StaffAkademik;
 use App\Models\TahunAjaran;
+use App\Models\Tugas;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -453,5 +457,155 @@ class PengaturanSekolahTest extends TestCase
             'batas_akun_per_perangkat' => 2,
         ]);
         $this->assertDatabaseHas('lokasi', ['id' => $lokasi->id]);
+    }
+
+    public function test_gps_checkin_enforces_three_stage_cutoff_hadir_terlambat_and_locked_alfa()
+    {
+        $lokasi = Lokasi::factory()->create([
+            'nama' => 'Kampus Utama',
+            'latitude' => -6.3021000,
+            'longitude' => 106.6522000,
+            'radius' => 100,
+        ]);
+
+        $pengaturan = PengaturanSekolah::first();
+        $pengaturan->update([
+            'jam_masuk' => '07:00:00',
+            'jam_pulang' => '15:00:00',
+            'toleransi_terlambat_menit' => 15, // Hadir s/d 07:15
+            'toleransi_alpha_menit' => 30,     // Terlambat 07:16 - 07:30, > 07:30 terkunci Alfa
+            'metode_absensi_siswa' => 'Zonasi',
+            'mode_lokasi_gps' => 'semua_lokasi',
+            'validasi_radius_gps' => true,
+            'wajib_foto_gps' => false,
+            'izinkan_absen_tanpa_jadwal' => true,
+        ]);
+
+        $ta = TahunAjaran::factory()->aktif()->create();
+
+        // Stage 1: Check-in at 07:10 -> Hadir
+        Carbon::setTestNow(Carbon::parse('2026-11-02 07:10:00', 'Asia/Jakarta'));
+        $u1 = User::factory()->siswa()->create(['is_active' => true]);
+        $s1 = Siswa::factory()->create(['user_id' => $u1->id, 'kelas' => 'X-RPL-1', 'tahun_ajaran_id' => $ta->id]);
+        $this->actingAs($u1)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 15,
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true, 'status' => 'Hadir']);
+        $this->assertDatabaseHas('absensi_siswa', ['siswa_id' => $s1->id, 'status' => 'Hadir']);
+
+        // Stage 2: Check-in at 07:25 (between 07:16 and 07:30) -> Terlambat
+        Carbon::setTestNow(Carbon::parse('2026-11-02 07:25:00', 'Asia/Jakarta'));
+        $u2 = User::factory()->siswa()->create(['is_active' => true]);
+        $s2 = Siswa::factory()->create(['user_id' => $u2->id, 'kelas' => 'X-RPL-1', 'tahun_ajaran_id' => $ta->id]);
+        $this->actingAs($u2)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 15,
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true, 'status' => 'Terlambat']);
+        $this->assertDatabaseHas('absensi_siswa', ['siswa_id' => $s2->id, 'status' => 'Terlambat']);
+
+        // Stage 3: Check-in at 07:35 (> 07:30) -> Blocked (400) & auto-recorded Alfa
+        Carbon::setTestNow(Carbon::parse('2026-11-02 07:35:00', 'Asia/Jakarta'));
+        $u3 = User::factory()->siswa()->create(['is_active' => true]);
+        $s3 = Siswa::factory()->create(['user_id' => $u3->id, 'kelas' => 'X-RPL-1', 'tahun_ajaran_id' => $ta->id]);
+        $this->actingAs($u3)
+            ->postJson('/api/gps/check-in', [
+                'latitude' => -6.3021000,
+                'longitude' => 106.6522000,
+                'accuracy' => 15,
+            ])
+            ->assertStatus(400)
+            ->assertJson(['success' => false, 'status' => 'Alfa']);
+        $this->assertDatabaseHas('absensi_siswa', [
+            'siswa_id' => $s3->id,
+            'status' => 'Alfa',
+            'jam_masuk' => null,
+        ]);
+        $this->assertDatabaseHas('lokasi', ['id' => $lokasi->id]);
+    }
+
+    public function test_siswa_ui_views_render_cleanly_on_mobile_and_desktop_without_gradient_slop()
+    {
+        $ta = TahunAjaran::factory()->aktif()->create();
+        $guru = Guru::factory()->create(['nama_lengkap' => 'Drs. Hendra Wijaya']);
+        $mapel = MataPelajaran::factory()->create(['nama' => 'Pemrograman Web']);
+        $lokasi = Lokasi::factory()->create(['nama' => 'Lab RPL 1']);
+
+        $siswaUser = User::factory()->siswa()->create(['is_active' => true]);
+        Siswa::factory()->create([
+            'user_id' => $siswaUser->id,
+            'nama_lengkap' => 'Rafi Akbar Pratama',
+            'kelas' => 'XI-RPL-2',
+            'tahun_ajaran_id' => $ta->id,
+        ]);
+
+        $jadwal = Jadwal::factory()->create([
+            'kelas' => 'XI-RPL-2',
+            'hari' => 'Senin',
+            'jam_mulai' => '07:30:00',
+            'jam_selesai' => '09:00:00',
+            'guru_id' => $guru->id,
+            'mata_pelajaran_id' => $mapel->id,
+            'lokasi_id' => $lokasi->id,
+            'tahun_ajaran_id' => $ta->id,
+        ]);
+
+        $materi = Materi::create([
+            'guru_id' => $guru->id,
+            'kelas' => 'XI-RPL-2',
+            'mata_pelajaran_id' => $mapel->id,
+            'judul' => 'Pengenalan Laravel Routing',
+            'deskripsi' => 'Pelajari routing dasar dan controller.',
+            'tipe_materi' => 'lainnya',
+            'file_path_atau_url' => 'https://laravel.com/docs',
+        ]);
+
+        $tugas = Tugas::create([
+            'guru_id' => $guru->id,
+            'kelas' => 'XI-RPL-2',
+            'mata_pelajaran_id' => $mapel->id,
+            'judul' => 'Latihan Membuat Route Resource',
+            'deskripsi' => 'Buat 3 route GET dan POST.',
+            'tenggat_waktu' => Carbon::now('Asia/Jakarta')->addDays(3),
+            'tipe_pengumpulan' => 'link_url',
+        ]);
+
+        $this->actingAs($siswaUser)
+            ->get(route('siswa.dashboard'))
+            ->assertOk()
+            ->assertSee('Rafi Akbar Pratama')
+            ->assertSee('Navigasi cepat mobile')
+            ->assertSee('Pemrograman Web')
+            ->assertDontSee('from-brand-500 to-indigo-600')
+            ->assertDontSee('Yey!');
+
+        $this->actingAs($siswaUser)
+            ->get(route('siswa.jadwal.show', $jadwal))
+            ->assertOk()
+            ->assertSee('Pemrograman Web')
+            ->assertSee('Drs. Hendra Wijaya')
+            ->assertSee('Pengenalan Laravel Routing')
+            ->assertDontSee('from-blue-500 to-brand-500');
+
+        $this->actingAs($siswaUser)
+            ->get(route('siswa.materi.show', $materi))
+            ->assertOk()
+            ->assertSee('Pengenalan Laravel Routing')
+            ->assertSee('Buka Tautan Materi')
+            ->assertDontSee('from-teal-400 to-emerald-500');
+
+        $this->actingAs($siswaUser)
+            ->get(route('siswa.tugas.show', $tugas))
+            ->assertOk()
+            ->assertSee('Latihan Membuat Route Resource')
+            ->assertSee('Status &amp; Pengumpulan', false)
+            ->assertDontSee('from-indigo-500 to-purple-600');
     }
 }
