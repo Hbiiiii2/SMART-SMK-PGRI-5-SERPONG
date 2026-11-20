@@ -25,6 +25,12 @@ class PengaturanSekolahController extends Controller
             'metode_absensi_siswa' => 'RFID',
             'metode_absensi_guru' => 'RFID',
             'metode_absensi_staff' => 'RFID',
+            'mode_lokasi_gps' => 'semua_lokasi',
+            'validasi_radius_gps' => true,
+            'wajib_foto_gps' => true,
+            'izinkan_absen_tanpa_jadwal' => true,
+            'absensi_hari_sabtu' => false,
+            'absensi_hari_minggu' => false,
         ]);
 
         return view('pages.admin.pengaturan-sekolah.edit', [
@@ -39,10 +45,16 @@ class PengaturanSekolahController extends Controller
         $pengaturan = PengaturanSekolah::firstOrFail();
         $data = $request->validated();
 
-        if (auth()->user()->role !== 'super_admin') {
-            unset($data['metode_absensi_siswa']);
-            unset($data['metode_absensi_guru']);
-            unset($data['metode_absensi_staff']);
+        foreach ([
+            'validasi_radius_gps',
+            'wajib_foto_gps',
+            'izinkan_absen_tanpa_jadwal',
+            'absensi_hari_sabtu',
+            'absensi_hari_minggu',
+        ] as $boolField) {
+            if ($request->has($boolField)) {
+                $data[$boolField] = $request->boolean($boolField);
+            }
         }
 
         if ($request->hasFile('logo')) {

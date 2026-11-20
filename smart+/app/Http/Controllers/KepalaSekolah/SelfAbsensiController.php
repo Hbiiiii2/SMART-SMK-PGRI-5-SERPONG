@@ -19,7 +19,7 @@ class SelfAbsensiController extends Controller
         }
 
         $today = Carbon::now('Asia/Jakarta')->toDateString();
-        $settings = PengaturanSekolah::firstOrFail();
+        $settings = PengaturanSekolah::current();
         
         $absensiStatus = app(AttendanceService::class)->getStaffAbsensiStatus($staff->id, $today);
 
@@ -28,8 +28,9 @@ class SelfAbsensiController extends Controller
             4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', default => 'Senin',
         };
         
-        $allowedLocations = auth()->user()->lokasi_diizinkan;
-        $isLibur = \App\Models\HariLibur::where('tanggal', $today)->exists();
+        $now = Carbon::now('Asia/Jakarta');
+        $allowedLocations = auth()->user()->getEffectiveAllowedLocations($settings);
+        $isLibur = $settings->isWeekendHoliday($now) || \App\Models\HariLibur::isLibur($today);
 
         // Validasi metode absensi untuk Staff Akademik
         $metode = $settings->metode_absensi_staff ?? 'RFID';
@@ -39,6 +40,7 @@ class SelfAbsensiController extends Controller
             'metode' => $metode,
             'absensiStatus' => $absensiStatus,
             'settings' => $settings,
+            'pengaturan' => $settings,
             'today' => $today,
             'dayName' => $dayName,
             'allowedLocations' => $allowedLocations,

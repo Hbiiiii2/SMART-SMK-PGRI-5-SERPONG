@@ -15,8 +15,7 @@ class GuruDashboardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
-        // Buat pengaturan default
+
         PengaturanSekolah::create([
             'nama_sekolah' => 'Sekolah Test',
             'jam_masuk' => '07:00:00',
@@ -27,42 +26,49 @@ class GuruDashboardTest extends TestCase
             'metode_absensi_siswa' => 'RFID',
             'metode_absensi_guru' => 'Hybrid',
             'metode_absensi_staff' => 'RFID',
+            'mode_lokasi_gps' => 'semua_lokasi',
+            'validasi_radius_gps' => true,
+            'wajib_foto_gps' => true,
         ]);
     }
 
-    public function test_guru_dashboard_hybrid_shows_rfid_view_not_zonasi()
+    public function test_guru_dashboard_hybrid_shows_gps_and_checkin_button()
     {
         $user = User::factory()->create(['role' => 'guru']);
-        $guru = Guru::factory()->create(['user_id' => $user->id]);
+        Guru::factory()->create(['user_id' => $user->id]);
 
         $response = $this->actingAs($user)->get(route('guru.dashboard'));
 
         $response->assertStatus(200);
-        // Hybrid should NOT show Check-in Zonasi buttons (Check-in Sekarang / Check-out Sekarang)
-        $response->assertDontSee('Check-in Sekarang');
-        $response->assertDontSee('Check-out Sekarang');
-        
-        // It should show Lihat Status Absensi
+        $response->assertSee('Check-in Sekarang');
+        $response->assertSee('Absensi Kehadiran (GPS');
+    }
+
+    public function test_guru_dashboard_rfid_shows_status_link_not_gps()
+    {
+        $user = User::factory()->create(['role' => 'guru']);
+        Guru::factory()->create(['user_id' => $user->id]);
+
+        PengaturanSekolah::first()->update(['metode_absensi_guru' => 'RFID']);
+
+        $response = $this->actingAs($user)->get(route('guru.dashboard'));
+
+        $response->assertStatus(200);
         $response->assertSee('Lihat Status Absensi');
-        
-        // It should NOT include gps-absensi
         $response->assertDontSee('navigator.geolocation.getCurrentPosition');
     }
 
     public function test_guru_dashboard_zonasi_shows_zonasi_view()
     {
         $user = User::factory()->create(['role' => 'guru']);
-        $guru = Guru::factory()->create(['user_id' => $user->id]);
+        Guru::factory()->create(['user_id' => $user->id]);
 
-        // Change to Zonasi
-        $pengaturan = PengaturanSekolah::first();
-        $pengaturan->update(['metode_absensi_guru' => 'Zonasi']);
+        PengaturanSekolah::first()->update(['metode_absensi_guru' => 'Zonasi']);
 
         $response = $this->actingAs($user)->get(route('guru.dashboard'));
 
         $response->assertStatus(200);
-        // Should show Check-in/Check-out buttons and GPS script
         $response->assertSee('Check-in Sekarang');
-        $response->assertSee('navigator.geolocation.getCurrentPosition');
+        $response->assertSee('Absensi Kehadiran (GPS');
     }
 }

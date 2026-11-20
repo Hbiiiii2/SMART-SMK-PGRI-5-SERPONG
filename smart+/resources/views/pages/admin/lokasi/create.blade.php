@@ -58,7 +58,7 @@
             </div>
 
             <div class="mt-6">
-                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Pengguna yang Diizinkan (Guru, Staff & Kepala Sekolah)</label>
+                <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Pengguna Khusus yang Diizinkan (Opsional — Kosongkan jika Mode Semua Lokasi Sekolah aktif)</label>
                 <select id="user-select" multiple name="user_ids[]" class="w-full" placeholder="Cari nama pengguna...">
                     @foreach($users as $user)
                         <option value="{{ $user->id }}" {{ (collect(old('user_ids'))->contains($user->id)) ? 'selected':'' }}>

@@ -24,9 +24,15 @@ class PengaturanSekolahRequest extends FormRequest
             'toleransi_terlambat_menit' => 'required|integer|min:0|max:60',
             'toleransi_alpha_menit' => 'required|integer|min:0|max:120',
             'radius_absensi_meter' => 'required|numeric|min:1',
-            'metode_absensi_siswa' => auth()->user()->role === 'super_admin' ? 'required|in:RFID,Zonasi' : 'nullable',
-            'metode_absensi_guru' => auth()->user()->role === 'super_admin' ? 'required|in:RFID,Hybrid,Zonasi' : 'nullable',
-            'metode_absensi_staff' => auth()->user()->role === 'super_admin' ? 'required|in:RFID,Hybrid,Zonasi' : 'nullable',
+            'metode_absensi_siswa' => 'required|in:RFID,Hybrid,Zonasi',
+            'metode_absensi_guru' => 'required|in:RFID,Hybrid,Zonasi',
+            'metode_absensi_staff' => 'required|in:RFID,Hybrid,Zonasi',
+            'mode_lokasi_gps' => 'sometimes|required|in:semua_lokasi,khusus_pengguna',
+            'validasi_radius_gps' => 'nullable|boolean',
+            'wajib_foto_gps' => 'nullable|boolean',
+            'izinkan_absen_tanpa_jadwal' => 'nullable|boolean',
+            'absensi_hari_sabtu' => 'nullable|boolean',
+            'absensi_hari_minggu' => 'nullable|boolean',
         ];
     }
 
@@ -42,6 +48,7 @@ class PengaturanSekolahRequest extends FormRequest
             'metode_absensi_siswa.required' => 'Metode absensi siswa wajib dipilih.',
             'metode_absensi_guru.required' => 'Metode absensi guru wajib dipilih.',
             'metode_absensi_staff.required' => 'Metode absensi staff wajib dipilih.',
+            'mode_lokasi_gps.in' => 'Mode izin lokasi GPS tidak valid.',
         ];
     }
 }

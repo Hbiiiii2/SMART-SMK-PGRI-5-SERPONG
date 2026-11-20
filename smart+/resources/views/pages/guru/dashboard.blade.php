@@ -57,13 +57,13 @@
                 @endif
             </div>
             <div>
-                @if($metode === 'Zonasi' && (!$absensiStatus || !$absensiStatus['sudah_check_in']))
+                @if(in_array($metode, ['Zonasi', 'Hybrid']) && (!$absensiStatus || !$absensiStatus['sudah_check_in']))
                     <a href="{{ route('guru.absensi-saya.index') }}"
                         class="bg-success-500 shadow-theme-xs hover:bg-success-600 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                         Check-in Sekarang
                     </a>
-                @elseif($metode === 'Zonasi' && $absensiStatus['sudah_check_in'] && !$absensiStatus['sudah_check_out'])
+                @elseif(in_array($metode, ['Zonasi', 'Hybrid']) && $absensiStatus['sudah_check_in'] && !$absensiStatus['sudah_check_out'])
                     <a href="{{ route('guru.absensi-saya.index') }}"
                         class="bg-warning-500 shadow-theme-xs hover:bg-warning-600 inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -79,8 +79,13 @@
         </div>
     </div>
 
-    @if($metode === 'Zonasi')
-        @include('components.gps-absensi')
+    @if(in_array($metode, ['Zonasi', 'Hybrid']))
+        @include('components.gps-absensi', [
+            'pengaturan' => $pengaturan ?? $settings ?? null,
+            'allowedLocations' => $allowedLocations,
+            'isLibur' => $isLibur,
+            'absensiStatus' => $absensiStatus
+        ])
     @endif
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">

@@ -20,7 +20,7 @@ class LokasiController extends Controller
 
     public function create()
     {
-        $users = \App\Models\User::whereIn('role', ['guru', 'staff_akademik', 'kepala_sekolah'])->get();
+        $users = \App\Models\User::whereIn('role', ['guru', 'staff_akademik', 'kepala_sekolah', 'siswa'])->orderBy('name')->get();
         return view('pages.admin.lokasi.create', ['title' => 'Tambah Lokasi', 'users' => $users]);
     }
 
@@ -40,7 +40,7 @@ class LokasiController extends Controller
 
     public function edit(Lokasi $lokasi)
     {
-        $users = \App\Models\User::whereIn('role', ['guru', 'staff_akademik', 'kepala_sekolah'])->get();
+        $users = \App\Models\User::whereIn('role', ['guru', 'staff_akademik', 'kepala_sekolah', 'siswa'])->orderBy('name')->get();
         $lokasi->load('users');
         return view('pages.admin.lokasi.edit', ['title' => 'Edit Lokasi', 'lokasi' => $lokasi, 'users' => $users]);
     }

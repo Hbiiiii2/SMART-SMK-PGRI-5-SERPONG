@@ -41,17 +41,16 @@ class DashboardController extends Controller
         }
 
         $absensiStatus = app(AttendanceService::class)->getGuruAbsensiStatus($guru->id, $today);
-        $settings = PengaturanSekolah::firstOrFail();
+        $settings = PengaturanSekolah::current();
         
         $user = auth()->user();
         $historyCuti = \App\Models\PengajuanCuti::where('user_id', $user->id)
             ->latest()
             ->limit(10)
             ->get();
-        $allowedLocations = $user->lokasi_diizinkan;
+        $allowedLocations = $user->getEffectiveAllowedLocations($settings);
         $now = Carbon::now('Asia/Jakarta');
-        $isWeekend = $now->dayOfWeek === Carbon::SATURDAY || $now->dayOfWeek === Carbon::SUNDAY;
-        $isLibur = $isWeekend || \App\Models\HariLibur::isLibur($today);
+        $isLibur = $settings->isWeekendHoliday($now) || \App\Models\HariLibur::isLibur($today);
 
         return view('pages.guru.dashboard', [
             'title' => 'Dashboard Guru',
@@ -59,6 +58,8 @@ class DashboardController extends Controller
             'rekapJadwal' => $rekapJadwal,
             'absensiStatus' => $absensiStatus,
             'metode' => $settings->metode_absensi_guru ?? 'RFID',
+            'settings' => $settings,
+            'pengaturan' => $settings,
             'today' => $today,
             'historyCuti' => $historyCuti,
             'allowedLocations' => $allowedLocations,

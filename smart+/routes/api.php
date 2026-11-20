@@ -16,8 +16,10 @@ Route::name('api.')->group(function () {
     Route::get('/rfid/stats', [RfidApiController::class, 'stats'])->name('rfid.stats');
     Route::post('/rfid/auto-mark-alfa', [RfidApiController::class, 'autoMarkAlfa'])->name('rfid.auto-mark-alfa');
 
-    Route::post('/gps/check-in', [AttendanceGpsController::class, 'checkIn'])->name('gps.check-in');
-    Route::post('/gps/check-out', [AttendanceGpsController::class, 'checkOut'])->name('gps.check-out');
+    Route::middleware(['web', 'auth'])->group(function () {
+        Route::post('/gps/check-in', [AttendanceGpsController::class, 'checkIn'])->name('gps.check-in');
+        Route::post('/gps/check-out', [AttendanceGpsController::class, 'checkOut'])->name('gps.check-out');
+    });
 });
 
 // --- Standard REST API v1 (PRD Version 2.0 Integration Contract) ---

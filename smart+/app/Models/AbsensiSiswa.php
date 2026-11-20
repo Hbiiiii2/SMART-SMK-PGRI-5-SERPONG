@@ -14,6 +14,7 @@ class AbsensiSiswa extends Model
     protected $fillable = [
         'siswa_id',
         'jadwal_id',
+        'lokasi_id',
         'tanggal',
         'status',
         'jam_masuk',
@@ -21,12 +22,17 @@ class AbsensiSiswa extends Model
         'keterangan',
         'diedit_oleh',
         'alasan_perubahan',
+        'latitude',
+        'longitude',
+        'foto_lokasi',
     ];
 
     protected $casts = [
         'tanggal' => 'date',
         'jam_masuk' => 'datetime:H:i',
         'jam_keluar' => 'datetime:H:i',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
 
     public function siswa()
@@ -37,5 +43,10 @@ class AbsensiSiswa extends Model
     public function jadwal()
     {
         return $this->belongsTo(Jadwal::class);
+    }
+
+    public function lokasi()
+    {
+        return $this->belongsTo(Lokasi::class);
     }
 }

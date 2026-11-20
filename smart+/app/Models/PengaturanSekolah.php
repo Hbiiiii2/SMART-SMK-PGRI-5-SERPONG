@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -25,11 +26,75 @@ class PengaturanSekolah extends Model
         'metode_absensi_siswa',
         'metode_absensi_guru',
         'metode_absensi_staff',
+        'mode_lokasi_gps',
+        'validasi_radius_gps',
+        'wajib_foto_gps',
+        'izinkan_absen_tanpa_jadwal',
+        'absensi_hari_sabtu',
+        'absensi_hari_minggu',
     ];
 
     protected $casts = [
         'toleransi_terlambat_menit' => 'integer',
         'toleransi_alpha_menit' => 'integer',
         'radius_absensi_meter' => 'float',
+        'validasi_radius_gps' => 'boolean',
+        'wajib_foto_gps' => 'boolean',
+        'izinkan_absen_tanpa_jadwal' => 'boolean',
+        'absensi_hari_sabtu' => 'boolean',
+        'absensi_hari_minggu' => 'boolean',
     ];
+
+    public static function current(): self
+    {
+        return static::firstOrCreate([], [
+            'nama_sekolah' => 'SMK PGRI 5 Serpong',
+            'jam_masuk' => '07:00',
+            'jam_pulang' => '15:00',
+            'toleransi_terlambat_menit' => 15,
+            'toleransi_alpha_menit' => 30,
+            'radius_absensi_meter' => 100,
+            'metode_absensi_siswa' => 'RFID',
+            'metode_absensi_guru' => 'RFID',
+            'metode_absensi_staff' => 'RFID',
+            'mode_lokasi_gps' => 'semua_lokasi',
+            'validasi_radius_gps' => true,
+            'wajib_foto_gps' => true,
+            'izinkan_absen_tanpa_jadwal' => true,
+            'absensi_hari_sabtu' => false,
+            'absensi_hari_minggu' => false,
+        ]);
+    }
+
+    public function getMethodForRole(string $role): string
+    {
+        return match ($role) {
+            'siswa' => $this->metode_absensi_siswa ?? 'RFID',
+            'guru' => $this->metode_absensi_guru ?? 'RFID',
+            default => $this->metode_absensi_staff ?? 'RFID',
+        };
+    }
+
+    public function allowsGpsForRole(string $role): bool
+    {
+        return in_array($this->getMethodForRole($role), ['Zonasi', 'Hybrid'], true);
+    }
+
+    public function allowsRfidForRole(string $role): bool
+    {
+        return in_array($this->getMethodForRole($role), ['RFID', 'Hybrid'], true);
+    }
+
+    public function isWeekendHoliday(Carbon $date): bool
+    {
+        if ($date->dayOfWeek === Carbon::SATURDAY) {
+            return !($this->absensi_hari_sabtu ?? false);
+        }
+
+        if ($date->dayOfWeek === Carbon::SUNDAY) {
+            return !($this->absensi_hari_minggu ?? false);
+        }
+
+        return false;
+    }
 }

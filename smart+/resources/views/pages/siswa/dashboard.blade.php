@@ -38,6 +38,26 @@
         </div>
     </div>
 
+    <!-- Quick GPS Attendance Banner if enabled -->
+    @if(in_array($metode ?? 'RFID', ['Zonasi', 'Hybrid']) && !($isLibur ?? false) && !($absensiStatus['sudah_check_out'] ?? false))
+        <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-brand-200 bg-brand-50/70 p-4 dark:border-brand-800/50 dark:bg-brand-500/10">
+            <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500 text-white">📍</div>
+                <div>
+                    <p class="text-sm font-bold text-gray-800 dark:text-white/90">
+                        {{ ($absensiStatus['sudah_check_in'] ?? false) ? 'Sudah Check-In (' . ($absensiStatus['jam_masuk'] ?? '-') . ') — Jangan lupa Check-Out pulang!' : 'Absensi GPS Aktif untuk Siswa' }}
+                    </p>
+                    <p class="text-xs text-gray-600 dark:text-gray-400">
+                        Mode absensi: {{ ($metode ?? 'RFID') === 'Hybrid' ? 'Hybrid (RFID Kiosk + GPS Lokasi)' : 'Zonasi (GPS Lokasi)' }}
+                    </p>
+                </div>
+            </div>
+            <button type="button" @click="activeTab = 'absensi'" class="rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-brand-600 transition">
+                {{ ($absensiStatus['sudah_check_in'] ?? false) ? 'Buka Absensi Check-Out' : 'Absen GPS Sekarang' }}
+            </button>
+        </div>
+    @endif
+
     <!-- Tabs with Bubbles -->
     <div class="mb-8 flex flex-wrap gap-4 border-b-2 border-gray-100 pb-4 dark:border-gray-800">
         <button @click="activeTab = 'jadwal'"
@@ -196,6 +216,24 @@
 
     <!-- TAB 3: ABSENSI SAYA -->
     <div x-show="activeTab === 'absensi'" style="display: none;" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+        @if(in_array($metode ?? 'RFID', ['Zonasi', 'Hybrid']))
+            @include('components.gps-absensi', [
+                'pengaturan' => $pengaturan ?? null,
+                'allowedLocations' => $allowedLocations ?? collect(),
+                'isLibur' => $isLibur ?? false,
+                'absensiStatus' => $absensiStatus ?? null
+            ])
+        @else
+            <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Metode absensi siswa saat ini menggunakan <strong>Kartu RFID (Tap Kiosk)</strong>.
+                    @if($absensiStatus && ($absensiStatus['sudah_check_in'] ?? false))
+                        Status hari ini: <strong>{{ $absensiStatus['status'] }}</strong> (Masuk: {{ $absensiStatus['jam_masuk'] ?? '-' }}@if($absensiStatus['jam_keluar'] ?? null), Keluar: {{ $absensiStatus['jam_keluar'] }}@endif).
+                    @endif
+                </p>
+            </div>
+        @endif
+
         <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
             @forelse($rekapAbsensi as $mapel => $rekap)
                 <div x-data="{ open: false }" class="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm transition-all hover:shadow-lg dark:border-gray-800 dark:bg-white/[0.03]">
@@ -276,7 +314,11 @@
                                         <div class="flex flex-col gap-0.5">
                                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ \Carbon\Carbon::parse($detail->tanggal)->translatedFormat('d M Y') }}</span>
                                             <span class="text-[10px] font-medium text-gray-500">
-                                                Jadwal: {{ substr($detail->jadwal->jam_mulai ?? '00:00', 0, 5) }} - {{ substr($detail->jadwal->jam_selesai ?? '00:00', 0, 5) }}
+                                                @if($detail->jadwal)
+                                                    Jadwal: {{ substr($detail->jadwal->jam_mulai ?? '00:00', 0, 5) }} - {{ substr($detail->jadwal->jam_selesai ?? '00:00', 0, 5) }}
+                                                @else
+                                                    Absensi Harian
+                                                @endif
                                             </span>
                                             @if($detail->jam_masuk)
                                                 <span class="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">

@@ -17,8 +17,11 @@ class DashboardController extends Controller
         $user = auth()->user();
         $staff = $user->staff_akademik;
         
-        $today = Carbon::today()->toDateString();
-        $isLibur = HariLibur::where('tanggal', $today)->exists();
+        $now = Carbon::now('Asia/Jakarta');
+        $today = $now->toDateString();
+        $pengaturan = PengaturanSekolah::first();
+        $isLibur = ($pengaturan ? $pengaturan->isWeekendHoliday($now) : ($now->isSaturday() || $now->isSunday()))
+            || HariLibur::isLibur($today);
 
         $absensiHariIni = null;
         $historyAbsensi = collect();
@@ -32,8 +35,10 @@ class DashboardController extends Controller
                 
             if ($absensiHariIni) {
                 $absensiStatus = [
-                    'sudah_check_in' => true,
+                    'sudah_check_in' => $absensiHariIni->waktu_check_in !== null,
                     'sudah_check_out' => $absensiHariIni->waktu_check_out !== null,
+                    'jam_masuk' => $absensiHariIni->waktu_check_in ? Carbon::parse($absensiHariIni->waktu_check_in)->format('H:i:s') : null,
+                    'jam_keluar' => $absensiHariIni->waktu_check_out ? Carbon::parse($absensiHariIni->waktu_check_out)->format('H:i:s') : null,
                     'status' => $absensiHariIni->status
                 ];
             }
@@ -49,10 +54,9 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        $pengaturan = PengaturanSekolah::first();
         $allowedLocations = collect();
         if ($user) {
-            $allowedLocations = $user->lokasi_diizinkan;
+            $allowedLocations = $user->getEffectiveAllowedLocations($pengaturan);
         }
 
         return view('pages.staff.dashboard', compact(

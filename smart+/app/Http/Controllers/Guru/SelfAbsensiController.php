@@ -15,7 +15,7 @@ class SelfAbsensiController extends Controller
     {
         $guru = auth()->user()->guru;
         $today = Carbon::now('Asia/Jakarta')->toDateString();
-        $settings = PengaturanSekolah::firstOrFail();
+        $settings = PengaturanSekolah::current();
         $absensiStatus = app(AttendanceService::class)->getGuruAbsensiStatus($guru->id, $today);
 
         $dayName = match (Carbon::now('Asia/Jakarta')->dayOfWeek) {
@@ -23,16 +23,16 @@ class SelfAbsensiController extends Controller
             4 => 'Kamis', 5 => 'Jumat', 6 => 'Sabtu', default => 'Senin',
         };
         
-        $allowedLocations = auth()->user()->lokasi_diizinkan;
         $now = Carbon::now('Asia/Jakarta');
-        $isWeekend = $now->dayOfWeek === Carbon::SATURDAY || $now->dayOfWeek === Carbon::SUNDAY;
-        $isLibur = $isWeekend || \App\Models\HariLibur::isLibur($today);
+        $allowedLocations = auth()->user()->getEffectiveAllowedLocations($settings);
+        $isLibur = $settings->isWeekendHoliday($now) || \App\Models\HariLibur::isLibur($today);
 
         return view('pages.guru.absensi-saya.index', [
             'title' => 'Absensi Saya',
             'metode' => $settings->metode_absensi_guru ?? 'RFID',
             'absensiStatus' => $absensiStatus,
             'settings' => $settings,
+            'pengaturan' => $settings,
             'today' => $today,
             'dayName' => $dayName,
             'allowedLocations' => $allowedLocations,

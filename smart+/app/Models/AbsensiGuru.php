@@ -13,6 +13,7 @@ class AbsensiGuru extends Model
 
     protected $fillable = [
         'guru_id',
+        'lokasi_id',
         'tanggal',
         'jam_masuk',
         'jam_keluar',
@@ -34,5 +35,10 @@ class AbsensiGuru extends Model
     public function guru()
     {
         return $this->belongsTo(Guru::class);
+    }
+
+    public function lokasi()
+    {
+        return $this->belongsTo(Lokasi::class);
     }
 }

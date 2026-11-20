@@ -88,8 +88,39 @@ class User extends Authenticatable
         return $this->role === 'staff_akademik';
     }
 
+    public function isSiswa(): bool
+    {
+        return $this->role === 'siswa';
+    }
+
     public function isSuperAdmin(): bool
     {
         return $this->role === 'super_admin';
+    }
+
+    public function getEffectiveAllowedLocations(?PengaturanSekolah $pengaturan = null)
+    {
+        $pengaturan = $pengaturan ?? PengaturanSekolah::first();
+        $assigned = $this->lokasi_diizinkan()->get();
+
+        if ($assigned->isNotEmpty()) {
+            $locations = $assigned;
+        } elseif (($pengaturan->mode_lokasi_gps ?? 'semua_lokasi') === 'semua_lokasi') {
+            $locations = \App\Models\Lokasi::all();
+        } else {
+            $locations = collect();
+        }
+
+        $defaultRadius = (float) ($pengaturan->radius_absensi_meter ?? 100);
+
+        return $locations
+            ->filter(fn ($loc) => $loc->latitude !== null && $loc->longitude !== null)
+            ->map(function ($loc) use ($defaultRadius) {
+                if (!$loc->radius || (float) $loc->radius <= 0) {
+                    $loc->radius = $defaultRadius;
+                }
+                return $loc;
+            })
+            ->values();
     }
 }

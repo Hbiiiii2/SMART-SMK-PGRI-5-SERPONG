@@ -22,7 +22,7 @@ class AttendanceService
     {
         if (!$this->settings) {
             $this->settings = PengaturanSekolah::firstOrCreate([], [
-                'nama_sekolah' => 'SMP Al - Madinah',
+                'nama_sekolah' => 'SMK PGRI 5 Serpong',
                 'jam_masuk' => '07:15:00',
                 'jam_pulang' => '15:00:00',
                 'toleransi_terlambat_menit' => 15,
@@ -31,6 +31,12 @@ class AttendanceService
                 'metode_absensi_siswa' => 'RFID',
                 'metode_absensi_guru' => 'RFID',
                 'metode_absensi_staff' => 'RFID',
+                'mode_lokasi_gps' => 'semua_lokasi',
+                'validasi_radius_gps' => true,
+                'wajib_foto_gps' => true,
+                'izinkan_absen_tanpa_jadwal' => true,
+                'absensi_hari_sabtu' => false,
+                'absensi_hari_minggu' => false,
             ]);
         }
 
@@ -41,9 +47,10 @@ class AttendanceService
     {
         $now = Carbon::now('Asia/Jakarta');
         $today = $now->toDateString();
+        $settings = $this->getSettings();
 
-        if ($now->dayOfWeek === Carbon::SATURDAY || $now->dayOfWeek === Carbon::SUNDAY) {
-            return ['success' => false, 'message' => 'Hari ini Sabtu/Minggu. Absensi tidak diperlukan.'];
+        if ($settings->isWeekendHoliday($now)) {
+            return ['success' => false, 'message' => 'Hari ini akhir pekan dan absensi akhir pekan tidak diaktifkan.'];
         }
 
         if (HariLibur::isLibur($today)) {
@@ -60,14 +67,23 @@ class AttendanceService
         }
 
         if ($rfid->guru_id && $rfid->guru) {
+            if (!$settings->allowsRfidForRole('guru')) {
+                return ['success' => false, 'message' => 'Metode absensi Guru saat ini diset hanya Zonasi (GPS).'];
+            }
             return $this->processGuruScan($rfid);
         }
 
         if ($rfid->siswa_id && $rfid->siswa) {
+            if (!$settings->allowsRfidForRole('siswa')) {
+                return ['success' => false, 'message' => 'Metode absensi Siswa saat ini diset hanya Zonasi (GPS).'];
+            }
             return $this->processSiswaScan($rfid);
         }
 
         if ($rfid->staff_akademik_id && $rfid->staff) {
+            if (!$settings->allowsRfidForRole('staff_akademik')) {
+                return ['success' => false, 'message' => 'Metode absensi Staff saat ini diset hanya Zonasi (GPS).'];
+            }
             return $this->processStaffScan($rfid);
         }
 
@@ -229,9 +245,77 @@ class AttendanceService
                 ->first();
 
             if ($existingOpen) {
-                $jadwalOpen = Jadwal::with('mataPelajaran')->find($existingOpen->jadwal_id);
+                $jadwalOpen = $existingOpen->jadwal_id ? Jadwal::with('mataPelajaran')->find($existingOpen->jadwal_id) : null;
 
                 return $this->processSiswaTapOut($siswa, $today, $now, $fotoUrl, $initials, $jadwalOpen);
+            }
+
+            $settings = $this->getSettings();
+            if ($settings->izinkan_absen_tanpa_jadwal ?? true) {
+                if ($this->isPastAlphaTime()) {
+                    $batasAlpha = Carbon::parse($today . ' ' . $settings->jam_pulang, 'Asia/Jakarta')
+                        ->addMinutes($settings->toleransi_alpha_menit);
+
+                    return [
+                        'success' => false,
+                        'message' => 'Waktu absensi sudah berakhir (lewat ' . $batasAlpha->format('H:i') . ').',
+                        'role' => 'siswa',
+                        'nama' => $siswa->nama_lengkap,
+                        'nisn' => $siswa->nisn,
+                        'kelas' => $siswa->kelas,
+                        'foto' => $fotoUrl,
+                        'initials' => $initials,
+                    ];
+                }
+
+                $alreadyDoneToday = AbsensiSiswa::where('siswa_id', $siswa->id)
+                    ->whereDate('tanggal', $today)
+                    ->whereNotNull('jam_keluar')
+                    ->exists();
+
+                if ($alreadyDoneToday) {
+                    return [
+                        'success' => false,
+                        'message' => 'Anda sudah melakukan absensi keluar hari ini.',
+                        'role' => 'siswa',
+                        'nama' => $siswa->nama_lengkap,
+                        'nisn' => $siswa->nisn,
+                        'kelas' => $siswa->kelas,
+                        'foto' => $fotoUrl,
+                        'initials' => $initials,
+                    ];
+                }
+
+                $batasTerlambat = Carbon::parse($today . ' ' . ($settings->jam_masuk ?: '07:00:00'), 'Asia/Jakarta')
+                    ->addMinutes($settings->toleransi_terlambat_menit);
+                $status = $now->greaterThan($batasTerlambat) ? 'Terlambat' : 'Hadir';
+                $jamMasukAktual = $now->format('H:i:s');
+
+                AbsensiSiswa::create([
+                    'siswa_id' => $siswa->id,
+                    'jadwal_id' => null,
+                    'tanggal' => $today,
+                    'status' => $status,
+                    'jam_masuk' => $jamMasukAktual,
+                    'keterangan' => 'Absensi RFID Harian (Tanpa Jadwal)',
+                ]);
+
+                Cache::forget('live_stats_' . $today);
+
+                return [
+                    'success' => true,
+                    'message' => "Absensi {$status} berhasil.",
+                    'type' => 'masuk',
+                    'role' => 'siswa',
+                    'nama' => $siswa->nama_lengkap,
+                    'nisn' => $siswa->nisn,
+                    'kelas' => $siswa->kelas,
+                    'foto' => $fotoUrl,
+                    'initials' => $initials,
+                    'mata_pelajaran' => 'Absensi Harian',
+                    'status' => $status,
+                    'jam' => $jamMasukAktual,
+                ];
             }
 
             return [
@@ -607,13 +691,18 @@ class AttendanceService
     {
         $now = Carbon::now('Asia/Jakarta');
         $today = $now->toDateString();
+        $settings = $this->getSettings();
 
-        if ($now->dayOfWeek === Carbon::SATURDAY || $now->dayOfWeek === Carbon::SUNDAY) {
-            return ['success' => false, 'message' => 'Hari ini Sabtu/Minggu. Absensi tidak diperlukan.'];
+        if ($settings->isWeekendHoliday($now)) {
+            return ['success' => false, 'message' => 'Hari ini akhir pekan dan absensi akhir pekan tidak diaktifkan.'];
         }
 
         if (HariLibur::isLibur($today)) {
             return ['success' => false, 'message' => 'Hari ini hari libur nasional. Absensi tidak diperlukan.'];
+        }
+
+        if (!$settings->allowsGpsForRole('guru')) {
+            return ['success' => false, 'message' => 'Metode absensi Guru saat ini diset hanya RFID.'];
         }
 
         $guru = Guru::find($guruId);
@@ -723,17 +812,24 @@ class AttendanceService
 
     private function isInSchoolRadius(float $latitude, float $longitude): bool
     {
+        $settings = $this->getSettings();
+        if (!($settings->validasi_radius_gps ?? true)) {
+            return true;
+        }
+
         $lokasis = Lokasi::all();
 
         if ($lokasis->isEmpty()) {
-            $settings = $this->getSettings();
             return true;
         }
+
+        $defaultRadius = (float) ($settings->radius_absensi_meter ?? 100);
 
         foreach ($lokasis as $lokasi) {
             if ($lokasi->latitude && $lokasi->longitude) {
                 $distance = $this->haversineDistance($latitude, $longitude, $lokasi->latitude, $lokasi->longitude);
-                if ($distance <= $lokasi->radius) {
+                $radius = (float) ($lokasi->radius ?: $defaultRadius);
+                if ($distance <= $radius) {
                     return true;
                 }
             }
@@ -786,6 +882,37 @@ class AttendanceService
         ];
     }
 
+    public function getSiswaAbsensiStatus(int $siswaId, ?string $date = null): ?array
+    {
+        $date = $date ?? Carbon::now('Asia/Jakarta')->toDateString();
+
+        $absensi = AbsensiSiswa::where('siswa_id', $siswaId)
+            ->whereDate('tanggal', $date)
+            ->whereNotNull('jam_masuk')
+            ->orderBy('jam_masuk', 'asc')
+            ->first();
+
+        if (!$absensi) {
+            return null;
+        }
+
+        $jamKeluar = AbsensiSiswa::where('siswa_id', $siswaId)
+            ->whereDate('tanggal', $date)
+            ->whereNotNull('jam_keluar')
+            ->orderBy('jam_keluar', 'desc')
+            ->value('jam_keluar');
+
+        return [
+            'id' => $absensi->id,
+            'jam_masuk' => $absensi->jam_masuk ? Carbon::parse($absensi->jam_masuk)->format('H:i:s') : null,
+            'jam_keluar' => $jamKeluar ? Carbon::parse($jamKeluar)->format('H:i:s') : null,
+            'status' => $absensi->status,
+            'keterangan' => $absensi->keterangan,
+            'sudah_check_in' => true,
+            'sudah_check_out' => $jamKeluar !== null,
+        ];
+    }
+
     public function getStaffAbsensiStatus(int $staffId, string $date = null): ?array
     {
         $date = $date ?? Carbon::now('Asia/Jakarta')->toDateString();
@@ -813,13 +940,18 @@ class AttendanceService
     {
         $now = Carbon::now('Asia/Jakarta');
         $today = $now->toDateString();
+        $settings = $this->getSettings();
 
-        if ($now->dayOfWeek === Carbon::SATURDAY || $now->dayOfWeek === Carbon::SUNDAY) {
-            return ['success' => false, 'message' => 'Hari ini Sabtu/Minggu. Absensi tidak diperlukan.'];
+        if ($settings->isWeekendHoliday($now)) {
+            return ['success' => false, 'message' => 'Hari ini akhir pekan dan absensi akhir pekan tidak diaktifkan.'];
         }
 
         if (HariLibur::isLibur($today)) {
             return ['success' => false, 'message' => 'Hari ini hari libur nasional. Absensi tidak diperlukan.'];
+        }
+
+        if (!$settings->allowsGpsForRole('staff_akademik')) {
+            return ['success' => false, 'message' => 'Metode absensi Staff saat ini diset hanya RFID.'];
         }
 
         $staff = \App\Models\StaffAkademik::find($staffId);

@@ -40,19 +40,22 @@ class DashboardController extends Controller
             }
         }
 
-        // 2. Ambil data absensi HANYA untuk jadwal yang terkait
+        // 2. Ambil data absensi untuk jadwal terkait atau absensi harian tanpa jadwal
         $jadwalIds = $jadwals->pluck('id')->toArray();
         $absensis = \App\Models\AbsensiSiswa::where('siswa_id', $siswa->id)
-            ->whereIn('jadwal_id', $jadwalIds)
+            ->where(function ($q) use ($jadwalIds) {
+                $q->whereIn('jadwal_id', $jadwalIds)
+                    ->orWhereNull('jadwal_id');
+            })
             ->with('jadwal.mataPelajaran')
             ->get();
             
         // 3. Masukkan data absensi ke dalam rekap (dikelompokkan per mata pelajaran)
         foreach ($absensis as $ab) {
-            $mapelId = $ab->jadwal->mata_pelajaran_id ?? 0;
+            $mapelId = $ab->jadwal?->mata_pelajaran_id ?? 0;
             
             if (!isset($rekapAbsensi[$mapelId])) {
-                $mapelName = $ab->jadwal->mataPelajaran->nama ?? 'Lainnya';
+                $mapelName = $ab->jadwal?->mataPelajaran?->nama ?? 'Absensi Harian';
                 $rekapAbsensi[$mapelId] = [
                     'title' => $mapelName,
                     'Hadir' => 0,
@@ -90,8 +93,28 @@ class DashboardController extends Controller
                       ->from('pengumpulan_tugas')
                       ->where('siswa_id', $siswa->id);
             })->count();
+
+        $now = \Carbon\Carbon::now('Asia/Jakarta');
+        $today = $now->toDateString();
+        $pengaturan = \App\Models\PengaturanSekolah::first();
+        $metode = $pengaturan->metode_absensi_siswa ?? 'RFID';
+        $allowedLocations = auth()->user()->getEffectiveAllowedLocations($pengaturan);
+        $isLibur = ($pengaturan ? $pengaturan->isWeekendHoliday($now) : ($now->isSaturday() || $now->isSunday()))
+            || \App\Models\HariLibur::isLibur($today);
+        $absensiStatus = app(\App\Services\AttendanceService::class)->getSiswaAbsensiStatus($siswa->id, $today);
             
-        return view('pages.siswa.dashboard', compact('jadwals', 'siswa', 'rekapAbsensi', 'tugasTerbaru', 'unreadTugasCount'));
+        return view('pages.siswa.dashboard', compact(
+            'jadwals',
+            'siswa',
+            'rekapAbsensi',
+            'tugasTerbaru',
+            'unreadTugasCount',
+            'pengaturan',
+            'metode',
+            'allowedLocations',
+            'isLibur',
+            'absensiStatus'
+        ));
     }
 
     public function showJadwal(Jadwal $jadwal)

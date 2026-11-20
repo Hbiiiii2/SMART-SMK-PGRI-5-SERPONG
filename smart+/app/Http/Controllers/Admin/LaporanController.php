@@ -29,12 +29,15 @@ class LaporanController extends Controller
         $queryGuru = AbsensiGuru::with('guru.user');
 
         if ($tahunAjaranFilter) {
-            $querySiswa->whereHas('jadwal', function($q) use ($tahunAjaranFilter) {
-                $q->where('tahun_ajaran_id', $tahunAjaranFilter);
+            $querySiswa->where(function ($outer) use ($tahunAjaranFilter) {
+                $outer->whereHas('jadwal', function ($q) use ($tahunAjaranFilter) {
+                    $q->where('tahun_ajaran_id', $tahunAjaranFilter);
+                })->orWhere(function ($sub) use ($tahunAjaranFilter) {
+                    $sub->whereNull('jadwal_id')->whereHas('siswa', function ($s) use ($tahunAjaranFilter) {
+                        $s->where('tahun_ajaran_id', $tahunAjaranFilter);
+                    });
+                });
             });
-            // Untuk guru, mungkin mereka mengajar di jadwal tersebut
-            // absensi_guru mungkin terhubung ke jadwal? AbsensiGuru schema: guru_id, tanggal, status. It doesn't have jadwal_id.
-            // So we only filter siswa by tahun ajaran for now.
         }
 
         if ($startDate) {
@@ -51,8 +54,14 @@ class LaporanController extends Controller
 
         $rekapSiswaQuery = AbsensiSiswa::query();
         if ($tahunAjaranFilter) {
-            $rekapSiswaQuery->whereHas('jadwal', function($q) use ($tahunAjaranFilter) {
-                $q->where('tahun_ajaran_id', $tahunAjaranFilter);
+            $rekapSiswaQuery->where(function ($outer) use ($tahunAjaranFilter) {
+                $outer->whereHas('jadwal', function ($q) use ($tahunAjaranFilter) {
+                    $q->where('tahun_ajaran_id', $tahunAjaranFilter);
+                })->orWhere(function ($sub) use ($tahunAjaranFilter) {
+                    $sub->whereNull('jadwal_id')->whereHas('siswa', function ($s) use ($tahunAjaranFilter) {
+                        $s->where('tahun_ajaran_id', $tahunAjaranFilter);
+                    });
+                });
             });
         }
         $rekapSiswa = $rekapSiswaQuery->selectRaw('status, count(*) as total')

@@ -17,11 +17,20 @@
         </div>
     </div>
 
-    @if(($pengaturan->metode_absensi_staff ?? 'RFID') === 'Zonasi')
-        @include('components.gps-absensi')
-    @else
+    @php $metodeStaff = $pengaturan->metode_absensi_staff ?? 'RFID'; @endphp
+
+    @if(in_array($metodeStaff, ['Zonasi', 'Hybrid']))
+        @include('components.gps-absensi', [
+            'pengaturan' => $pengaturan,
+            'allowedLocations' => $allowedLocations,
+            'isLibur' => $isLibur,
+            'absensiStatus' => $absensiStatus
+        ])
+    @endif
+
+    @if(in_array($metodeStaff, ['RFID', 'Hybrid']))
         <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-            <p class="text-gray-600 dark:text-gray-400">Metode absensi Anda saat ini menggunakan <strong>{{ ($pengaturan->metode_absensi_staff ?? 'RFID') === 'Hybrid' ? 'Hybrid (Manual / RFID)' : 'RFID Kiosk' }}</strong>.</p>
+            <p class="text-gray-600 dark:text-gray-400">Metode absensi Anda saat ini menggunakan <strong>{{ $metodeStaff === 'Hybrid' ? 'Hybrid (RFID Kiosk + GPS Lokasi)' : 'RFID Kiosk' }}</strong>.</p>
         </div>
     @endif
 
