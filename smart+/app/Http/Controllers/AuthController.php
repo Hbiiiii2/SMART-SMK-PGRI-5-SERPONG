@@ -11,13 +11,105 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function showLogin()
+    public function showLogin(Request $request)
+    {
+        return $this->renderLoginPortal($request);
+    }
+
+    public function showLoginAkademik(Request $request)
+    {
+        return $this->renderLoginPortal($request, 'akademik');
+    }
+
+    public function showLoginElearning(Request $request)
+    {
+        return $this->renderLoginPortal($request, 'elearning');
+    }
+
+    public function showLoginUjian(Request $request)
+    {
+        return $this->renderLoginPortal($request, 'ujian');
+    }
+
+    private function renderLoginPortal(Request $request, ?string $forcedPortal = null)
     {
         if (Auth::check()) {
             return $this->redirectByRole();
         }
 
-        return view('pages.auth.signin', ['title' => 'Masuk']);
+        $portalContext = $this->resolvePortalContext($request, $forcedPortal);
+
+        return view('pages.auth.signin', [
+            'title' => $portalContext['title'],
+            'portalContext' => $portalContext,
+        ]);
+    }
+
+    private function resolvePortalContext(Request $request, ?string $forcedPortal = null): array
+    {
+        $key = $forcedPortal;
+
+        if (!$key) {
+            $queryPortal = strtolower((string) $request->query('portal', ''));
+            if ($queryPortal === 'cbt') {
+                $queryPortal = 'ujian';
+            }
+            if (in_array($queryPortal, ['akademik', 'elearning', 'ujian'], true)) {
+                $key = $queryPortal;
+            }
+        }
+
+        if (!$key) {
+            $host = strtolower($request->getHost());
+            if (str_contains($host, 'elearning')) {
+                $key = 'elearning';
+            } elseif (str_contains($host, 'cbt') || str_contains($host, 'ujian')) {
+                $key = 'ujian';
+            } else {
+                $key = 'akademik';
+            }
+        }
+
+        $portals = [
+            'akademik' => [
+                'key' => 'akademik',
+                'title' => 'Login Manajemen Akademik',
+                'badge' => 'Portal Manajemen Akademik & Presensi',
+                'heading' => 'Manajemen Akademik & Presensi',
+                'description' => 'Pusat kendali presensi RFID & GPS Geofencing, penjadwalan akademik, pengelolaan E-Rapor Kurikulum Merdeka, serta pemantauan kehadiran guru, staf, dan siswa secara real-time.',
+                'email_label' => 'Email Akun Akademik',
+                'email_placeholder' => 'Masukkan email guru, staf, atau admin',
+                'button_text' => 'Masuk ke Portal Akademik',
+                'audience' => 'Admin Sekolah, Kepala Sekolah, Guru & Staf Akademik',
+                'highlights' => ['Presensi RFID & GPS', 'E-Rapor Terintegrasi', 'Monitoring Kehadiran'],
+            ],
+            'elearning' => [
+                'key' => 'elearning',
+                'title' => 'Login E-Learning & LMS',
+                'badge' => 'Portal E-Learning & Ruang Belajar Digital',
+                'heading' => 'Ruang Belajar & E-Learning',
+                'description' => 'Akses materi pembelajaran digital (modul PDF & video interaktif), pengumpulan tugas kelas, jadwal mata pelajaran harian, serta absensi kehadiran belajar siswa dan guru.',
+                'email_label' => 'Email Siswa / Guru',
+                'email_placeholder' => 'Masukkan email akun belajar Anda',
+                'button_text' => 'Masuk ke Ruang E-Learning',
+                'audience' => 'Siswa & Guru Pengampu Mata Pelajaran',
+                'highlights' => ['Materi & Video Ajar', 'Pengumpulan Tugas', 'Jadwal & Absensi Kelas'],
+            ],
+            'ujian' => [
+                'key' => 'ujian',
+                'title' => 'Login Portal Ujian (CBT)',
+                'badge' => 'Computer Based Test & Evaluasi Akademik',
+                'heading' => 'Portal Ujian Berbasis Komputer',
+                'description' => 'Pelaksanaan ujian sekolah, penilaian tengah semester (STS), penilaian akhir semester (SAS), dan evaluasi kompetensi berbasis komputer dengan pengawasan token ujian real-time.',
+                'email_label' => 'Email Peserta / Pengawas Ujian',
+                'email_placeholder' => 'Masukkan email akun peserta atau guru CBT',
+                'button_text' => 'Masuk ke Portal Ujian',
+                'audience' => 'Peserta Ujian (Siswa), Guru Pembuat Soal & Pengawas CBT',
+                'highlights' => ['Ujian STS & SAS', 'Validasi Token Ujian', 'Evaluasi Terintegrasi'],
+            ],
+        ];
+
+        return $portals[$key] ?? $portals['akademik'];
     }
 
     public function login(Request $request)

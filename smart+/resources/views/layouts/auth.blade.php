@@ -9,21 +9,24 @@
     <title>{{ $title ?? 'Masuk' }} | SMART+</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemTheme;
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+    </script>
 </head>
 
-<body class="bg-gray-50 font-outfit antialiased">
+<body class="min-h-full bg-slate-50 font-outfit antialiased text-gray-900 dark:bg-gray-950 dark:text-white">
     <div class="relative flex min-h-screen items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
-        <!-- Background shapes -->
-        <div class="absolute top-0 left-0 z-0 hidden lg:block">
-            <img src="images/grid-01.svg" alt="" class="dark:hidden" />
-            <img src="images/grid-01-dark.svg" alt="" class="hidden dark:block" />
-        </div>
-        <div class="absolute bottom-0 right-0 z-0 hidden lg:block">
-            <img src="images/grid-02.svg" alt="" class="dark:hidden" />
-            <img src="images/grid-02-dark.svg" alt="" class="hidden dark:block" />
-        </div>
-
-        <div class="z-1 w-full max-w-[440px]">
+        <div class="w-full max-w-[960px]">
             @yield('content')
         </div>
     </div>

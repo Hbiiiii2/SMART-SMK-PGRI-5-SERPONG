@@ -36,9 +36,15 @@ use App\Http\Controllers\KalenderController;
 use App\Http\Controllers\CutiController;
 
 Route::get('/', function (Request $request) {
-    // Jika diakses melalui subdomain elearning, langsung arahkan ke halaman login
-    if (str_contains($request->getHost(), 'elearning')) {
-        return redirect()->route('login');
+    $host = strtolower($request->getHost());
+
+    // Jika diakses melalui subdomain khusus portal, langsung arahkan ke login portal terkait
+    if (str_contains($host, 'elearning')) {
+        return redirect()->route('login.elearning');
+    }
+
+    if (str_contains($host, 'cbt') || str_contains($host, 'ujian')) {
+        return redirect()->route('login.ujian');
     }
 
     return view('landing');
@@ -49,6 +55,9 @@ Route::get('/kiosk/stats', [KioskController::class, 'stats'])->name('kiosk.stats
 Route::get('/kiosk/recent', [KioskController::class, 'recentActivities'])->name('kiosk.recent');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::get('/login/akademik', [AuthController::class, 'showLoginAkademik'])->name('login.akademik');
+Route::get('/login/elearning', [AuthController::class, 'showLoginElearning'])->name('login.elearning');
+Route::get('/login/ujian', [AuthController::class, 'showLoginUjian'])->name('login.ujian');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 

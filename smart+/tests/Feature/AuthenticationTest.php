@@ -150,4 +150,39 @@ class AuthenticationTest extends TestCase
         $this->assertAuthenticatedAs($user);
         $this->assertNotNull($user->fresh()->remember_token);
     }
+
+    public function test_dedicated_login_pages_for_akademik_elearning_and_ujian_have_distinct_headings_and_descriptions(): void
+    {
+        $this->get(route('landing'))
+            ->assertStatus(200)
+            ->assertSee('/login/akademik', false)
+            ->assertSee('/login/elearning', false)
+            ->assertSee('/login/ujian', false);
+
+        $this->get('/login/akademik')
+            ->assertStatus(200)
+            ->assertSee('<title>Login Manajemen Akademik | SMART+</title>', false)
+            ->assertSee('Manajemen Akademik &amp; Presensi', false)
+            ->assertSee('Pusat kendali presensi RFID');
+
+        $this->get('/login/elearning')
+            ->assertStatus(200)
+            ->assertSee('<title>Login E-Learning &amp; LMS | SMART+</title>', false)
+            ->assertSee('Ruang Belajar &amp; E-Learning', false)
+            ->assertSee('Akses materi pembelajaran digital');
+
+        $this->get('/login/ujian')
+            ->assertStatus(200)
+            ->assertSee('<title>Login Portal Ujian (CBT) | SMART+</title>', false)
+            ->assertSee('Portal Ujian Berbasis Komputer')
+            ->assertSee('Pelaksanaan ujian sekolah, penilaian tengah semester');
+
+        $this->get('http://elearning.smkpgri5serpong.sch.id/login')
+            ->assertStatus(200)
+            ->assertSee('<title>Login E-Learning &amp; LMS | SMART+</title>', false)
+            ->assertSee('Ruang Belajar &amp; E-Learning', false);
+
+        $this->get('http://elearning.smkpgri5serpong.sch.id/')
+            ->assertRedirect(route('login.elearning', [], false) ?: '/login/elearning');
+    }
 }
