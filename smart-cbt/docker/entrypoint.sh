@@ -38,9 +38,12 @@ for ($i = 1; $i <= $maxTries; $i++) {
                 PDO::ATTR_TIMEOUT => 3
             ]);
             $testDb = $db . "_testing";
-            $stmt = $pdo->query("SELECT 1 FROM pg_database WHERE datname = '{$testDb}'");
-            if (! $stmt->fetchColumn()) {
-                $pdo->exec("CREATE DATABASE \"{$testDb}\" OWNER \"{$user}\"");
+            if (getenv("RUN_MIGRATIONS") !== "false") {
+                $stmt = $pdo->prepare("SELECT 1 FROM pg_database WHERE datname = ?");
+                $stmt->execute([$testDb]);
+                if (! $stmt->fetchColumn()) {
+                    $pdo->exec("CREATE DATABASE \"{$testDb}\" OWNER \"{$user}\"");
+                }
             }
             echo "[Smart-CBT] PostgreSQL \"{$db}\" and \"{$testDb}\" ready on {$host}:{$port}.\n";
             $connected = true;
