@@ -1,0 +1,108 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\ExamAttempt;
+use App\Models\Exam;
+use App\Models\Siswa;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class GuruMonitoringController extends Controller
+{
+    public function index(Request $request): View
+    {
+        $guruId = $request->user()->guru?->id;
+        abort_unless($guruId, 403);
+
+        $queryExamId = $request->input('exam_id');
+        
+        $ownedExamQuery = Exam::where(function ($q) use ($guruId) {
+            $q->where('guru_id', $guruId)
+              ->orWhere('guru_pengawas_id', $guruId);
+        });
+
+        if ($queryExamId) {
+            $ownedExamQuery->where('id', $queryExamId);
+        }
+        
+        $ownedExamIds = $ownedExamQuery->pluck('id');
+        $base = ExamAttempt::whereIn('exam_id', $ownedExamIds);
+
+        $counts = [
+            'online' => (clone $base)->where('status', 'in_progress')->where('updated_at', '>=', now()->subMinutes(5))->count(),
+            'in_progress' => (clone $base)->where('status', 'in_progress')->count(),
+            'completed' => (clone $base)->whereIn('status', ['submitted', 'completed', 'expired'])->count(),
+            'not_started' => $this->notStartedQuery($ownedExamIds)->count(),
+        ];
+
+        // Auto-select the first non-empty tab if the user didn't explicitly request a specific status
+        if (!$request->has('status')) {
+            $status = 'online'; // default
+            if ($counts['online'] === 0) {
+                foreach (['in_progress', 'completed', 'not_started'] as $s) {
+                    if ($counts[$s] > 0) {
+                        $status = $s;
+                        break;
+                    }
+                }
+            }
+        } else {
+            $status = $request->string('status')->toString();
+            $allowedStatuses = ['online', 'in_progress', 'completed', 'not_started'];
+            $status = in_array($status, $allowedStatuses, true) ? $status : 'online';
+        }
+
+        if ($status === 'not_started') {
+            $attempts = $this->notStartedQuery($ownedExamIds)->paginate(20)->withQueryString();
+        } else {
+            $attempts = ExamAttempt::with([
+                'exam' => fn ($query) => $query->with('kelasData')->withCount('questions'),
+                'siswa',
+            ])->withCount('answers')
+                ->whereIn('exam_id', $ownedExamIds)
+                ->when($status === 'online', fn ($query) => $query->where('status', 'in_progress')->where('updated_at', '>=', now()->subMinutes(5)))
+                ->when($status === 'in_progress', fn ($query) => $query->where('status', 'in_progress'))
+                ->when($status === 'completed', fn ($query) => $query->whereIn('status', ['submitted', 'completed', 'expired']))
+                ->latest()
+                ->paginate(20)
+                ->withQueryString();
+        }
+
+        $ownedExamsList = (clone $ownedExamQuery)->with('kelasData')->orderBy('nama')->get(['id', 'nama', 'kelas_id', 'kelas'])->map(function($exam) {
+            $exam->kelas_nama = $exam->kelasData ? $exam->kelasData->nama_kelas : $exam->kelas;
+            return $exam;
+        });
+
+        return view('guru.monitoring.index', [
+            'attempts' => $attempts,
+            'status' => $status,
+            'counts' => $counts,
+            'ownedExams' => $ownedExamsList,
+            'queryExamId' => $queryExamId,
+        ]);
+    }
+
+    private function notStartedQuery($examIds)
+    {
+        return Siswa::query()
+            ->select('siswas.*', 'exams.id as exam_id', 'exams.nama as exam_nama', 'exams.kelas as exam_kelas', 'exams.tanggal_mulai', 'exams.tanggal_selesai')
+            ->join('exams', function ($join) {
+                $join->on(function ($query) {
+                    $query->on('exams.kelas_id', '=', 'siswas.kelas_id')
+                        ->orWhere(function ($legacy) {
+                            $legacy->whereNull('exams.kelas_id')->whereColumn('exams.kelas', 'siswas.kelas');
+                        });
+                });
+            })
+            ->whereIn('exams.id', $examIds)
+            ->where('siswas.status_aktif', true)
+            ->whereNotExists(function ($query) {
+                $query->selectRaw('1')->from('exam_attempts')
+                    ->whereColumn('exam_attempts.exam_id', 'exams.id')
+                    ->whereColumn('exam_attempts.siswa_id', 'siswas.id');
+            })
+            ->latest('exams.tanggal_mulai');
+    }
+}
