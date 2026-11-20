@@ -1,4 +1,4 @@
-name: smp-almadinah
+name: smart-smkpgri5
 
 include:
   - path: smart+/docker-compose.yml

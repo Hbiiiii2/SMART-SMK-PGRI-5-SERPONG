@@ -13,10 +13,10 @@ class PengaturanSekolahSeeder extends Seeder
     public function run(): void
     {
         PengaturanSekolah::firstOrCreate([], [
-            'nama_sekolah' => 'SMKN 1 Jakarta',
-            'alamat_sekolah' => 'Jl. Pendidikan No. 1, Jakarta Selatan',
-            'no_telepon_sekolah' => '021-5551234',
-            'email_sekolah' => 'info@smkn1jakarta.sch.id',
+            'nama_sekolah' => 'SMK PGRI 5 Serpong',
+            'alamat_sekolah' => 'Jl. Raya Puspiptek Serpong, Tangerang Selatan, Banten',
+            'no_telepon_sekolah' => '021-75871234',
+            'email_sekolah' => 'info@smkpgri5serpong.sch.id',
             'logo' => null,
             'jam_masuk' => '07:00',
             'jam_pulang' => '15:00',
@@ -28,19 +28,23 @@ class PengaturanSekolahSeeder extends Seeder
             'metode_absensi_staff' => 'RFID',
         ]);
 
-        TahunAjaran::create([
-            'nama' => '2025/2026',
-            'tanggal_mulai' => '2025-07-01',
-            'tanggal_selesai' => '2026-06-30',
-            'is_aktif' => true,
-        ]);
+        TahunAjaran::firstOrCreate(
+            ['nama' => '2025/2026'],
+            [
+                'tanggal_mulai' => '2025-07-01',
+                'tanggal_selesai' => '2026-06-30',
+                'is_aktif' => true,
+            ]
+        );
 
-        TahunAjaran::create([
-            'nama' => '2024/2025',
-            'tanggal_mulai' => '2024-07-01',
-            'tanggal_selesai' => '2025-06-30',
-            'is_aktif' => false,
-        ]);
+        TahunAjaran::firstOrCreate(
+            ['nama' => '2024/2025'],
+            [
+                'tanggal_mulai' => '2024-07-01',
+                'tanggal_selesai' => '2025-06-30',
+                'is_aktif' => false,
+            ]
+        );
 
         $lokasis = [
             ['nama' => 'Gedung A', 'deskripsi' => 'Gedung utama lantai 1-3', 'latitude' => -6.2297, 'longitude' => 106.8213, 'radius' => 100],
@@ -51,7 +55,7 @@ class PengaturanSekolahSeeder extends Seeder
         ];
 
         foreach ($lokasis as $lokasi) {
-            Lokasi::create($lokasi);
+            Lokasi::firstOrCreate(['nama' => $lokasi['nama']], $lokasi);
         }
 
         $mataPelajarans = [
@@ -68,7 +72,7 @@ class PengaturanSekolahSeeder extends Seeder
         ];
 
         foreach ($mataPelajarans as $mp) {
-            MataPelajaran::create($mp);
+            MataPelajaran::firstOrCreate(['kode' => $mp['kode']], $mp);
         }
     }
 }

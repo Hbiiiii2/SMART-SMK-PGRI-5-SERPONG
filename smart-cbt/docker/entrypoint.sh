@@ -11,9 +11,11 @@ if [ -d "/var/www/html/public_template/build" ]; then
     cp -rf /var/www/html/public_template/build/. /var/www/html/public/build/ 2>/dev/null || true
 fi
 
-# 2. Clear stale cache files to prevent class/config conflicts
-echo "[Smart-CBT] Clearing stale cache files..."
-rm -f /var/www/html/bootstrap/cache/*.php
+# 2. Clear stale cache files to prevent class/config conflicts (only on primary runner)
+if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+    echo "[Smart-CBT] Clearing stale cache files..."
+    rm -f /var/www/html/bootstrap/cache/*.php
+fi
 
 # 3. Check database connection and auto-create database if not exists
 echo "[Smart-CBT] Checking database connection..."
@@ -75,8 +77,8 @@ if (!$connected) {
 }
 '
 
-# 4. Run Laravel migrations (skip if running queue or scheduler to avoid race condition)
-if [ "$1" = "php-fpm" ]; then
+# 4. Run Laravel migrations (skip if running queue/scheduler or secondary replicas to avoid race condition)
+if [ "$1" = "php-fpm" ] && [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
     if [ -z "$APP_KEY" ]; then
         echo "[Smart-CBT] Checking APP_KEY..."
         php artisan key:generate --force || true
@@ -96,6 +98,9 @@ if [ "$1" = "php-fpm" ]; then
         php artisan view:cache || true
         php artisan event:cache || true
     fi
+elif [ "$1" = "php-fpm" ]; then
+    echo "[Smart-CBT] Secondary replica waiting for primary initialization..."
+    sleep 3
 fi
 
 # 5. Fix permissions for storage and bootstrap/cache

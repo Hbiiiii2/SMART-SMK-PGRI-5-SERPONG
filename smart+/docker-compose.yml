@@ -20,8 +20,8 @@ services:
       - APP_NAME=SMART
       - APP_ENV=production
       - APP_DEBUG=false
-      - APP_KEY=${APP_KEY}
-      - APP_URL=${APP_URL:-http://localhost:8000}
+      - APP_KEY=${SMART_APP_KEY:-base64:MZA3l3TM7NzHXfW4Jsr4Y2pCCpxu4b2wtFlZy4f8ULE=}
+      - APP_URL=${SMART_APP_URL:-https://smart.smkpgri5serpong.sch.id}
       - DB_CONNECTION=mysql
       - DB_HOST=smart-db
       - DB_PORT=3306
@@ -39,18 +39,17 @@ services:
       - REDIS_DB=0
       - REDIS_CACHE_DB=0
       - REDIS_PREFIX=smart_absensi_
-      # CBT & AI Integration
+      # CBT & AI Integration (OPENROUTER_API_KEY loaded via env_file .env)
       - CBT_API_BASE_URL=${DOCKER_CBT_API_BASE_URL:-http://smart-cbt-web/api/v1}
-      - CBT_API_TOKEN=${CBT_API_TOKEN:-cbt_secret_token_almadinah_2026}
-      - SMART_PLUS_API_TOKEN=${SMART_PLUS_API_TOKEN:-smart_secret_token_almadinah_2026}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - CBT_API_TOKEN=${CBT_API_TOKEN:-cbt_secret_token_smkpgri5_2026}
+      - SMART_PLUS_API_TOKEN=${SMART_PLUS_API_TOKEN:-smart_secret_token_smkpgri5_2026}
       - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
       - OPENROUTER_MODEL=${OPENROUTER_MODEL:-google/gemini-2.5-flash}
     depends_on:
       smart-db:
         condition: service_healthy
       smart-redis:
-        condition: service_started
+        condition: service_healthy
     networks:
       - smart-network
 
@@ -59,7 +58,7 @@ services:
     container_name: smart-web
     restart: always
     ports:
-      - "${APP_PORT:-8000}:80"
+      - "127.0.0.1:${APP_PORT:-8002}:80"
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - smart-storage:/var/www/html/storage/app/public:ro
@@ -70,12 +69,17 @@ services:
       - smart-network
 
   smart-redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: smart-redis
     restart: always
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - smart-cbt-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - smart-network
 
@@ -83,8 +87,6 @@ services:
     image: mysql:8.0
     container_name: smart-db
     restart: always
-    ports:
-      - "${DB_PORT:-3306}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_secret_123}
       MYSQL_DATABASE: ${DOCKER_DB_DATABASE:-smart}
@@ -105,7 +107,7 @@ services:
     container_name: smart-phpmyadmin
     restart: always
     ports:
-      - "${PMA_PORT:-8080}:80"
+      - "127.0.0.1:${PMA_PORT:-8080}:80"
     environment:
       PMA_HOST: smart-db
       PMA_USER: root
@@ -114,13 +116,15 @@ services:
       - smart-db
     networks:
       - smart-network
+    profiles:
+      - debug
 
   dozzle:
     image: amir20/dozzle:latest
     container_name: smart-dozzle
     restart: always
     ports:
-      - "${DOZZLE_PORT:-9999}:8080"
+      - "127.0.0.1:${DOZZLE_PORT:-9999}:8080"
     environment:
       - DOZZLE_AUTH_PROVIDER=simple
     volumes:
@@ -128,6 +132,8 @@ services:
       - ./docker/dozzle:/data
     networks:
       - smart-network
+    profiles:
+      - debug
 
   cloudflared:
     image: cloudflare/cloudflared:latest
@@ -141,19 +147,17 @@ services:
 
 volumes:
   smart-db-data:
-    name: ${DB_VOLUME_NAME:-tailadmin-laravel-main_smart-db-data}
-    external: true
+    name: ${DB_VOLUME_NAME:-smart-smkpgri5_smart-db-data}
   smart-storage:
-    name: ${STORAGE_VOLUME_NAME:-tailadmin-laravel-main_smart-storage}
-    external: true
+    name: ${STORAGE_VOLUME_NAME:-smart-smkpgri5_smart-storage}
   smart-cache:
-    name: ${CACHE_VOLUME_NAME:-tailadmin-laravel-main_smart-cache}
-    external: true
+    name: ${CACHE_VOLUME_NAME:-smart-smkpgri5_smart-cache}
   smart-public:
-    name: ${PUBLIC_VOLUME_NAME:-tailadmin-laravel-main_smart-public}
-    external: true
+    name: ${PUBLIC_VOLUME_NAME:-smart-smkpgri5_smart-public}
+  smart-cbt-redis-data:
+    name: ${CBT_VOLUME_REDIS:-smart-smkpgri5_smart-redis-data}
 
 networks:
   smart-network:
     name: smart-network
-    external: true
+    driver: bridge
