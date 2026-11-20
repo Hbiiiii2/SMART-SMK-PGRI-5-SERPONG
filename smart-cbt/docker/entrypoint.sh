@@ -84,6 +84,9 @@ if [ "$1" = "php-fpm" ] && [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
         php artisan key:generate --force || true
     fi
 
+    echo "[Smart-CBT] Discovering Laravel packages..."
+    php artisan package:discover --ansi || true
+
     echo "[Smart-CBT] Running database migrations..."
     php artisan migrate --force || echo "[Smart-CBT] Migration step completed with notices."
 

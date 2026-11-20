@@ -34,7 +34,7 @@ COPY routes ./routes
 COPY tests ./tests
 COPY artisan ./artisan
 
-RUN composer dump-autoload --optimize --classmap-authoritative
+RUN composer dump-autoload --optimize --classmap-authoritative --no-scripts
 
 # ==========================================
 # Stage 3: Production PHP-FPM Image

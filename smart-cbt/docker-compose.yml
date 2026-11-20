@@ -208,9 +208,7 @@ services:
       - smart-network
 
   smart-cbt-queue:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: smart-cbt-app:latest
     container_name: smart-cbt-queue
     restart: always
     working_dir: /var/www/html
@@ -260,9 +258,7 @@ services:
       - smart-network
 
   smart-cbt-scheduler:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: smart-cbt-app:latest
     container_name: smart-cbt-scheduler
     restart: always
     working_dir: /var/www/html

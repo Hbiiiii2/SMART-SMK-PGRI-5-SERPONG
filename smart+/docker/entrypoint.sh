@@ -71,6 +71,9 @@ if [ "$1" = "php-fpm" ]; then
         php artisan key:generate --force || true
     fi
 
+    echo "[SMART+] Discovering Laravel packages..."
+    php artisan package:discover --ansi || true
+
     echo "[SMART+] Running database migrations..."
     php artisan migrate --force || echo "[SMART+] Migrations finished with notices."
 

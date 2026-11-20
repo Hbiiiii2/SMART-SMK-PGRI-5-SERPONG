@@ -27,7 +27,7 @@ COPY database ./database
 COPY routes ./routes
 COPY artisan ./artisan
 
-RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
+RUN composer dump-autoload --optimize --no-dev --classmap-authoritative --no-scripts
 
 # Stage 3: Final Production PHP 8.4.27 FPM Image
 FROM php:8.4.27-fpm
