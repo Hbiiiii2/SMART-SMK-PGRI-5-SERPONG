@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AbsensiGuru;
-use App\Models\AbsensiSiswa;
 use App\Services\CacheService;
 use Carbon\Carbon;
 
@@ -14,8 +12,10 @@ class DashboardController extends Controller
     {
         $today = Carbon::now('Asia/Jakarta')->toDateString();
 
-        $data = CacheService::dashboardAdmin($today);
+        $viewData = CacheService::dashboardMonitoring($today);
 
-        return view('pages.admin.dashboard', ['title' => 'Dashboard Admin', 'data' => $data, 'today' => $today]);
+        return view('pages.admin.dashboard', array_merge($viewData, [
+            'title' => 'Dashboard Admin',
+        ]));
     }
 }
