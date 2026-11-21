@@ -22,18 +22,16 @@
                 </div>
 
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal Mulai <span class="text-error-500">*</span></label>
-                    <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', $tahunAjaran->tanggal_mulai?->format('Y-m-d')) }}"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                    <label for="input-tanggal_mulai" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal Mulai <span class="text-error-500">*</span></label>
+                    <x-form.indo-date-input name="tanggal_mulai" :value="$tahunAjaran->tanggal_mulai" hint="Format: DD-MM-YYYY (contoh: 01-07-2026)" required />
                     @error('tanggal_mulai')
                         <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal Selesai <span class="text-error-500">*</span></label>
-                    <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', $tahunAjaran->tanggal_selesai?->format('Y-m-d')) }}"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                    <label for="input-tanggal_selesai" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal Selesai <span class="text-error-500">*</span></label>
+                    <x-form.indo-date-input name="tanggal_selesai" :value="$tahunAjaran->tanggal_selesai" hint="Format: DD-MM-YYYY (contoh: 30-06-2027)" required />
                     @error('tanggal_selesai')
                         <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
                     @enderror

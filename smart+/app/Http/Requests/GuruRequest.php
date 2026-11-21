@@ -2,13 +2,21 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\NormalizesDateInputs;
 use Illuminate\Foundation\Http\FormRequest;
 
 class GuruRequest extends FormRequest
 {
+    use NormalizesDateInputs;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeDateFields(['tanggal_lahir']);
     }
 
     public function rules(): array
@@ -36,6 +44,8 @@ class GuruRequest extends FormRequest
             'email.required' => 'Email wajib diisi.',
             'email.email' => 'Format email tidak valid.',
             'email.unique' => 'Email sudah digunakan.',
+            'tanggal_lahir.date' => 'Format tanggal lahir harus DD-MM-YYYY yang valid (contoh: 02-01-1988).',
+            'tanggal_lahir.before' => 'Tanggal lahir harus sebelum hari ini.',
             'password.required' => 'Password wajib diisi.',
             'password.min' => 'Password minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',

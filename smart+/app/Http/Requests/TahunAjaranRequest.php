@@ -2,13 +2,21 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\NormalizesDateInputs;
 use Illuminate\Foundation\Http\FormRequest;
 
 class TahunAjaranRequest extends FormRequest
 {
+    use NormalizesDateInputs;
+
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeDateFields(['tanggal_mulai', 'tanggal_selesai']);
     }
 
     public function rules(): array
@@ -29,7 +37,9 @@ class TahunAjaranRequest extends FormRequest
             'nama.required' => 'Nama tahun ajaran wajib diisi.',
             'nama.unique' => 'Nama tahun ajaran sudah ada.',
             'tanggal_mulai.required' => 'Tanggal mulai wajib diisi.',
+            'tanggal_mulai.date' => 'Format tanggal mulai harus DD-MM-YYYY yang valid.',
             'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'tanggal_selesai.date' => 'Format tanggal selesai harus DD-MM-YYYY yang valid.',
             'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai.',
         ];
     }

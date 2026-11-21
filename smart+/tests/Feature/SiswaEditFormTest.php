@@ -13,7 +13,7 @@ class SiswaEditFormTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_siswa_edit_form_populates_saved_tanggal_lahir_and_email(): void
+    public function test_admin_siswa_edit_form_populates_saved_tanggal_lahir_in_dd_mm_yyyy_and_email(): void
     {
         $admin = User::factory()->create([
             'role' => 'admin_sekolah',
@@ -27,13 +27,13 @@ class SiswaEditFormTest extends TestCase
             'is_aktif' => true,
         ]);
 
-        // Create student through the actual store endpoint
+        // Submit tanggal lahir dalam format DD-MM-YYYY saat tambah siswa
         $this->actingAs($admin)->post(route('admin.siswa.store'), [
             'nisn' => '0081234567',
             'nama_lengkap' => 'Budi Santoso',
             'kelas' => 'XI-RPL-1',
             'jenis_kelamin' => 'L',
-            'tanggal_lahir' => '2008-05-14',
+            'tanggal_lahir' => '14-05-2008',
             'alamat' => 'Jl. Raya Serpong No. 12',
             'no_telepon' => '081234567890',
             'tahun_ajaran_id' => $tahunAjaran->id,
@@ -43,11 +43,13 @@ class SiswaEditFormTest extends TestCase
         ])->assertRedirect(route('admin.siswa.index'));
 
         $siswa = Siswa::with('user')->where('nisn', '0081234567')->firstOrFail();
+        $this->assertSame('2008-05-14', $siswa->tanggal_lahir?->format('Y-m-d'));
 
         $response = $this->actingAs($admin)->get(route('admin.siswa.edit', $siswa));
 
         $response->assertStatus(200)
-            ->assertSee('name="tanggal_lahir" value="2008-05-14"', false)
+            ->assertSee('value="14-05-2008"', false)
+            ->assertSee('placeholder="DD-MM-YYYY"', false)
             ->assertDontSee('2008-05-14 00:00:00', false)
             ->assertSee('name="email" value="budi.santoso@smkpgri5.sch.id"', false)
             ->assertSee('name="nisn" value="0081234567"', false)
@@ -55,13 +57,13 @@ class SiswaEditFormTest extends TestCase
             ->assertSee('name="kelas" value="XI-RPL-1"', false)
             ->assertSee('Jl. Raya Serpong No. 12', false);
 
-        // Updating without altering tanggal_lahir keeps all values intact
+        // Uji tanggal ambigu (04-07-2008 = 4 Juli 2008, bukan 7 April) tetap akurat
         $this->actingAs($admin)->put(route('admin.siswa.update', $siswa), [
             'nisn' => '0081234567',
             'nama_lengkap' => 'Budi Santoso Updated',
             'kelas' => 'XI-RPL-1',
             'jenis_kelamin' => 'L',
-            'tanggal_lahir' => '2008-05-14',
+            'tanggal_lahir' => '04-07-2008',
             'alamat' => 'Jl. Raya Serpong No. 12',
             'no_telepon' => '081234567890',
             'tahun_ajaran_id' => $tahunAjaran->id,
@@ -71,12 +73,59 @@ class SiswaEditFormTest extends TestCase
         $siswa->refresh();
         $siswa->load('user');
 
-        $this->assertSame('2008-05-14', $siswa->tanggal_lahir?->format('Y-m-d'));
+        $this->assertSame('2008-07-04', $siswa->tanggal_lahir?->format('Y-m-d'));
         $this->assertSame('budi.updated@smkpgri5.sch.id', $siswa->user?->email);
-        $this->assertSame('Budi Santoso Updated', $siswa->nama_lengkap);
+
+        $this->actingAs($admin)->get(route('admin.siswa.edit', $siswa))
+            ->assertStatus(200)
+            ->assertSee('value="04-07-2008"', false);
     }
 
-    public function test_admin_guru_and_tahun_ajaran_edit_forms_also_populate_date_and_email(): void
+    public function test_invalid_date_fails_validation_and_valid_old_date_remains_dd_mm_yyyy_on_other_errors(): void
+    {
+        $admin = User::factory()->create([
+            'role' => 'admin_sekolah',
+            'is_active' => true,
+        ]);
+
+        $tahunAjaran = TahunAjaran::create([
+            'nama' => '2026/2027',
+            'tanggal_mulai' => '2026-07-01',
+            'tanggal_selesai' => '2027-06-30',
+            'is_aktif' => true,
+        ]);
+
+        $this->actingAs($admin)->from(route('admin.siswa.create'))
+            ->post(route('admin.siswa.store'), [
+                'nisn' => '0089999999',
+                'nama_lengkap' => 'Test Invalid Date',
+                'kelas' => 'X-1',
+                'jenis_kelamin' => 'P',
+                'tanggal_lahir' => '31-02-2008',
+                'tahun_ajaran_id' => $tahunAjaran->id,
+                'email' => 'invaliddate@smkpgri5.sch.id',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ])->assertSessionHasErrors('tanggal_lahir');
+
+        $response = $this->actingAs($admin)->followingRedirects()
+            ->from(route('admin.siswa.create'))
+            ->post(route('admin.siswa.store'), [
+                'nisn' => '0089999998',
+                'nama_lengkap' => 'Test Old Date Format',
+                'kelas' => 'X-1',
+                'jenis_kelamin' => 'P',
+                'tanggal_lahir' => '04-07-2008',
+                'tahun_ajaran_id' => $tahunAjaran->id,
+                'email' => 'bukan-email-valid',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
+            ]);
+
+        $response->assertSee('value="04-07-2008"', false);
+    }
+
+    public function test_admin_guru_and_tahun_ajaran_edit_forms_also_populate_dd_mm_yyyy_and_email(): void
     {
         $admin = User::factory()->create([
             'role' => 'admin_sekolah',
@@ -101,7 +150,7 @@ class SiswaEditFormTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.guru.edit', $guru))
             ->assertStatus(200)
-            ->assertSee('name="tanggal_lahir" value="1988-01-02"', false)
+            ->assertSee('value="02-01-1988"', false)
             ->assertDontSee('1988-01-02 00:00:00', false)
             ->assertSee('name="email" value="siti.guru@smkpgri5.sch.id"', false);
 
@@ -114,8 +163,8 @@ class SiswaEditFormTest extends TestCase
 
         $this->actingAs($admin)->get(route('admin.tahun-ajaran.edit', $tahunAjaran))
             ->assertStatus(200)
-            ->assertSee('name="tanggal_mulai" value="2026-07-01"', false)
-            ->assertSee('name="tanggal_selesai" value="2027-06-30"', false)
+            ->assertSee('value="01-07-2026"', false)
+            ->assertSee('value="30-06-2027"', false)
             ->assertDontSee('2026-07-01 00:00:00', false);
     }
 }
