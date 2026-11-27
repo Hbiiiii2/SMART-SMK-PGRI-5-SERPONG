@@ -131,9 +131,9 @@
     </style>
 </head>
 <body class="min-h-screen bg-slate-50 text-slate-800 antialiased" 
-      x-data="{ navOpen: false, zoomImage: null, showConfirmModal: false, unansweredCount: 0, pendingCount: 0, submitErrorMessage: null }"
-      @keydown.escape.window="navOpen = false"
-      @open-submit-modal.window="unansweredCount = $event.detail.unansweredCount; pendingCount = $event.detail.pendingCount; showConfirmModal = true;"
+      x-data="{ navOpen: false, zoomImage: null, showConfirmModal: false, unansweredCount: 0, pendingCount: 0, activePhotoCount: 0, failedPhotoCount: 0, submitErrorMessage: null }"
+      @keydown.escape.window="navOpen = false; zoomImage = null; if (typeof closeEmbeddedCamera === 'function') closeEmbeddedCamera();"
+      @open-submit-modal.window="unansweredCount = $event.detail.unansweredCount; pendingCount = $event.detail.pendingCount; activePhotoCount = $event.detail.activePhotoCount || 0; failedPhotoCount = $event.detail.failedPhotoCount || 0; showConfirmModal = true;"
       @close-submit-modal.window="showConfirmModal = false;">
     <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-sm">
         <div class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-3 py-2.5 sm:px-6 sm:py-3.5">
@@ -230,7 +230,7 @@
                             </span>
                         </div>
                         <span class="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 uppercase tracking-wide">
-                            {{ $question->tipe === 'pg' ? 'Pilihan Ganda' : 'Essay' }}
+                            {{ match ($question->tipe) { 'pg' => 'Pilihan Ganda', 'essay_1' => 'Essay 1', 'essay_2' => 'Essay 2', default => 'Essay' } }}
                         </span>
                     </div>
 
@@ -288,14 +288,99 @@
                             @endforeach
                         </div>
                     @else
-                        <label class="mt-6 block">
-                            <span class="mb-2 block text-xs sm:text-sm font-bold text-slate-700">Jawaban Anda</span>
-                            <textarea name="answers[{{ $question->id }}]" 
-                                      rows="5" 
-                                      class="w-full max-w-full rounded-xl border-slate-300 p-3 sm:p-4 text-sm sm:text-base focus:border-blue-500 focus:ring-blue-500 answer-input shadow-inner transition-colors"
-                                      data-question-id="{{ $question->id }}"
-                                      placeholder="Tulis jawaban Anda di sini...">{{ $answers[$question->id] ?? '' }}</textarea>
-                        </label>
+                        @php
+                            $initialEssayMode = $answerTypes[$question->id] ?? 'text';
+                            $initialPhotoCount = count($answerAttachments[$question->id] ?? []);
+                        @endphp
+                        <div class="mt-6 space-y-4 essay-answer-wrapper"
+                             data-question-id="{{ $question->id }}"
+                             data-upload-url="{{ route('siswa.ujian.lampiran.store', [$exam, $question], false) }}"
+                             data-mode-url="{{ route('siswa.ujian.mode', [$exam, $question], false) }}">
+                            <div>
+                                <span class="mb-2 block text-xs sm:text-sm font-bold text-slate-700">Metode Jawaban Essay</span>
+                                <div class="grid grid-cols-2 gap-2.5 sm:inline-flex sm:gap-2 rounded-xl bg-slate-100 p-1">
+                                    <button type="button"
+                                            data-mode-btn="text"
+                                            data-question-id="{{ $question->id }}"
+                                            onclick="setEssayMode({{ $question->id }}, 'text')"
+                                            class="flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-bold transition min-h-[40px] {{ $initialEssayMode === 'text' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                        <span>Jawaban Teks</span>
+                                    </button>
+                                    <button type="button"
+                                            data-mode-btn="photo"
+                                            data-question-id="{{ $question->id }}"
+                                            onclick="setEssayMode({{ $question->id }}, 'photo')"
+                                            class="flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-bold transition min-h-[40px] {{ $initialEssayMode === 'photo' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900' }}">
+                                        <span>Jawaban Foto</span>
+                                        <span data-photo-count-badge="{{ $question->id }}" class="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-extrabold text-blue-700">{{ $initialPhotoCount }}/{{ $maxEssayPhotos ?? 3 }}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            {{-- Mode Teks --}}
+                            <div data-essay-panel="text" data-question-id="{{ $question->id }}" style="display: {{ $initialEssayMode === 'photo' ? 'none' : 'block' }}">
+                                <label class="block">
+                                    <span class="mb-2 block text-xs sm:text-sm font-bold text-slate-700">Jawaban Anda (Teks)</span>
+                                    <textarea name="answers[{{ $question->id }}]"
+                                              rows="5"
+                                              class="w-full max-w-full rounded-xl border-slate-300 p-3 sm:p-4 text-sm sm:text-base focus:border-blue-500 focus:ring-blue-500 answer-input shadow-inner transition-colors"
+                                              data-question-id="{{ $question->id }}"
+                                              placeholder="Tulis jawaban Anda di sini...">{{ $answers[$question->id] ?? '' }}</textarea>
+                                </label>
+                            </div>
+
+                            {{-- Mode Foto / Gambar --}}
+                            <div data-essay-panel="photo" data-question-id="{{ $question->id }}" style="display: {{ $initialEssayMode === 'photo' ? 'block' : 'none' }}" class="space-y-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 sm:p-4">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-xs sm:text-sm font-bold text-slate-800">Unggah Foto Jawaban</p>
+                                        <p class="text-[11px] sm:text-xs text-slate-500">Maksimal {{ $maxEssayPhotos ?? 3 }} foto (JPG/PNG/WEBP). Foto dikompres otomatis sebelum dikirim.</p>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button"
+                                                data-camera-btn="{{ $question->id }}"
+                                                onclick="openEmbeddedCamera({{ $question->id }})"
+                                                class="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-blue-700 active:scale-95 transition min-h-[44px]">
+                                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                            <span>Kamera Langsung</span>
+                                        </button>
+                                        <button type="button"
+                                                data-gallery-btn="{{ $question->id }}"
+                                                onclick="triggerPhotoPicker({{ $question->id }}, 'gallery')"
+                                                class="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 active:scale-95 transition min-h-[44px]">
+                                            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            <span>Pilih Galeri / File</span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {{-- Input File Terpisah (sr-only agar tetap kompatibel dengan WebView Android Exambro) --}}
+                                <input type="file"
+                                       class="sr-only"
+                                       tabindex="-1"
+                                       accept="image/jpeg,image/png,image/webp,image/*"
+                                       capture="environment"
+                                       data-photo-input="camera"
+                                       data-question-id="{{ $question->id }}">
+                                <input type="file"
+                                       class="sr-only"
+                                       tabindex="-1"
+                                       accept="image/jpeg,image/png,image/webp,image/*"
+                                       multiple
+                                       data-photo-input="gallery"
+                                       data-question-id="{{ $question->id }}">
+                                <input type="file"
+                                       class="sr-only"
+                                       tabindex="-1"
+                                       accept="image/jpeg,image/png,image/webp,image/*"
+                                       data-photo-input="replace"
+                                       data-question-id="{{ $question->id }}">
+
+                                <div data-photo-error="{{ $question->id }}" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700"></div>
+
+                                <div data-photo-grid="{{ $question->id }}" class="grid grid-cols-1 gap-3 sm:grid-cols-3"></div>
+                            </div>
+                        </div>
                     @endif
                 </section>
             @endforeach
@@ -413,6 +498,21 @@
         </div>
     </aside>
 
+    @php
+        $startedAt = $attempt->started_at ?? now();
+        $calculatedDeadline = isset($deadline) && $deadline instanceof \Illuminate\Support\Carbon
+            ? $deadline
+            : $startedAt->copy()->addMinutes((int) $exam->durasi_menit);
+        if ($exam->tanggal_selesai && $exam->tanggal_selesai->lt($calculatedDeadline)) {
+            $calculatedDeadline = $exam->tanggal_selesai->copy();
+        }
+        $initialRemainingSeconds = isset($remainingSeconds)
+            ? max(0, (int) $remainingSeconds)
+            : max(0, $calculatedDeadline->getTimestamp() - now()->getTimestamp());
+        $initialServerNowMs = $serverNowMs ?? (now()->getTimestamp() * 1000);
+        $initialDeadlineMs = $deadlineMs ?? ($calculatedDeadline->getTimestamp() * 1000);
+    @endphp
+
     <script>
         /**
          * ============================================================================
@@ -449,7 +549,23 @@
         const ATTEMPT_ID = '{{ $attempt->id }}';
         const STORAGE_KEY = `cbt_pending_answers_${ATTEMPT_ID}`;
         const SEQ_STORAGE_KEY = `cbt_question_seqs_${ATTEMPT_ID}`;
+        const MODE_STORAGE_KEY = `cbt_essay_modes_${ATTEMPT_ID}`;
+        const INITIAL_REMAINING_SECONDS = {{ $initialRemainingSeconds }};
+        const SERVER_NOW_MS = {{ $initialServerNowMs }};
+        const SERVER_DEADLINE_MS = {{ $initialDeadlineMs }};
+        const TIMER_ORIGIN_PERF = (typeof performance !== 'undefined' && typeof performance.now === 'function')
+            ? performance.now()
+            : null;
+        const TIMER_ORIGIN_DATE = Date.now();
         const SERVER_SEQS = @json($answerSeqs ?? []);
+        const INITIAL_ESSAY_MODES = @json($answerTypes ?? []);
+        const INITIAL_ATTACHMENTS = @json($answerAttachments ?? []);
+        const MAX_ESSAY_PHOTOS = @json($maxEssayPhotos ?? 3);
+        const DELETE_ATTACHMENT_URL_TEMPLATE = '{{ route('siswa.ujian.lampiran.destroy', [$exam, '__ATTACHMENT__'], false) }}';
+        const MAX_RAW_FILE_BYTES = 15 * 1024 * 1024;
+        const COMPRESS_MAX_EDGE = 1600;
+        const COMPRESS_JPEG_QUALITY = 0.80;
+        const SKIP_COMPRESS_BYTES = 300 * 1024;
 
         // State tracking
         const state = {
@@ -459,6 +575,11 @@
             pendingSeqs: {},                  // { questionId: sequence_number }
             questionSequences: {},            // Monotonic sequence tracker per question
             questionStates: {},               // { questionId: 'unanswered' | 'dirty' | 'pending' | 'saving' | 'saved' | 'failed' }
+            changedQuestions: new Set(),      // Pertanyaan yang memiliki perubahan lokal
+            essayModes: {},                   // { questionId: 'text' | 'photo' }
+            essayPhotos: {},                  // { questionId: PhotoItem[] }
+            uploadQueue: [],                  // Antrean upload XHR
+            runningUploads: 0,                // Concurrency counter (max 2)
             
             savedAnswers: new Map(),          // Map<questionId, jawaban> - jawaban yang sudah tersimpan di server
             isSaving: false,                  // Prevent concurrent saves
@@ -467,6 +588,7 @@
             pageUnloading: false,             // Flag untuk page unload
             isSubmitting: false,              // Flag untuk submit
             submitStarted: false,             // Mutex global untuk submit/timer race condition
+            timeExpiredTriggered: false,      // Mutex untuk mencegah timeExpired berjalan ganda
         };
 
         // DOM Elements
@@ -507,7 +629,8 @@
         function getPendingAnswersFromStorage() {
             try {
                 const stored = localStorage.getItem(STORAGE_KEY);
-                return stored ? JSON.parse(stored) : {};
+                const parsed = stored ? JSON.parse(stored) : {};
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
             } catch (error) {
                 console.error('Error reading from localStorage:', error);
                 return {};
@@ -520,7 +643,8 @@
         function getPendingSeqsFromStorage() {
             try {
                 const stored = localStorage.getItem(SEQ_STORAGE_KEY);
-                return stored ? JSON.parse(stored) : {};
+                const parsed = stored ? JSON.parse(stored) : {};
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
             } catch (error) {
                 console.error('Error reading seqs from localStorage:', error);
                 return {};
@@ -615,18 +739,66 @@
          * Update visual indicator untuk status penyimpanan (5 Status UI: Dirty, Pending, Saving, Saved, Failed)
          * CRITICAL INTEGRITY RULE: Never display "Tersimpan" unless server explicitly acknowledged persistence.
          */
+        function countAnsweredQuestions(answers) {
+            let count = 0;
+            elements.panels.forEach(panel => {
+                const qId = String(panel.dataset.questionId);
+                if (isQuestionAnswered(qId, answers)) {
+                    count++;
+                }
+            });
+            return count;
+        }
+
+        function isQuestionAnswered(questionId, answers) {
+            const qId = String(questionId);
+            if (String(answers[qId] ?? '').trim() !== '') {
+                return true;
+            }
+            const photos = state.essayPhotos[qId] || [];
+            return photos.some(item => item.status === 'persisted');
+        }
+
+        function countActivePhotoUploads() {
+            let count = 0;
+            Object.values(state.essayPhotos).forEach(list => {
+                list.forEach(item => {
+                    if (item.status === 'uploading' || item.status === 'queued') {
+                        count++;
+                    }
+                });
+            });
+            return count;
+        }
+
+        function countFailedPhotoUploads() {
+            let count = 0;
+            Object.values(state.essayPhotos).forEach(list => {
+                list.forEach(item => {
+                    if (item.status === 'failed') {
+                        count++;
+                    }
+                });
+            });
+            return count;
+        }
+
         function updateSaveStatus() {
             const pendingCount = Object.keys(state.pendingAnswers).length;
+            const activeUploads = countActivePhotoUploads();
+            const failedUploads = countFailedPhotoUploads();
             const answers = getCurrentAnswers();
-            const answeredCount = Object.values(answers).filter(a => String(a).trim() !== '').length;
+            const answeredCount = countAnsweredQuestions(answers);
 
-            if (state.isSaving) {
+            if (state.isSaving || activeUploads > 0) {
                 elements.saveStatus.className = 'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold bg-amber-50 text-amber-700';
-                elements.saveStatusText.textContent = 'Menyimpan...';
+                elements.saveStatusText.textContent = activeUploads > 0 ? `Mengunggah ${activeUploads} foto...` : 'Menyimpan...';
                 elements.saveStatusIcon.innerHTML = '<svg class="animate-spin h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-            } else if (state.savingError) {
+            } else if (state.savingError || failedUploads > 0) {
                 elements.saveStatus.className = 'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold bg-red-50 text-red-700';
-                elements.saveStatusText.textContent = `Gagal (${state.retryCount}/${CONFIG.MAX_RETRIES}) - Mencoba lagi`;
+                elements.saveStatusText.textContent = failedUploads > 0
+                    ? `${failedUploads} foto gagal diunggah`
+                    : `Gagal (${state.retryCount}/${CONFIG.MAX_RETRIES}) - Mencoba lagi`;
                 elements.saveStatusIcon.innerHTML = '<svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>';
             } else if (pendingCount > 0) {
                 elements.saveStatus.className = 'flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold bg-blue-50 text-blue-700';
@@ -645,10 +817,10 @@
             // Sync with mobile status bar
             const mobileSaveStatus = document.getElementById('mobile-save-status-text');
             if (mobileSaveStatus) {
-                if (state.isSaving) {
-                    mobileSaveStatus.textContent = 'Menyimpan...';
-                } else if (state.savingError) {
-                    mobileSaveStatus.textContent = `Gagal (${state.retryCount}/${CONFIG.MAX_RETRIES})`;
+                if (state.isSaving || activeUploads > 0) {
+                    mobileSaveStatus.textContent = activeUploads > 0 ? `Upload ${activeUploads} foto...` : 'Menyimpan...';
+                } else if (state.savingError || failedUploads > 0) {
+                    mobileSaveStatus.textContent = failedUploads > 0 ? `${failedUploads} foto gagal` : `Gagal (${state.retryCount}/${CONFIG.MAX_RETRIES})`;
                 } else if (pendingCount > 0) {
                     mobileSaveStatus.textContent = `${pendingCount} pending`;
                 } else if (answeredCount > 0) {
@@ -677,7 +849,7 @@
 
         function updateAnswerProgress() {
             const answers = getCurrentAnswers();
-            const answeredCount = Object.values(answers).filter(answer => String(answer).trim() !== '').length;
+            const answeredCount = countAnsweredQuestions(answers);
             const totalQuestions = elements.panels.length;
             const percentage = totalQuestions ? (answeredCount / totalQuestions) * 100 : 0;
 
@@ -706,7 +878,7 @@
 
             elements.numbers.forEach(button => {
                 const questionId = button.dataset.questionId;
-                const isAnswered = String(answers[questionId] ?? '').trim() !== '';
+                const isAnswered = isQuestionAnswered(questionId, answers);
                 button.classList.toggle('border-emerald-500', isAnswered);
                 button.classList.toggle('bg-emerald-50', isAnswered);
                 button.classList.toggle('text-emerald-700', isAnswered);
@@ -961,6 +1133,983 @@
         }
 
         // ============================================================================
+        // ESSAY PHOTO UPLOAD, COMPRESSION & MODE MANAGEMENT
+        // ============================================================================
+
+        function openZoomModal(url) {
+            const bodyEl = document.querySelector('body');
+            if (window.Alpine && bodyEl) {
+                const alpineData = Alpine.$data(bodyEl);
+                if (alpineData) {
+                    alpineData.zoomImage = url;
+                }
+            }
+        }
+
+        function showPhotoError(questionId, message) {
+            const el = document.querySelector(`[data-photo-error="${questionId}"]`);
+            if (!el) return;
+            if (!message) {
+                el.textContent = '';
+                el.classList.add('hidden');
+                return;
+            }
+            el.textContent = message;
+            el.classList.remove('hidden');
+        }
+
+        function loadSavedEssayModes() {
+            try {
+                const raw = localStorage.getItem(MODE_STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : {};
+                return (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) ? parsed : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function persistEssayModesToStorage() {
+            try {
+                localStorage.setItem(MODE_STORAGE_KEY, JSON.stringify(state.essayModes));
+            } catch (e) {
+                console.warn('Error writing essay modes to localStorage:', e);
+            }
+        }
+
+        function applyEssayModeUI(questionId, mode) {
+            const qId = String(questionId);
+            const textPanel = document.querySelector(`[data-essay-panel="text"][data-question-id="${qId}"]`);
+            const photoPanel = document.querySelector(`[data-essay-panel="photo"][data-question-id="${qId}"]`);
+            const textBtn = document.querySelector(`[data-mode-btn="text"][data-question-id="${qId}"]`);
+            const photoBtn = document.querySelector(`[data-mode-btn="photo"][data-question-id="${qId}"]`);
+
+            if (textPanel) textPanel.style.display = mode === 'text' ? 'block' : 'none';
+            if (photoPanel) photoPanel.style.display = mode === 'photo' ? 'block' : 'none';
+
+            if (textBtn) {
+                textBtn.className = `flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-bold transition min-h-[40px] ${mode === 'text' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
+            }
+            if (photoBtn) {
+                photoBtn.className = `flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-xs sm:text-sm font-bold transition min-h-[40px] ${mode === 'photo' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`;
+            }
+        }
+
+        function setEssayMode(questionId, mode, syncServer = true) {
+            const qId = String(questionId);
+            const normalized = mode === 'photo' ? 'photo' : 'text';
+            state.essayModes[qId] = normalized;
+            persistEssayModesToStorage();
+            applyEssayModeUI(qId, normalized);
+
+            if (!syncServer) {
+                return;
+            }
+
+            const wrapper = document.querySelector(`.essay-answer-wrapper[data-question-id="${qId}"]`);
+            if (!wrapper || !wrapper.dataset.modeUrl) {
+                return;
+            }
+
+            fetch(wrapper.dataset.modeUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ answer_type: normalized }),
+            }).catch(err => console.warn('Sync essay mode warning:', err));
+        }
+
+        function renderPhotoGrid(questionId) {
+            const qId = String(questionId);
+            const grid = document.querySelector(`[data-photo-grid="${qId}"]`);
+            const badge = document.querySelector(`[data-photo-count-badge="${qId}"]`);
+            const cameraBtn = document.querySelector(`[data-camera-btn="${qId}"]`);
+            const galleryBtn = document.querySelector(`[data-gallery-btn="${qId}"]`);
+            const list = state.essayPhotos[qId] || [];
+
+            if (badge) {
+                badge.textContent = `${list.length}/${MAX_ESSAY_PHOTOS}`;
+            }
+
+            const atLimit = list.length >= MAX_ESSAY_PHOTOS;
+            [cameraBtn, galleryBtn].forEach(btn => {
+                if (!btn) return;
+                btn.disabled = atLimit;
+                btn.classList.toggle('opacity-50', atLimit);
+                btn.classList.toggle('cursor-not-allowed', atLimit);
+            });
+
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            list.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs';
+
+                const previewSrc = item.previewUrl || item.url;
+                const safeSrc = String(previewSrc || '').replace(/'/g, "\\'");
+
+                const thumbWrap = document.createElement('button');
+                thumbWrap.type = 'button';
+                thumbWrap.className = 'relative block h-36 w-full bg-slate-100 overflow-hidden focus:outline-none';
+                thumbWrap.onclick = () => openZoomModal(previewSrc);
+
+                const img = document.createElement('img');
+                img.src = previewSrc;
+                img.alt = `Foto Jawaban ${index + 1}`;
+                img.className = 'h-full w-full object-cover transition hover:opacity-90';
+                thumbWrap.appendChild(img);
+
+                const numBadge = document.createElement('span');
+                numBadge.className = 'absolute left-2 top-2 rounded-md bg-slate-900/75 px-2 py-0.5 text-[10px] font-bold text-white';
+                numBadge.textContent = `Foto ${index + 1}`;
+                thumbWrap.appendChild(numBadge);
+
+                if (item.status === 'uploading' || item.status === 'queued') {
+                    const overlay = document.createElement('div');
+                    overlay.className = 'absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 px-3 text-white';
+                    overlay.innerHTML = `
+                        <span class="text-xs font-bold">${item.status === 'queued' ? 'Menunggu...' : `Mengunggah ${item.progress || 0}%`}</span>
+                        <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/30">
+                            <div class="h-full bg-emerald-400 transition-all" style="width:${item.progress || 10}%"></div>
+                        </div>
+                    `;
+                    thumbWrap.appendChild(overlay);
+                }
+
+                card.appendChild(thumbWrap);
+
+                const body = document.createElement('div');
+                body.className = 'flex flex-1 flex-col justify-between gap-2 p-2.5';
+
+                const statusLine = document.createElement('div');
+                if (item.status === 'persisted') {
+                    const sizeKb = item.fileSize ? ` (${Math.max(1, Math.round(item.fileSize / 1024))} KB)` : '';
+                    statusLine.className = 'text-[11px] font-bold text-emerald-700';
+                    statusLine.textContent = `Tersimpan${sizeKb}`;
+                } else if (item.status === 'failed') {
+                    statusLine.className = 'text-[11px] font-bold text-rose-600';
+                    statusLine.textContent = item.errorMsg || 'Gagal diunggah';
+                } else {
+                    statusLine.className = 'text-[11px] font-bold text-amber-600';
+                    statusLine.textContent = item.status === 'queued' ? 'Dalam antrean...' : 'Sedang mengirim...';
+                }
+                body.appendChild(statusLine);
+
+                const actions = document.createElement('div');
+                actions.className = 'flex items-center gap-1.5';
+
+                if (item.status === 'persisted') {
+                    const replaceBtn = document.createElement('button');
+                    replaceBtn.type = 'button';
+                    replaceBtn.className = 'flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-100';
+                    replaceBtn.textContent = 'Ganti';
+                    replaceBtn.onclick = () => openEmbeddedCamera(qId, item.id);
+                    actions.appendChild(replaceBtn);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.className = 'flex-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100';
+                    deleteBtn.textContent = 'Hapus';
+                    deleteBtn.onclick = () => removePhotoAttachment(qId, item.clientId);
+                    actions.appendChild(deleteBtn);
+                } else if (item.status === 'failed') {
+                    const retryBtn = document.createElement('button');
+                    retryBtn.type = 'button';
+                    retryBtn.className = 'flex-1 rounded-lg bg-blue-600 px-2 py-1.5 text-[11px] font-bold text-white hover:bg-blue-700';
+                    retryBtn.textContent = 'Coba Lagi';
+                    retryBtn.onclick = () => retryFailedPhoto(qId, item.clientId);
+                    actions.appendChild(retryBtn);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'rounded-lg border border-rose-200 bg-rose-50 px-2 py-1.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100';
+                    removeBtn.textContent = 'Hapus';
+                    removeBtn.onclick = () => removePhotoAttachment(qId, item.clientId);
+                    actions.appendChild(removeBtn);
+                } else {
+                    const zoomHint = document.createElement('span');
+                    zoomHint.className = 'text-[10px] text-slate-400';
+                    zoomHint.textContent = 'Mohon tunggu...';
+                    actions.appendChild(zoomHint);
+                }
+
+                body.appendChild(actions);
+                card.appendChild(body);
+                grid.appendChild(card);
+            });
+        }
+
+        function triggerPhotoPicker(questionId, kind) {
+            const qId = String(questionId);
+            showPhotoError(qId, null);
+            const list = state.essayPhotos[qId] || [];
+            if (list.length >= MAX_ESSAY_PHOTOS) {
+                showPhotoError(qId, `Maksimal ${MAX_ESSAY_PHOTOS} foto untuk setiap soal essay.`);
+                return;
+            }
+            const input = document.querySelector(`input[data-photo-input="${kind}"][data-question-id="${qId}"]`);
+            if (input) {
+                input.value = '';
+                input.click();
+            }
+        }
+
+        function triggerReplacePhoto(questionId, attachmentId) {
+            const qId = String(questionId);
+            showPhotoError(qId, null);
+            const input = document.querySelector(`input[data-photo-input="replace"][data-question-id="${qId}"]`);
+            if (input) {
+                input.value = '';
+                input.dataset.replaceAttachmentId = String(attachmentId);
+                input.click();
+            }
+        }
+
+        const cameraState = {
+            active: false,
+            questionId: null,
+            replaceAttachmentId: null,
+            stream: null,
+            facingMode: 'environment',
+            capturedBlob: null,
+            capturedPreviewUrl: null,
+        };
+
+        function getCameraModalElements() {
+            return {
+                modal: document.getElementById('embedded-camera-modal'),
+                questionBadge: document.getElementById('embedded-camera-question-badge'),
+                video: document.getElementById('embedded-camera-video'),
+                canvas: document.getElementById('embedded-camera-canvas'),
+                preview: document.getElementById('embedded-camera-preview'),
+                loading: document.getElementById('embedded-camera-loading'),
+                errorBox: document.getElementById('embedded-camera-error'),
+                errorText: document.getElementById('embedded-camera-error-text'),
+                liveActions: document.getElementById('embedded-camera-live-actions'),
+                previewActions: document.getElementById('embedded-camera-preview-actions'),
+                switchBtn: document.getElementById('embedded-camera-switch-btn'),
+                captureBtn: document.getElementById('embedded-camera-capture-btn'),
+            };
+        }
+
+        function stopEmbeddedCameraStream() {
+            if (cameraState.stream) {
+                cameraState.stream.getTracks().forEach(track => {
+                    try { track.stop(); } catch (e) {}
+                });
+                cameraState.stream = null;
+            }
+            const els = getCameraModalElements();
+            if (els.video) {
+                try {
+                    els.video.pause();
+                    els.video.srcObject = null;
+                } catch (e) {}
+            }
+        }
+
+        function revokeCapturedCameraPreview() {
+            if (cameraState.capturedPreviewUrl && cameraState.capturedPreviewUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(cameraState.capturedPreviewUrl);
+            }
+            cameraState.capturedPreviewUrl = null;
+            cameraState.capturedBlob = null;
+        }
+
+        function setEmbeddedCameraUIMode(mode) {
+            const els = getCameraModalElements();
+            if (!els.modal) return;
+
+            if (els.video) {
+                els.video.classList.toggle('hidden', mode !== 'live');
+                els.video.style.display = mode === 'live' ? 'block' : 'none';
+            }
+            if (els.preview) {
+                els.preview.classList.toggle('hidden', mode !== 'preview');
+                els.preview.style.display = mode === 'preview' ? 'block' : 'none';
+            }
+            if (els.loading) {
+                els.loading.classList.toggle('hidden', mode !== 'loading');
+                els.loading.style.display = mode === 'loading' ? 'flex' : 'none';
+            }
+            if (els.errorBox) {
+                els.errorBox.classList.toggle('hidden', mode !== 'error');
+                els.errorBox.style.display = mode === 'error' ? 'block' : 'none';
+            }
+            if (els.liveActions) {
+                els.liveActions.classList.toggle('hidden', mode !== 'live');
+                els.liveActions.style.display = mode === 'live' ? 'flex' : 'none';
+            }
+            if (els.previewActions) {
+                els.previewActions.classList.toggle('hidden', mode !== 'preview');
+                els.previewActions.style.display = mode === 'preview' ? 'flex' : 'none';
+            }
+        }
+
+        async function requestMediaStreamWithConstraints(constraints) {
+            if (navigator.mediaDevices && typeof navigator.mediaDevices.getUserMedia === 'function') {
+                return navigator.mediaDevices.getUserMedia(constraints);
+            }
+            const legacyGetUserMedia = navigator.getUserMedia
+                || navigator.webkitGetUserMedia
+                || navigator.mozGetUserMedia;
+            if (!legacyGetUserMedia) {
+                throw new Error('Kamera web (getUserMedia) tidak didukung di browser ini.');
+            }
+            return new Promise((resolve, reject) => {
+                legacyGetUserMedia.call(navigator, constraints, resolve, reject);
+            });
+        }
+
+        async function openEmbeddedCamera(questionId, replaceAttachmentId = null) {
+            const qId = String(questionId);
+            showPhotoError(qId, null);
+
+            if (!replaceAttachmentId) {
+                const list = state.essayPhotos[qId] || [];
+                if (list.length >= MAX_ESSAY_PHOTOS) {
+                    showPhotoError(qId, `Maksimal ${MAX_ESSAY_PHOTOS} foto untuk setiap soal essay.`);
+                    return;
+                }
+            }
+
+            if (window.SmartCbtNative && typeof window.SmartCbtNative.openEssayCamera === 'function') {
+                window.SmartCbtNative.openEssayCamera(qId, replaceAttachmentId ? String(replaceAttachmentId) : '');
+                return;
+            }
+
+            cameraState.active = true;
+            cameraState.questionId = qId;
+            cameraState.replaceAttachmentId = replaceAttachmentId ? String(replaceAttachmentId) : null;
+            revokeCapturedCameraPreview();
+
+            const els = getCameraModalElements();
+            if (!els.modal) {
+                if (replaceAttachmentId) {
+                    triggerReplacePhoto(qId, replaceAttachmentId);
+                } else {
+                    triggerPhotoPicker(qId, 'camera');
+                }
+                return;
+            }
+
+            const panel = document.querySelector(`.question-panel[data-question-id="${qId}"]`);
+            if (els.questionBadge) {
+                const qNum = panel?.dataset?.question || '';
+                els.questionBadge.textContent = qNum ? `Soal ${qNum}` : 'Jawaban Essay';
+            }
+
+            els.modal.classList.remove('hidden');
+            els.modal.classList.add('flex');
+            els.modal.style.display = 'flex';
+            await startEmbeddedCameraStream();
+        }
+
+        async function startEmbeddedCameraStream() {
+            const els = getCameraModalElements();
+            if (!cameraState.active || !els.modal) return;
+
+            stopEmbeddedCameraStream();
+            revokeCapturedCameraPreview();
+            setEmbeddedCameraUIMode('loading');
+
+            try {
+                let stream;
+                try {
+                    stream = await requestMediaStreamWithConstraints({
+                        video: {
+                            facingMode: { ideal: cameraState.facingMode },
+                            width: { ideal: 1600 },
+                            height: { ideal: 1200 },
+                        },
+                        audio: false,
+                    });
+                } catch (constraintErr) {
+                    if (constraintErr && (constraintErr.name === 'NotAllowedError' || constraintErr.name === 'PermissionDeniedError' || constraintErr.name === 'SecurityError')) {
+                        throw constraintErr;
+                    }
+                    stream = await requestMediaStreamWithConstraints({ video: true, audio: false });
+                }
+
+                if (!cameraState.active) {
+                    stream.getTracks().forEach(t => { try { t.stop(); } catch (e) {} });
+                    return;
+                }
+
+                cameraState.stream = stream;
+                if (els.video) {
+                    els.video.setAttribute('playsinline', 'true');
+                    els.video.muted = true;
+                    els.video.srcObject = stream;
+                    await els.video.play().catch(() => {});
+                }
+                setEmbeddedCameraUIMode('live');
+            } catch (err) {
+                console.warn('Embedded camera error:', err);
+                if (els.errorText) {
+                    if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                        els.errorText.textContent = 'Kamera langsung memerlukan koneksi HTTPS atau izin kamera Exambro. Gunakan tombol fallback di bawah untuk mengambil atau memilih foto jawaban.';
+                    } else if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+                        els.errorText.textContent = 'Akses kamera diblokir oleh aplikasi Exambro/browser. Izinkan akses kamera pada pengaturan aplikasi atau gunakan tombol fallback di bawah.';
+                    } else if (err && err.name === 'NotFoundError') {
+                        els.errorText.textContent = 'Perangkat kamera tidak ditemukan. Anda masih dapat memilih foto jawaban dari perangkat/galeri.';
+                    } else {
+                        els.errorText.textContent = (err && err.message)
+                            ? `Kamera langsung tidak dapat dibuka (${err.message}). Gunakan tombol fallback di bawah.`
+                            : 'Kamera langsung tidak dapat dibuka di browser ini. Gunakan tombol fallback di bawah.';
+                    }
+                }
+                setEmbeddedCameraUIMode('error');
+            }
+        }
+
+        async function switchEmbeddedCameraFacing() {
+            cameraState.facingMode = cameraState.facingMode === 'environment' ? 'user' : 'environment';
+            await startEmbeddedCameraStream();
+        }
+
+        function dataUrlToJpegBlob(dataUrl) {
+            const parts = dataUrl.split(',');
+            const mimeMatch = (parts[0] || '').match(/:(.*?);/);
+            const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+            const binary = atob(parts[1] || '');
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new Blob([bytes], { type: mime });
+        }
+
+        function captureEmbeddedCameraPhoto() {
+            const els = getCameraModalElements();
+            if (!els.video || !els.canvas || !cameraState.stream) return;
+
+            const rawW = els.video.videoWidth || 1280;
+            const rawH = els.video.videoHeight || 720;
+            const maxSide = Math.max(rawW, rawH);
+            const scale = maxSide > COMPRESS_MAX_EDGE ? (COMPRESS_MAX_EDGE / maxSide) : 1;
+            const targetW = Math.max(1, Math.round(rawW * scale));
+            const targetH = Math.max(1, Math.round(rawH * scale));
+
+            els.canvas.width = targetW;
+            els.canvas.height = targetH;
+            const ctx = els.canvas.getContext('2d');
+            if (!ctx) return;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, targetW, targetH);
+            ctx.drawImage(els.video, 0, 0, targetW, targetH);
+
+            const onBlobReady = (blob) => {
+                if (!blob) {
+                    if (els.errorText) {
+                        els.errorText.textContent = 'Gagal mengambil gambar dari kamera. Silakan coba lagi atau gunakan fallback perangkat.';
+                    }
+                    setEmbeddedCameraUIMode('error');
+                    return;
+                }
+                revokeCapturedCameraPreview();
+                cameraState.capturedBlob = blob;
+                cameraState.capturedPreviewUrl = URL.createObjectURL(blob);
+                if (els.preview) {
+                    els.preview.src = cameraState.capturedPreviewUrl;
+                }
+                setEmbeddedCameraUIMode('preview');
+            };
+
+            if (typeof els.canvas.toBlob === 'function') {
+                els.canvas.toBlob((blob) => {
+                    if (blob) {
+                        onBlobReady(blob);
+                    } else {
+                        try {
+                            onBlobReady(dataUrlToJpegBlob(els.canvas.toDataURL('image/jpeg', COMPRESS_JPEG_QUALITY)));
+                        } catch (e) {
+                            onBlobReady(null);
+                        }
+                    }
+                }, 'image/jpeg', COMPRESS_JPEG_QUALITY);
+            } else {
+                try {
+                    onBlobReady(dataUrlToJpegBlob(els.canvas.toDataURL('image/jpeg', COMPRESS_JPEG_QUALITY)));
+                } catch (e) {
+                    onBlobReady(null);
+                }
+            }
+        }
+
+        function retakeEmbeddedCameraPhoto() {
+            revokeCapturedCameraPreview();
+            const els = getCameraModalElements();
+            if (els.preview) {
+                els.preview.src = '';
+            }
+            if (cameraState.stream) {
+                setEmbeddedCameraUIMode('live');
+                if (els.video) els.video.play().catch(() => {});
+            } else {
+                startEmbeddedCameraStream();
+            }
+        }
+
+        function confirmEmbeddedCameraPhoto() {
+            const qId = cameraState.questionId;
+            const replaceId = cameraState.replaceAttachmentId;
+            const blob = cameraState.capturedBlob;
+
+            if (!qId || !blob) {
+                closeEmbeddedCamera();
+                return;
+            }
+
+            const fileName = `kamera_jawaban_${Date.now()}.jpg`;
+            let fileObj;
+            try {
+                fileObj = new File([blob], fileName, { type: 'image/jpeg' });
+            } catch (e) {
+                blob.name = fileName;
+                fileObj = blob;
+            }
+
+            closeEmbeddedCamera();
+            handlePhotoFilesSelected(qId, [fileObj], replaceId);
+        }
+
+        function triggerFallbackCameraInput() {
+            const qId = cameraState.questionId;
+            const replaceId = cameraState.replaceAttachmentId;
+            if (!qId) return;
+
+            if (replaceId) {
+                triggerReplacePhoto(qId, replaceId);
+            } else {
+                triggerPhotoPicker(qId, 'camera');
+            }
+            closeEmbeddedCamera();
+        }
+
+        function triggerFallbackGalleryInput() {
+            const qId = cameraState.questionId;
+            if (!qId) return;
+
+            triggerPhotoPicker(qId, 'gallery');
+            closeEmbeddedCamera();
+        }
+
+        function closeEmbeddedCamera() {
+            cameraState.active = false;
+            cameraState.questionId = null;
+            cameraState.replaceAttachmentId = null;
+            stopEmbeddedCameraStream();
+            revokeCapturedCameraPreview();
+
+            const els = getCameraModalElements();
+            if (els.preview) els.preview.src = '';
+            if (els.modal) {
+                els.modal.classList.add('hidden');
+                els.modal.classList.remove('flex');
+                els.modal.style.display = 'none';
+            }
+        }
+
+        window.__onSmartCbtNativePhoto = function (questionId, base64Data, fileName, replaceAttachmentId) {
+            const qId = String(questionId || '');
+            if (!qId || !base64Data) {
+                return;
+            }
+
+            try {
+                const rawPayload = String(base64Data).trim();
+                const base64Clean = rawPayload.includes(',') ? rawPayload.split(',')[1] : rawPayload;
+                const binary = atob(base64Clean);
+                const len = binary.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+
+                const blob = new Blob([bytes], { type: 'image/jpeg' });
+                const resolvedName = fileName || `kamera_jawaban_${Date.now()}.jpg`;
+                let fileObj;
+                try {
+                    fileObj = new File([blob], resolvedName, { type: 'image/jpeg' });
+                } catch (e) {
+                    blob.name = resolvedName;
+                    fileObj = blob;
+                }
+
+                handlePhotoFilesSelected(
+                    qId,
+                    [fileObj],
+                    replaceAttachmentId ? String(replaceAttachmentId) : null
+                );
+            } catch (err) {
+                console.error('Failed to process native camera photo:', err);
+                showPhotoError(qId, 'Gagal memproses foto dari kamera aplikasi.');
+            }
+        };
+
+        window.__onSmartCbtNativeCameraError = function (questionId, errorMessage) {
+            const qId = String(questionId || '');
+            if (qId && errorMessage) {
+                showPhotoError(qId, String(errorMessage));
+            }
+        };
+
+        async function compressImageFile(file) {
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            const lowerName = (file.name || '').toLowerCase();
+            const hasAllowedExt = /\.(jpe?g|png|webp)$/.test(lowerName);
+
+            if (!allowedTypes.includes(file.type) && !hasAllowedExt) {
+                throw new Error('Format foto tidak didukung. Gunakan JPG, PNG, atau WEBP.');
+            }
+            if (file.size > MAX_RAW_FILE_BYTES) {
+                throw new Error('Ukuran file asli terlalu besar (maksimal 15 MB).');
+            }
+
+            let bitmap = null;
+            let fallbackImg = null;
+            let tempUrl = null;
+            let width = 0;
+            let height = 0;
+
+            try {
+                if (typeof createImageBitmap === 'function') {
+                    bitmap = await createImageBitmap(file);
+                    width = bitmap.width;
+                    height = bitmap.height;
+                } else {
+                    throw new Error('createImageBitmap unavailable');
+                }
+            } catch (e) {
+                tempUrl = URL.createObjectURL(file);
+                fallbackImg = await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => reject(new Error('File gambar rusak atau tidak dapat dibaca.'));
+                    img.src = tempUrl;
+                });
+                width = fallbackImg.naturalWidth || fallbackImg.width;
+                height = fallbackImg.naturalHeight || fallbackImg.height;
+            }
+
+            try {
+                const maxSide = Math.max(width, height);
+                if (
+                    file.size <= SKIP_COMPRESS_BYTES &&
+                    maxSide <= COMPRESS_MAX_EDGE &&
+                    allowedTypes.includes(file.type)
+                ) {
+                    return { blob: file, fileName: file.name || 'foto_jawaban.jpg' };
+                }
+
+                const scale = maxSide > COMPRESS_MAX_EDGE ? (COMPRESS_MAX_EDGE / maxSide) : 1;
+                const targetW = Math.max(1, Math.round(width * scale));
+                const targetH = Math.max(1, Math.round(height * scale));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, targetW, targetH);
+                ctx.drawImage(bitmap || fallbackImg, 0, 0, targetW, targetH);
+
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob(
+                        result => result ? resolve(result) : reject(new Error('Gagal memproses gambar.')),
+                        'image/jpeg',
+                        COMPRESS_JPEG_QUALITY
+                    );
+                });
+
+                const baseName = (file.name || 'jawaban').replace(/\.[^.]+$/, '');
+                return { blob, fileName: `${baseName}.jpg` };
+            } finally {
+                if (bitmap && typeof bitmap.close === 'function') bitmap.close();
+                if (tempUrl) URL.revokeObjectURL(tempUrl);
+            }
+        }
+
+        async function handlePhotoFilesSelected(questionId, fileList, replaceAttachmentId = null) {
+            const qId = String(questionId);
+            showPhotoError(qId, null);
+
+            if (!fileList || fileList.length === 0) return;
+
+            if (!state.essayPhotos[qId]) {
+                state.essayPhotos[qId] = [];
+            }
+
+            if (replaceAttachmentId) {
+                const file = fileList[0];
+                const existingItem = state.essayPhotos[qId].find(i => Number(i.id) === Number(replaceAttachmentId));
+                if (!existingItem) return;
+
+                try {
+                    const compressed = await compressImageFile(file);
+                    const previewUrl = URL.createObjectURL(compressed.blob);
+
+                    existingItem.previousUrl = existingItem.url;
+                    existingItem.previousFileSize = existingItem.fileSize;
+                    existingItem.previewUrl = previewUrl;
+                    existingItem.blob = compressed.blob;
+                    existingItem.fileName = compressed.fileName;
+                    existingItem.replaceTargetId = existingItem.id;
+                    existingItem.status = 'queued';
+                    existingItem.progress = 0;
+                    existingItem.errorMsg = null;
+                    existingItem.autoRetries = 0;
+
+                    renderPhotoGrid(qId);
+                    updateSaveStatus();
+                    enqueueUploadJob(qId, existingItem);
+                } catch (err) {
+                    showPhotoError(qId, err.message || 'Gagal memproses foto pengganti.');
+                }
+                return;
+            }
+
+            const files = Array.from(fileList);
+            const availableSlots = MAX_ESSAY_PHOTOS - state.essayPhotos[qId].length;
+            if (availableSlots <= 0) {
+                showPhotoError(qId, `Maksimal ${MAX_ESSAY_PHOTOS} foto untuk setiap soal essay.`);
+                return;
+            }
+
+            const selectedFiles = files.slice(0, availableSlots);
+            if (files.length > availableSlots) {
+                showPhotoError(qId, `Hanya ${availableSlots} foto yang ditambahkan (maksimal ${MAX_ESSAY_PHOTOS} foto per soal).`);
+            }
+
+            for (const file of selectedFiles) {
+                try {
+                    const compressed = await compressImageFile(file);
+                    const previewUrl = URL.createObjectURL(compressed.blob);
+                    const item = {
+                        clientId: 'photo_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7),
+                        id: null,
+                        url: null,
+                        previewUrl,
+                        blob: compressed.blob,
+                        fileName: compressed.fileName,
+                        fileSize: compressed.blob.size,
+                        status: 'queued',
+                        progress: 0,
+                        errorMsg: null,
+                        replaceTargetId: null,
+                        autoRetries: 0,
+                    };
+                    state.essayPhotos[qId].push(item);
+                    renderPhotoGrid(qId);
+                    updateSaveStatus();
+                    enqueueUploadJob(qId, item);
+                } catch (err) {
+                    showPhotoError(qId, err.message || 'Gagal memproses foto.');
+                }
+            }
+        }
+
+        function enqueueUploadJob(questionId, item) {
+            state.uploadQueue.push({ questionId: String(questionId), item });
+            processUploadQueue();
+        }
+
+        function processUploadQueue() {
+            while (state.runningUploads < 2 && state.uploadQueue.length > 0) {
+                const job = state.uploadQueue.shift();
+                if (!job || !job.item || job.item.status === 'persisted') continue;
+                state.runningUploads++;
+                uploadSinglePhoto(job.questionId, job.item)
+                    .finally(() => {
+                        state.runningUploads--;
+                        processUploadQueue();
+                    });
+            }
+        }
+
+        function uploadSinglePhoto(questionId, item) {
+            const qId = String(questionId);
+            const wrapper = document.querySelector(`.essay-answer-wrapper[data-question-id="${qId}"]`);
+            if (!wrapper || !wrapper.dataset.uploadUrl || !item.blob) {
+                item.status = 'failed';
+                item.errorMsg = 'Data foto tidak tersedia';
+                renderPhotoGrid(qId);
+                updateSaveStatus();
+                return Promise.resolve();
+            }
+
+            item.status = 'uploading';
+            item.progress = 5;
+            item.errorMsg = null;
+            renderPhotoGrid(qId);
+            updateSaveStatus();
+
+            return new Promise((resolve) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', wrapper.dataset.uploadUrl, true);
+                xhr.withCredentials = true;
+                xhr.timeout = 30000;
+                xhr.setRequestHeader('Accept', 'application/json');
+                xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').content);
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        item.progress = Math.min(99, Math.round((event.loaded / event.total) * 100));
+                        renderPhotoGrid(qId);
+                    }
+                };
+
+                const handleFailure = async (message, retryable = true) => {
+                    if (retryable && (item.autoRetries || 0) < 1 && navigator.onLine && !state.submitStarted) {
+                        item.autoRetries = (item.autoRetries || 0) + 1;
+                        await new Promise(r => setTimeout(r, 1500));
+                        resolve(await uploadSinglePhoto(qId, item));
+                        return;
+                    }
+
+                    item.status = 'failed';
+                    item.errorMsg = message;
+                    renderPhotoGrid(qId);
+                    updateSaveStatus();
+                    resolve();
+                };
+
+                xhr.onload = () => {
+                    let payload = {};
+                    try {
+                        payload = JSON.parse(xhr.responseText || '{}');
+                    } catch (e) {}
+
+                    if (xhr.status >= 200 && xhr.status < 300 && payload.persisted && payload.attachment) {
+                        const att = payload.attachment;
+                        if (item.previewUrl && item.previewUrl.startsWith('blob:')) {
+                            URL.revokeObjectURL(item.previewUrl);
+                        }
+                        item.id = att.id;
+                        item.url = att.url;
+                        item.previewUrl = null;
+                        item.fileSize = att.file_size;
+                        item.blob = null;
+                        item.replaceTargetId = null;
+                        item.previousUrl = null;
+                        item.status = 'persisted';
+                        item.progress = 100;
+                        item.errorMsg = null;
+
+                        state.essayModes[qId] = 'photo';
+                        persistEssayModesToStorage();
+                        renderPhotoGrid(qId);
+                        updateSaveStatus();
+                        resolve();
+                    } else if (xhr.status === 419 || xhr.status === 401 || xhr.status === 403) {
+                        handleFailure(payload.message || 'Sesi ujian tidak valid / berakhir', false);
+                    } else if (xhr.status === 422) {
+                        const firstErr = payload.errors ? Object.values(payload.errors).flat()[0] : null;
+                        handleFailure(firstErr || payload.message || 'File foto ditolak server', false);
+                    } else {
+                        handleFailure(payload.message || `Gagal upload (${xhr.status})`, true);
+                    }
+                };
+
+                xhr.onerror = () => handleFailure('Koneksi terputus saat mengunggah', true);
+                xhr.ontimeout = () => handleFailure('Waktu unggah habis (timeout)', true);
+
+                const formData = new FormData();
+                formData.append('photo', item.blob, item.fileName || 'foto_jawaban.jpg');
+                if (item.replaceTargetId) {
+                    formData.append('replace_attachment_id', String(item.replaceTargetId));
+                }
+                xhr.send(formData);
+            });
+        }
+
+        function retryFailedPhoto(questionId, clientId) {
+            const qId = String(questionId);
+            const item = (state.essayPhotos[qId] || []).find(i => i.clientId === clientId);
+            if (!item || !item.blob) return;
+            item.status = 'queued';
+            item.errorMsg = null;
+            item.autoRetries = 0;
+            renderPhotoGrid(qId);
+            updateSaveStatus();
+            enqueueUploadJob(qId, item);
+        }
+
+        async function removePhotoAttachment(questionId, clientId) {
+            const qId = String(questionId);
+            const list = state.essayPhotos[qId] || [];
+            const idx = list.findIndex(i => i.clientId === clientId);
+            if (idx === -1) return;
+
+            const item = list[idx];
+
+            if (item.status === 'failed' && !item.id) {
+                if (item.previewUrl && item.previewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(item.previewUrl);
+                }
+                list.splice(idx, 1);
+                renderPhotoGrid(qId);
+                updateSaveStatus();
+                return;
+            }
+
+            // Failed replacement for an existing persisted photo: revert back to the original persisted photo
+            if (item.status === 'failed' && item.id && item.previousUrl) {
+                if (item.previewUrl && item.previewUrl.startsWith('blob:')) {
+                    URL.revokeObjectURL(item.previewUrl);
+                }
+                item.url = item.previousUrl;
+                item.fileSize = item.previousFileSize;
+                item.previewUrl = null;
+                item.blob = null;
+                item.replaceTargetId = null;
+                item.previousUrl = null;
+                item.status = 'persisted';
+                item.errorMsg = null;
+                renderPhotoGrid(qId);
+                updateSaveStatus();
+                return;
+            }
+
+            if (!item.id) return;
+
+            try {
+                const url = DELETE_ATTACHMENT_URL_TEMPLATE.replace('__ATTACHMENT__', String(item.id));
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                });
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || 'Gagal menghapus foto.');
+                }
+                list.splice(idx, 1);
+                renderPhotoGrid(qId);
+                updateSaveStatus();
+            } catch (err) {
+                showPhotoError(qId, err.message || 'Gagal menghapus foto dari server.');
+            }
+        }
+
+        async function waitForActivePhotoUploads(timeoutMs = 30000) {
+            const start = Date.now();
+            while (countActivePhotoUploads() > 0 && (Date.now() - start) < timeoutMs) {
+                await new Promise(resolve => setTimeout(resolve, 250));
+            }
+        }
+
+        // ============================================================================
         // NAVIGATION
         // ============================================================================
 
@@ -1006,17 +2155,21 @@
                 return;
             }
 
-            // Hitung jumlah soal yang belum dijawab
+            // Hitung jumlah soal yang belum dijawab (termasuk jawaban foto yang sudah tersimpan)
             const answers = getCurrentAnswers();
-            const answeredCount = Object.values(answers).filter(a => String(a).trim() !== '').length;
+            const answeredCount = countAnsweredQuestions(answers);
             const unanswered = elements.panels.length - answeredCount;
             const pending = Object.keys(state.pendingAnswers).length;
+            const activePhotos = countActivePhotoUploads();
+            const failedPhotos = countFailedPhotoUploads();
 
             // Buka custom DOM modal melalui event Alpine
             window.dispatchEvent(new CustomEvent('open-submit-modal', {
                 detail: {
                     unansweredCount: unanswered,
-                    pendingCount: pending
+                    pendingCount: pending,
+                    activePhotoCount: activePhotos,
+                    failedPhotoCount: failedPhotos
                 }
             }));
         }
@@ -1055,6 +2208,7 @@
             }
 
             try {
+                await waitForActivePhotoUploads(30000);
                 await saveAllPendingAnswers();
 
                 // Hanya clear localStorage setelah server mengkonfirmasi save sukses.
@@ -1085,9 +2239,61 @@
         }
 
         /**
+         * Hitung sisa waktu ujian berdasarkan sisa waktu server saat halaman dimuat
+         * dan elapsed time monotonik (independen terhadap perbedaan jam client vs container server).
+         */
+        function getRemainingTimeMs() {
+            const totalMs = Math.max(0, Number(INITIAL_REMAINING_SECONDS) || 0) * 1000;
+            const elapsedPerf = TIMER_ORIGIN_PERF !== null
+                ? Math.max(0, performance.now() - TIMER_ORIGIN_PERF)
+                : 0;
+            const elapsedDate = Math.max(0, Date.now() - TIMER_ORIGIN_DATE);
+            const elapsedMs = Math.max(elapsedPerf, elapsedDate);
+
+            return Math.max(0, totalMs - elapsedMs);
+        }
+
+        function renderCountdownText(remainingMs) {
+            if (!elements.countdown) return;
+            const totalSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+
+            elements.countdown.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateCountdownDisplay() {
+            const remaining = getRemainingTimeMs();
+            renderCountdownText(remaining);
+
+            if (remaining <= 0) {
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                }
+                timeExpired();
+            }
+        }
+
+        function startCountdownTimer() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            updateCountdownDisplay();
+            if (getRemainingTimeMs() > 0) {
+                countdownTimer = setInterval(updateCountdownDisplay, 1000);
+            }
+        }
+
+        /**
          * Auto submit ketika waktu habis
          */
         async function timeExpired() {
+            if (state.timeExpiredTriggered || state.submitStarted || state.isSubmitting) {
+                return;
+            }
+            state.timeExpiredTriggered = true;
             console.log('Waktu ujian habis');
             state.pageUnloading = true;
             
@@ -1116,7 +2322,10 @@
             }
 
             try {
-                await saveAllPendingAnswers();
+                await Promise.all([
+                    waitForActivePhotoUploads(6000),
+                    saveAllPendingAnswers(),
+                ]);
                 clearPendingAnswersStorage();
                 await new Promise(resolve => setTimeout(resolve, 1000));
             } catch (error) {
@@ -1142,18 +2351,27 @@
             if (pendingCount > 0) {
                 state.pageUnloading = true;
                 
-                // Use fetch dengan keepalive untuk reliability pada page unload
+                // Use fetch dengan keepalive & client_seqs untuk reliability pada page unload
                 const answers = { ...state.pendingAnswers };
+                const client_seqs = {};
+                Object.keys(answers).forEach(qId => {
+                    client_seqs[qId] = state.pendingSeqs[qId] || state.questionSequences[qId] || 1;
+                });
 
                 fetch('{{ route('siswa.ujian.answers', $exam, false) }}', {
                     method: 'POST',
-                            credentials: 'same-origin',
-                    
+                    credentials: 'same-origin',
+                    keepalive: true,
                     headers: {
                         'Content-Type': 'application/json',
+                        'Accept': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     },
-                    body: JSON.stringify({ answers }),
+                    body: JSON.stringify({
+                        request_id: generateRequestId(),
+                        answers,
+                        client_seqs,
+                    }),
                 }).catch(err => console.error('Error saving on page unload:', err));
             }
 
@@ -1174,9 +2392,10 @@
          */
         window.addEventListener('beforeunload', (e) => {
             const pendingCount = Object.keys(state.pendingAnswers).length;
-            if (pendingCount > 0 && !state.submitStarted && !state.isSubmitting && !state.pageUnloading) {
+            const hasPendingUploads = countActivePhotoUploads() > 0 || countFailedPhotoUploads() > 0;
+            if ((pendingCount > 0 || hasPendingUploads) && !state.submitStarted && !state.isSubmitting && !state.pageUnloading) {
                 e.preventDefault();
-                e.returnValue = 'Ada jawaban yang belum tersimpan. Apakah Anda yakin ingin meninggalkan halaman?';
+                e.returnValue = 'Ada jawaban atau foto yang belum selesai tersimpan. Apakah Anda yakin ingin meninggalkan halaman?';
             }
         });
 
@@ -1188,88 +2407,95 @@
          * Initialize dengan load dari localStorage dan database
          */
         function initialize() {
-            // Load jawaban dari database yang sudah tersimpan
-            const dbAnswers = getCurrentAnswers();
-            Object.entries(dbAnswers).forEach(([qId, answer]) => {
-                if (answer) {  // Hanya jika ada jawaban
-                    state.savedAnswers.set(String(qId), answer);
-                }
-            });
+            // Set deadline (relatif terhadap sisa waktu server agar kebal perbedaan jam client vs Docker server)
+            deadline = Date.now() + (Math.max(0, Number(INITIAL_REMAINING_SECONDS) || 0) * 1000);
+            renderCountdownText(Math.max(0, Number(INITIAL_REMAINING_SECONDS) || 0) * 1000);
 
-            // Load pending answers & sequences dari localStorage (jawaban yang belum berhasil disimpan)
-            const storedPending = getPendingAnswersFromStorage();
-            const storedSeqs = getPendingSeqsFromStorage();
-            state.pendingAnswers = { ...storedPending };
-            state.pendingSeqs = { ...storedSeqs };
-
-            // RECOVERY MECHANISM:
-            // Safely initialize monotonic sequences from authoritative server state and local state
-            // Ensures sequence is never reset to 1 when localStorage is cleared, switching browsers, or devices
-            state.questionSequences = {};
-            
-            // 1. Seed from authoritative server-side sequences
-            if (typeof SERVER_SEQS === 'object' && SERVER_SEQS !== null) {
-                Object.entries(SERVER_SEQS).forEach(([qId, sSeq]) => {
-                    const parsed = parseInt(sSeq, 10);
-                    if (!isNaN(parsed) && parsed > 0) {
-                        state.questionSequences[String(qId)] = parsed;
+            try {
+                // Load jawaban dari database yang sudah tersimpan
+                const dbAnswers = getCurrentAnswers();
+                Object.entries(dbAnswers).forEach(([qId, answer]) => {
+                    if (answer) {  // Hanya jika ada jawaban
+                        state.savedAnswers.set(String(qId), answer);
                     }
                 });
-            }
 
-            // 2. Reconcile with local storage sequences (taking the higher sequence if local has un-synced edits)
-            Object.entries(storedSeqs).forEach(([qId, lSeq]) => {
-                const parsed = parseInt(lSeq, 10);
-                if (!isNaN(parsed) && parsed > 0) {
-                    const existing = state.questionSequences[String(qId)] || 0;
-                    state.questionSequences[String(qId)] = Math.max(existing, parsed);
-                }
-            });
+                // Load pending answers & sequences dari localStorage (jawaban yang belum berhasil disimpan)
+                const storedPending = getPendingAnswersFromStorage();
+                const storedSeqs = getPendingSeqsFromStorage();
+                state.pendingAnswers = { ...storedPending };
+                state.pendingSeqs = { ...storedSeqs };
 
-            // 3. Prevent stale recovered local answers from overwriting newer server answers:
-            // If local pending answer has a sequence strictly lower than authoritative server sequence,
-            // discard the stale local pending answer.
-            Object.keys(state.pendingAnswers).forEach(qId => {
-                const sSeq = (SERVER_SEQS && SERVER_SEQS[qId]) ? parseInt(SERVER_SEQS[qId], 10) : 0;
-                const lSeq = state.pendingSeqs[qId] ? parseInt(state.pendingSeqs[qId], 10) : 0;
-                if (sSeq > 0 && lSeq > 0 && lSeq < sSeq) {
-                    delete state.pendingAnswers[qId];
-                    delete state.pendingSeqs[qId];
-                }
-            });
-            savePendingAnswersToStorage(state.pendingAnswers, state.pendingSeqs);
-
-            // Reconstruct changedQuestions dari pending answers
-            Object.keys(state.pendingAnswers).forEach(qId => {
-                state.changedQuestions.add(qId);
-            });
-
-            console.log('Initialized state:');
-            console.log('- Saved answers from DB:', state.savedAnswers.size);
-            console.log('- Pending answers from localStorage:', Object.keys(state.pendingAnswers).length);
-            console.log('- Changed questions:', state.changedQuestions.size);
-
-            // Restore UI from localStorage pending answers
-            if (Object.keys(state.pendingAnswers).length > 0) {
-                Object.entries(state.pendingAnswers).forEach(([qId, val]) => {
-                    const inputs = elements.form.querySelectorAll(`[name="answers[${qId}]"]`);
-                    inputs.forEach(input => {
-                        if (input.type === 'radio') {
-                            if (input.value === val) {
-                                input.checked = true;
-                            }
-                        } else {
-                            input.value = val;
+                // RECOVERY MECHANISM:
+                // Safely initialize monotonic sequences from authoritative server state and local state
+                // Ensures sequence is never reset to 1 when localStorage is cleared, switching browsers, or devices
+                state.questionSequences = {};
+                
+                // 1. Seed from authoritative server-side sequences
+                if (typeof SERVER_SEQS === 'object' && SERVER_SEQS !== null) {
+                    Object.entries(SERVER_SEQS).forEach(([qId, sSeq]) => {
+                        const parsed = parseInt(sSeq, 10);
+                        if (!isNaN(parsed) && parsed > 0) {
+                            state.questionSequences[String(qId)] = parsed;
                         }
                     });
+                }
+
+                // 2. Reconcile with local storage sequences (taking the higher sequence if local has un-synced edits)
+                Object.entries(storedSeqs).forEach(([qId, lSeq]) => {
+                    const parsed = parseInt(lSeq, 10);
+                    if (!isNaN(parsed) && parsed > 0) {
+                        const existing = state.questionSequences[String(qId)] || 0;
+                        state.questionSequences[String(qId)] = Math.max(existing, parsed);
+                    }
                 });
-                // Update nav button colors based on restored answers
-                updateAnswerProgress();
+
+                // 3. Prevent stale recovered local answers from overwriting newer server answers:
+                // If local pending answer has a sequence strictly lower than authoritative server sequence,
+                // discard the stale local pending answer.
+                Object.keys(state.pendingAnswers).forEach(qId => {
+                    const sSeq = (SERVER_SEQS && SERVER_SEQS[qId]) ? parseInt(SERVER_SEQS[qId], 10) : 0;
+                    const lSeq = state.pendingSeqs[qId] ? parseInt(state.pendingSeqs[qId], 10) : 0;
+                    if (sSeq > 0 && lSeq > 0 && lSeq < sSeq) {
+                        delete state.pendingAnswers[qId];
+                        delete state.pendingSeqs[qId];
+                    }
+                });
+                savePendingAnswersToStorage(state.pendingAnswers, state.pendingSeqs);
+
+                // Reconstruct changedQuestions dari pending answers
+                Object.keys(state.pendingAnswers).forEach(qId => {
+                    state.changedQuestions.add(qId);
+                });
+
+                console.log('Initialized state:');
+                console.log('- Saved answers from DB:', state.savedAnswers.size);
+                console.log('- Pending answers from localStorage:', Object.keys(state.pendingAnswers).length);
+                console.log('- Changed questions:', state.changedQuestions.size);
+
+                // Restore UI from localStorage pending answers
+                if (Object.keys(state.pendingAnswers).length > 0) {
+                    Object.entries(state.pendingAnswers).forEach(([qId, val]) => {
+                        const inputs = elements.form.querySelectorAll(`[name="answers[${qId}]"]`);
+                        inputs.forEach(input => {
+                            if (input.type === 'radio') {
+                                if (input.value === val) {
+                                    input.checked = true;
+                                }
+                            } else {
+                                input.value = val;
+                            }
+                        });
+                    });
+                    // Update nav button colors based on restored answers
+                    updateAnswerProgress();
+                }
+            } catch (recoveryError) {
+                console.error('Error during exam state recovery:', recoveryError);
             }
 
-            // Set deadline
-            const deadlineStr = '{{ $attempt->started_at->copy()->addMinutes($exam->durasi_menit)->min($exam->tanggal_selesai ?? $attempt->started_at->copy()->addMinutes($exam->durasi_menit))->toIso8601String() }}';
-            deadline = new Date(deadlineStr).getTime();
+            // Mulai countdown timer segera setelah pemulihan state agar tidak terhambat error komponen lain
+            startCountdownTimer();
 
             // Setup event listeners
             elements.previous.addEventListener('click', () => showQuestion(current - 1));
@@ -1337,19 +2563,48 @@
             window.addEventListener('offline', updateConnectionStatus);
             updateConnectionStatus();
 
-            // Countdown timer
-            countdownTimer = setInterval(() => {
-                const remaining = Math.max(0, deadline - Date.now());
-                const minutes = Math.floor(remaining / 60000);
-                const seconds = Math.floor((remaining % 60000) / 1000);
+            // Inisialisasi state essay mode & lampiran foto dari server + localStorage
+            const storedModes = loadSavedEssayModes();
+            document.querySelectorAll('.essay-answer-wrapper').forEach(wrapper => {
+                const qId = String(wrapper.dataset.questionId);
+                const serverPhotos = Array.isArray(INITIAL_ATTACHMENTS[qId]) ? INITIAL_ATTACHMENTS[qId] : [];
 
-                elements.countdown.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                state.essayPhotos[qId] = serverPhotos.map(att => ({
+                    clientId: `server_${att.id}`,
+                    id: att.id,
+                    url: att.url,
+                    previewUrl: null,
+                    fileSize: att.file_size,
+                    status: 'persisted',
+                    progress: 100,
+                    errorMsg: null,
+                    replaceTargetId: null,
+                }));
 
-                if (remaining === 0) {
-                    clearInterval(countdownTimer);
-                    timeExpired();
-                }
-            }, 1000);
+                const serverMode = INITIAL_ESSAY_MODES[qId];
+                const resolvedMode = serverPhotos.length > 0 && !serverMode
+                    ? 'photo'
+                    : (serverMode || storedModes[qId] || 'text');
+
+                state.essayModes[qId] = resolvedMode;
+                applyEssayModeUI(qId, resolvedMode);
+                renderPhotoGrid(qId);
+            });
+            persistEssayModesToStorage();
+
+            // Pasang listener untuk input kamera, galeri, dan ganti foto
+            document.querySelectorAll('input[data-photo-input]').forEach(fileInput => {
+                fileInput.addEventListener('change', (e) => {
+                    const qId = e.target.dataset.questionId;
+                    const kind = e.target.dataset.photoInput;
+                    const replaceId = kind === 'replace' ? (e.target.dataset.replaceAttachmentId || null) : null;
+                    handlePhotoFilesSelected(qId, e.target.files, replaceId);
+                    if (kind === 'replace') {
+                        delete e.target.dataset.replaceAttachmentId;
+                    }
+                    e.target.value = '';
+                });
+            });
 
             // Show first question
             showQuestion(1);
@@ -1377,6 +2632,24 @@
                 </div>
 
                 <div class="mt-4 space-y-3 text-xs sm:text-sm text-slate-600">
+                    <template x-if="activePhotoCount > 0">
+                        <div class="rounded-xl border border-amber-200 bg-amber-50 p-3 sm:p-3.5 text-amber-800">
+                            <p class="font-bold text-xs sm:text-sm">Ada <span x-text="activePhotoCount"></span> foto yang sedang diunggah.</p>
+                            <p class="mt-1 text-xs leading-relaxed text-amber-700">
+                                Jika Anda klik <strong>Ya, Kumpulkan</strong>, sistem akan menunggu proses unggahan foto selesai terlebih dahulu sebelum mengirim ujian.
+                            </p>
+                        </div>
+                    </template>
+
+                    <template x-if="failedPhotoCount > 0">
+                        <div class="rounded-xl border border-rose-200 bg-rose-50 p-3 sm:p-3.5 text-rose-800">
+                            <p class="font-bold text-xs sm:text-sm">Peringatan: Ada <span x-text="failedPhotoCount"></span> foto gagal diunggah!</p>
+                            <p class="mt-1 text-xs leading-relaxed text-rose-700">
+                                Foto yang gagal tidak akan masuk ke nilai guru. Silakan klik <strong>Periksa Lagi</strong> lalu tekan <strong>Coba Lagi</strong>, atau tetap kumpulkan jika memang tidak diperlukan.
+                            </p>
+                        </div>
+                    </template>
+
                     <template x-if="unansweredCount > 0">
                         <div class="rounded-xl border border-rose-200 bg-rose-50 p-3 sm:p-3.5 text-rose-800">
                             <div class="flex items-center gap-2 font-bold text-xs sm:text-sm">
@@ -1458,6 +2731,103 @@
             </div>
         </div>
     </template>
+
+    <!-- Embedded WebRTC Camera Modal (Android Exambro Compatible) -->
+    <div id="embedded-camera-modal"
+         class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-4 backdrop-blur-sm"
+         style="display: none; z-index: 90; background: rgba(15, 23, 42, 0.9);"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="embedded-camera-title">
+        <div class="flex w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-slate-900 text-white shadow-2xl border border-slate-800" style="max-height: 92vh;">
+            <div class="flex items-center justify-between border-b border-slate-800 px-4 py-3 sm:px-5">
+                <div>
+                    <h3 id="embedded-camera-title" class="text-sm sm:text-base font-bold text-white">Kamera Jawaban Essay</h3>
+                    <p id="embedded-camera-question-badge" class="text-[11px] font-semibold" style="color: #93c5fd;">Jawaban Essay</p>
+                </div>
+                <button type="button"
+                        onclick="closeEmbeddedCamera()"
+                        class="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white active:scale-95 transition"
+                        title="Tutup Kamera">
+                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="relative flex flex-1 items-center justify-center bg-black overflow-hidden" style="min-height: 280px;">
+                <video id="embedded-camera-video" autoplay playsinline muted class="hidden h-full w-full object-contain bg-black" style="display: none; max-height: 60vh;"></video>
+                <canvas id="embedded-camera-canvas" class="hidden" style="display: none;"></canvas>
+                <img id="embedded-camera-preview" class="hidden h-full w-full object-contain bg-black" style="display: none; max-height: 60vh;" alt="Preview Foto Jawaban">
+
+                <div id="embedded-camera-loading" class="flex flex-col items-center justify-center gap-3 p-6 text-center">
+                    <div class="h-9 w-9 animate-spin rounded-full border-blue-500 border-t-transparent" style="border-width: 3px;"></div>
+                    <p class="text-xs sm:text-sm font-semibold text-slate-300">Membuka kamera perangkat...</p>
+                </div>
+
+                <div id="embedded-camera-error" class="hidden max-w-md space-y-4 p-6 text-center" style="display: none;">
+                    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full" style="background: rgba(245, 158, 11, 0.2); color: #fcd34d;">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <p id="embedded-camera-error-text" class="text-xs sm:text-sm leading-relaxed text-slate-300"></p>
+                    <div class="flex flex-col gap-2 sm:flex-row sm:justify-center">
+                        <button type="button"
+                                onclick="triggerFallbackCameraInput()"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-blue-700 active:scale-95 transition">
+                            <span>Ambil via Kamera/File Perangkat</span>
+                        </button>
+                        <button type="button"
+                                onclick="triggerFallbackGalleryInput()"
+                                class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-slate-700 active:scale-95 transition">
+                            <span>Pilih File / Galeri</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 bg-slate-900 px-4 py-3 sm:px-5">
+                <div id="embedded-camera-live-actions" class="hidden items-center justify-between gap-2.5" style="display: none;">
+                    <button type="button"
+                            id="embedded-camera-switch-btn"
+                            onclick="switchEmbeddedCameraFacing()"
+                            class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-800 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-700 active:scale-95 transition min-h-[44px]">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Ganti Kamera</span>
+                    </button>
+                    <button type="button"
+                            id="embedded-camera-capture-btn"
+                            onclick="captureEmbeddedCameraPhoto()"
+                            class="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-blue-700 active:scale-95 transition min-h-[44px]">
+                        <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span>Jepret Foto</span>
+                    </button>
+                </div>
+
+                <div id="embedded-camera-preview-actions" class="hidden items-center justify-between gap-2.5" style="display: none;">
+                    <button type="button"
+                            onclick="retakeEmbeddedCameraPhoto()"
+                            class="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-800 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-300 hover:bg-slate-700 active:scale-95 transition min-h-[44px]">
+                        <span>Ulangi</span>
+                    </button>
+                    <button type="button"
+                            onclick="confirmEmbeddedCameraPhoto()"
+                            class="inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-emerald-700 active:scale-95 transition min-h-[44px]">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <span>Gunakan Foto</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Image Zoom Modal -->
     <template x-if="zoomImage">

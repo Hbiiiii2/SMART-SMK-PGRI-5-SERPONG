@@ -12,6 +12,7 @@ services:
     command: php-fpm -F
     volumes:
       - smart-cbt-storage:/var/www/html/storage/app/public
+      - smart-cbt-private-storage:/var/www/html/storage/app/private
       - smart-cbt-cache:/var/www/html/bootstrap/cache
       - smart-cbt-public:/var/www/html/public
     env_file:
@@ -20,15 +21,17 @@ services:
       - path: .env.docker
         required: false
     environment:
+      - TZ=Asia/Jakarta
+      - CONTAINER_ROLE=primary
       - APP_NAME=Smart-CBT
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_KEY=${CBT_APP_KEY:-base64:uCmfgq9ixvn4I/mdbjuPsyd2uklgdD69Zd4HCffiajE=}
       - APP_URL=${CBT_APP_URL:-https://cbt.smkpgri5serpong.sch.id}
       - APP_TIMEZONE=Asia/Jakarta
-      - DB_CONNECTION=pgsql
-      - DB_HOST=smart-cbt-db
-      - DB_PORT=5432
+      - DB_CONNECTION=${DOCKER_CBT_DB_CONNECTION:-pgsql}
+      - DB_HOST=${DOCKER_CBT_DB_HOST:-smart-cbt-db}
+      - DB_PORT=${DOCKER_CBT_DB_PORT:-5432}
       - DB_DATABASE=${DOCKER_CBT_DB_DATABASE:-smart_cbt}
       - DB_USERNAME=${DOCKER_CBT_DB_USERNAME:-smart_cbt}
       - DB_PASSWORD=${DOCKER_CBT_DB_PASSWORD:-smart_cbt_password}
@@ -61,6 +64,7 @@ services:
     command: php-fpm -F
     volumes:
       - smart-cbt-storage:/var/www/html/storage/app/public
+      - smart-cbt-private-storage:/var/www/html/storage/app/private
       - smart-cbt-cache:/var/www/html/bootstrap/cache
       - smart-cbt-public:/var/www/html/public
     env_file:
@@ -69,16 +73,17 @@ services:
       - path: .env.docker
         required: false
     environment:
+      - TZ=Asia/Jakarta
+      - CONTAINER_ROLE=replica
       - APP_NAME=Smart-CBT
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_KEY=${CBT_APP_KEY:-base64:uCmfgq9ixvn4I/mdbjuPsyd2uklgdD69Zd4HCffiajE=}
       - APP_URL=${CBT_APP_URL:-https://cbt.smkpgri5serpong.sch.id}
       - APP_TIMEZONE=Asia/Jakarta
-      - RUN_MIGRATIONS=false
-      - DB_CONNECTION=pgsql
-      - DB_HOST=smart-cbt-db
-      - DB_PORT=5432
+      - DB_CONNECTION=${DOCKER_CBT_DB_CONNECTION:-pgsql}
+      - DB_HOST=${DOCKER_CBT_DB_HOST:-smart-cbt-db}
+      - DB_PORT=${DOCKER_CBT_DB_PORT:-5432}
       - DB_DATABASE=${DOCKER_CBT_DB_DATABASE:-smart_cbt}
       - DB_USERNAME=${DOCKER_CBT_DB_USERNAME:-smart_cbt}
       - DB_PASSWORD=${DOCKER_CBT_DB_PASSWORD:-smart_cbt_password}
@@ -113,6 +118,7 @@ services:
     command: php-fpm -F
     volumes:
       - smart-cbt-storage:/var/www/html/storage/app/public
+      - smart-cbt-private-storage:/var/www/html/storage/app/private
       - smart-cbt-cache:/var/www/html/bootstrap/cache
       - smart-cbt-public:/var/www/html/public
     env_file:
@@ -121,16 +127,17 @@ services:
       - path: .env.docker
         required: false
     environment:
+      - TZ=Asia/Jakarta
+      - CONTAINER_ROLE=replica
       - APP_NAME=Smart-CBT
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_KEY=${CBT_APP_KEY:-base64:uCmfgq9ixvn4I/mdbjuPsyd2uklgdD69Zd4HCffiajE=}
       - APP_URL=${CBT_APP_URL:-https://cbt.smkpgri5serpong.sch.id}
       - APP_TIMEZONE=Asia/Jakarta
-      - RUN_MIGRATIONS=false
-      - DB_CONNECTION=pgsql
-      - DB_HOST=smart-cbt-db
-      - DB_PORT=5432
+      - DB_CONNECTION=${DOCKER_CBT_DB_CONNECTION:-pgsql}
+      - DB_HOST=${DOCKER_CBT_DB_HOST:-smart-cbt-db}
+      - DB_PORT=${DOCKER_CBT_DB_PORT:-5432}
       - DB_DATABASE=${DOCKER_CBT_DB_DATABASE:-smart_cbt}
       - DB_USERNAME=${DOCKER_CBT_DB_USERNAME:-smart_cbt}
       - DB_PASSWORD=${DOCKER_CBT_DB_PASSWORD:-smart_cbt_password}
@@ -215,6 +222,7 @@ services:
     command: php artisan queue:work redis --sleep=3 --tries=3 --timeout=90
     volumes:
       - smart-cbt-storage:/var/www/html/storage/app/public
+      - smart-cbt-private-storage:/var/www/html/storage/app/private
       - smart-cbt-cache:/var/www/html/bootstrap/cache
     env_file:
       - path: .env
@@ -222,16 +230,17 @@ services:
       - path: .env.docker
         required: false
     environment:
+      - TZ=Asia/Jakarta
+      - CONTAINER_ROLE=worker
       - APP_NAME=Smart-CBT
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_KEY=${CBT_APP_KEY:-base64:uCmfgq9ixvn4I/mdbjuPsyd2uklgdD69Zd4HCffiajE=}
       - APP_URL=${CBT_APP_URL:-https://cbt.smkpgri5serpong.sch.id}
       - APP_TIMEZONE=Asia/Jakarta
-      - RUN_MIGRATIONS=false
-      - DB_CONNECTION=pgsql
-      - DB_HOST=smart-cbt-db
-      - DB_PORT=5432
+      - DB_CONNECTION=${DOCKER_CBT_DB_CONNECTION:-pgsql}
+      - DB_HOST=${DOCKER_CBT_DB_HOST:-smart-cbt-db}
+      - DB_PORT=${DOCKER_CBT_DB_PORT:-5432}
       - DB_DATABASE=${DOCKER_CBT_DB_DATABASE:-smart_cbt}
       - DB_USERNAME=${DOCKER_CBT_DB_USERNAME:-smart_cbt}
       - DB_PASSWORD=${DOCKER_CBT_DB_PASSWORD:-smart_cbt_password}
@@ -266,6 +275,7 @@ services:
     command: php artisan schedule:work
     volumes:
       - smart-cbt-storage:/var/www/html/storage/app/public
+      - smart-cbt-private-storage:/var/www/html/storage/app/private
       - smart-cbt-cache:/var/www/html/bootstrap/cache
     env_file:
       - path: .env
@@ -273,16 +283,17 @@ services:
       - path: .env.docker
         required: false
     environment:
+      - TZ=Asia/Jakarta
+      - CONTAINER_ROLE=worker
       - APP_NAME=Smart-CBT
       - APP_ENV=production
       - APP_DEBUG=false
       - APP_KEY=${CBT_APP_KEY:-base64:uCmfgq9ixvn4I/mdbjuPsyd2uklgdD69Zd4HCffiajE=}
       - APP_URL=${CBT_APP_URL:-https://cbt.smkpgri5serpong.sch.id}
       - APP_TIMEZONE=Asia/Jakarta
-      - RUN_MIGRATIONS=false
-      - DB_CONNECTION=pgsql
-      - DB_HOST=smart-cbt-db
-      - DB_PORT=5432
+      - DB_CONNECTION=${DOCKER_CBT_DB_CONNECTION:-pgsql}
+      - DB_HOST=${DOCKER_CBT_DB_HOST:-smart-cbt-db}
+      - DB_PORT=${DOCKER_CBT_DB_PORT:-5432}
       - DB_DATABASE=${DOCKER_CBT_DB_DATABASE:-smart_cbt}
       - DB_USERNAME=${DOCKER_CBT_DB_USERNAME:-smart_cbt}
       - DB_PASSWORD=${DOCKER_CBT_DB_PASSWORD:-smart_cbt_password}
@@ -319,6 +330,8 @@ services:
 volumes:
   smart-cbt-storage:
     name: ${CBT_VOLUME_STORAGE:-smart-cbt_smart-cbt-storage}
+  smart-cbt-private-storage:
+    name: ${CBT_VOLUME_PRIVATE_STORAGE:-smart-cbt_smart-cbt-private-storage}
   smart-cbt-cache:
     name: ${CBT_VOLUME_CACHE:-smart-cbt_smart-cbt-cache}
   smart-cbt-public:

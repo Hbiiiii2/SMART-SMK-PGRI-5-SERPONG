@@ -2,90 +2,114 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ExamAttempt;
 use App\Models\Exam;
-use App\Models\Kelas;
-use App\Models\MataPelajaran;
+use App\Models\ExamAttempt;
+use App\Services\Examination\ExamFilterService;
 use App\Services\Examination\ScoringService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ResultController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ExamFilterService $examFilterService): View
     {
         abort_unless($request->user()->isAdmin() || $request->user()->isGuru(), 403);
 
-        $query = ExamAttempt::with(['exam.mataPelajaran', 'exam.kelasData', 'siswa.kelasData']);
-        if ($request->user()->isGuru()) {
-            $guruId = $request->user()->guru?->id;
+        $examFilterService->syncExpiredExams();
+
+        $isGuru = $request->user()->isGuru();
+        $guruId = $isGuru ? $request->user()->guru?->id : null;
+        if ($isGuru) {
             abort_unless($guruId, 403);
-            $query->whereHas('exam', fn ($exam) => $exam->where(fn ($q) => $q->where('guru_id', $guruId)->orWhere('guru_pengawas_id', $guruId)));
         }
 
-        $query->when($request->filled('search_siswa'), function ($query) use ($request) {
-            $search = $request->string('search_siswa')->trim();
-            $query->whereHas('siswa', fn ($siswa) => $siswa->where('nama', 'like', "%{$search}%"));
-        });
-
-        $query->when($request->filled('exam_id'), fn ($query) => $query->where('exam_id', $request->integer('exam_id')))
-            ->when($request->filled('kelas_id'), fn ($query) => $query->whereHas('exam', fn ($exam) => $exam->where('kelas_id', $request->integer('kelas_id'))))
-            ->when($request->filled('mata_pelajaran_id'), fn ($query) => $query->whereHas('exam', fn ($exam) => $exam->where('mata_pelajaran_id', $request->integer('mata_pelajaran_id'))))
-            ->when($request->filled('tahun_ajaran'), fn ($query) => $query->whereHas('exam', fn ($exam) => $exam->where('tahun_ajaran', (string) $request->string('tahun_ajaran'))))
-            ->when($request->filled('semester'), fn ($query) => $query->whereHas('exam', fn ($exam) => $exam->where('semester', (string) $request->string('semester'))))
-            ->when($request->filled('status'), fn ($query) => $query->where('status', (string) $request->string('status')))
-            ->when($request->filled('start_date'), fn ($query) => $query->whereDate('started_at', '>=', $request->date('start_date')))
-            ->when($request->filled('end_date'), fn ($query) => $query->whereDate('started_at', '<=', $request->date('end_date')));
+        // 1. Query Attempt Hasil Siswa
+        $query = ExamAttempt::with(['exam.mataPelajaran', 'exam.kelasData', 'exam.guru', 'siswa.kelasData']);
+        $examFilterService->applyAttemptFilters($query, $request, $isGuru, $guruId);
 
         $totalPeserta = (clone $query)->count();
-        $totalSelesai = (clone $query)->whereIn('status', ['submitted', 'completed', 'expired'])->count();
+        $totalSelesai = (clone $query)->whereIn('status', ['submitted', 'completed', 'needs_grading', 'expired'])->count();
+        $totalMenungguNilai = (clone $query)->where('status', 'needs_grading')->count();
         $rataRata = (clone $query)->whereNotNull('nilai_akhir')->avg('nilai_akhir');
         $nilaiTertinggi = (clone $query)->whereNotNull('nilai_akhir')->max('nilai_akhir');
 
-        $examOptions = Exam::query()
-            ->when($request->user()->isGuru(), fn ($exam) => $exam->where(fn ($q) => $q->where('guru_id', $request->user()->guru?->id)->orWhere('guru_pengawas_id', $request->user()->guru?->id)))
-            ->orderBy('nama')
-            ->get(['id', 'nama']);
-        $kelasOptions = Kelas::query()->orderBy('nama_kelas')->get(['id', 'nama_kelas']);
-        $mataPelajaranOptions = MataPelajaran::query()->orderBy('nama')->get(['id', 'nama']);
-        $tahunAjaranOptions = Exam::query()
-            ->whereNotNull('tahun_ajaran')
-            ->where('tahun_ajaran', '!=', '')
-            ->when($request->user()->isGuru(), fn ($exam) => $exam->where(fn ($q) => $q->where('guru_id', $request->user()->guru?->id)->orWhere('guru_pengawas_id', $request->user()->guru?->id)))
-            ->distinct()
-            ->orderByDesc('tahun_ajaran')
-            ->pluck('tahun_ajaran');
+        // 2. Opsi Searchable Exam Picker & Filter Dropdowns
+        $filterOptions = $examFilterService->examFilterOptions($guruId);
+
+        $examOptionsQuery = Exam::with(['mataPelajaran:id,nama', 'kelasData:id,nama_kelas', 'guru:id,nama'])
+            ->when($isGuru, fn (Builder $exam) => $exam->where(
+                fn (Builder $q) => $q->where('guru_id', $guruId)->orWhere('guru_pengawas_id', $guruId)
+            ))
+            ->latest('created_at')
+            ->orderBy('nama');
+        $examFilterService->withExamCounts($examOptionsQuery);
+        $examOptions = $examOptionsQuery->get();
+        $examPickerItems = $examFilterService->formatExamPickerItems($examOptions);
+
+        // 3. Rekap Status Pelaksanaan Per Paket Ujian (Sudah Pernah Ujian vs Belum)
+        $examBaseQuery = Exam::query()
+            ->when($isGuru, fn (Builder $exam) => $exam->where(
+                fn (Builder $q) => $q->where('guru_id', $guruId)->orWhere('guru_pengawas_id', $guruId)
+            ));
+        $examExecutionSummary = $examFilterService->summarizeExams(clone $examBaseQuery);
+
+        $examSummaryQuery = (clone $examBaseQuery)
+            ->with(['mataPelajaran', 'kelasData', 'guru', 'guruPengawas'])
+            ->withAvg('examAttempts', 'nilai_akhir');
+        $examFilterService->withExamCounts($examSummaryQuery);
+
+        // Filter summary ujian memakai keyword search_ujian + filter mapel/kelas/guru/periode/soal/pelaksanaan
+        $summaryRequest = $request->duplicate();
+        if ($request->filled('search_ujian')) {
+            $summaryRequest->merge(['q' => $request->input('search_ujian')]);
+        }
+        $examFilterService->applyExamFilters($examSummaryQuery, $summaryRequest, [
+            'allowGuruFilter' => ! $isGuru,
+            'allowGuruSearch' => ! $isGuru,
+            'defaultSort' => 'peserta_desc',
+        ]);
+
+        $examSummaries = $examSummaryQuery
+            ->paginate(12, ['*'], 'exam_page')
+            ->withQueryString();
 
         return view('hasil.index', [
-            'attempts' => $query->latest()->paginate(20)->withQueryString(),
+            'attempts' => $query->paginate(20)->withQueryString(),
             'examOptions' => $examOptions,
-            'kelasOptions' => $kelasOptions,
-            'mataPelajaranOptions' => $mataPelajaranOptions,
-            'tahunAjaranOptions' => $tahunAjaranOptions,
+            'examPickerItems' => $examPickerItems,
+            'kelasOptions' => $filterOptions['kelasData'],
+            'mataPelajaranOptions' => $filterOptions['mataPelajarans'],
+            'guruOptions' => $filterOptions['gurus'],
+            'tahunAjaranOptions' => $filterOptions['tahunAjarans'],
             'totalPeserta' => $totalPeserta,
             'totalSelesai' => $totalSelesai,
+            'totalMenungguNilai' => $totalMenungguNilai,
             'rataRata' => $rataRata,
             'nilaiTertinggi' => $nilaiTertinggi,
+            'examSummaries' => $examSummaries,
+            'examExecutionSummary' => $examExecutionSummary,
         ]);
     }
-    
+
     public function show(Request $request, $id)
     {
         abort_unless($request->user()->isAdmin() || $request->user()->isGuru(), 403);
-        
+
         $attempt = ExamAttempt::with([
-            'exam.mataPelajaran', 
-            'exam.kelasData', 
-            'siswa.kelasData', 
+            'exam.mataPelajaran',
+            'exam.kelasData',
+            'siswa.kelasData',
             'siswa.user',
-            'answers.question'
+            'answers.question',
+            'answers.attachments',
         ])->findOrFail($id);
-        
+
         if ($request->user()->isGuru()) {
             abort_unless($attempt->exam->guru_id === $request->user()->guru?->id || $attempt->exam->guru_pengawas_id === $request->user()->guru?->id, 403, 'Anda tidak memiliki akses ke hasil ujian ini.');
         }
-        
+
         $riwayatUjian = ExamAttempt::with(['exam.mataPelajaran', 'exam.kelasData'])
             ->where('siswa_id', $attempt->siswa_id)
             ->when($request->user()->isGuru(), function ($query) use ($request) {
@@ -94,12 +118,12 @@ class ResultController extends Controller
             })
             ->latest('started_at')
             ->get();
-            
+
         // Urutkan jawaban berdasarkan urutan soal
-        $answers = $attempt->answers->sortBy(function($answer) {
+        $answers = $attempt->answers->sortBy(function ($answer) {
             return $answer->question->urutan ?? 9999;
         });
-            
+
         return view('hasil.show', [
             'attempt' => $attempt,
             'siswa' => $attempt->siswa,
@@ -133,7 +157,7 @@ class ResultController extends Controller
 
         $answer = $attempt->answers()->whereKey($validated['answer_id'])->firstOrFail();
 
-        abort_unless($answer->question->tipe === 'essay', 422, 'Pertanyaan ini bukan bertipe essay.');
+        abort_unless($answer->question->tipe !== 'pg', 422, 'Pertanyaan ini bukan bertipe essay.');
 
         $maxBobot = (float) ($answer->question->bobot ?: 1);
         if ((float) $validated['skor'] > $maxBobot) {

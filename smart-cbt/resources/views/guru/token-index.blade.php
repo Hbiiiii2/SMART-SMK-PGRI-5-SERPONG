@@ -12,7 +12,7 @@
                     Manajemen Token Ujian
                 </h2>
                 <p class="mt-0.5 text-xs text-slate-500">
-                    Daftar kode token ujian untuk paket-paket ujian aktif yang Anda ampu.
+                    Cari paket ujian, cek kesiapan soal, dan kelola kode token untuk ujian yang Anda ampu.
                 </p>
             </div>
 
@@ -29,10 +29,25 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
+
+            <x-exam-quick-filter-pills routeName="guru.token.index" :summary="$summary" />
+
+            <x-exam-filter-bar
+                :action="route('guru.token.index')"
+                :resetUrl="route('guru.token.index')"
+                :filterOptions="$filterOptions"
+                :showGuruFilter="false"
+                :showPeriodAndSort="false"
+                searchPlaceholder="Cari nama ujian, kode ujian, mapel, kelas..."
+            />
+
             <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div class="border-b border-slate-200 px-6 py-4">
-                    <h3 class="font-bold text-slate-900">Daftar Token Ujian</h3>
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-6 py-4">
+                    <div>
+                        <h3 class="font-bold text-slate-900">Daftar Token Ujian</h3>
+                        <p class="mt-0.5 text-xs text-slate-500">Menampilkan {{ $exams->total() }} paket ujian.</p>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -40,6 +55,7 @@
                         <thead class="bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
                             <tr>
                                 <th class="px-6 py-4">Nama Paket Ujian</th>
+                                <th class="px-6 py-4">Kesiapan &amp; Pelaksanaan</th>
                                 <th class="px-6 py-4 text-center">Kode Token</th>
                                 <th class="px-6 py-4 text-center">Status Token</th>
                                 <th class="px-6 py-4 text-right">Aksi</th>
@@ -47,12 +63,19 @@
                         </thead>
                         <tbody class="divide-y divide-slate-100">
                             @forelse ($exams as $exam)
-                                <tr class="transition hover:bg-slate-50/70">
-                                    <td class="px-6 py-4 font-bold text-slate-900">
-                                        {{ $exam->nama }}
-                                        <p class="text-xs font-normal text-slate-500">
-                                            {{ $exam->mataPelajaran?->nama ?? '-' }} &bull; Kelas: {{ $exam->kelasData?->nama_kelas ?? $exam->kelas ?? '-' }}
+                                <tr class="align-top transition hover:bg-slate-50/70">
+                                    <td class="px-6 py-4">
+                                        <p class="font-bold text-slate-900">{{ $exam->nama }}</p>
+                                        <p class="mt-0.5 text-xs font-normal text-slate-500">
+                                            <span class="font-mono text-slate-600">{{ $exam->kode_ujian ?? '-' }}</span>
+                                            &bull;
+                                            {{ $exam->mataPelajaran?->nama ?? '-' }}
+                                            &bull;
+                                            Kelas: {{ $exam->kelasData?->nama_kelas ?? $exam->kelas ?? '-' }}
                                         </p>
+                                    </td>
+                                    <td class="min-w-56 px-6 py-4">
+                                        <x-exam-readiness-badges :exam="$exam" />
                                     </td>
                                     <td class="px-6 py-4 text-center font-mono text-base font-black {{ $exam->token_aktif ? 'text-emerald-700' : 'text-slate-400' }}">
                                         {{ $exam->token ?? '-' }}
@@ -78,8 +101,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-12 text-center text-slate-500">
-                                        Belum ada ujian yang ditugaskan kepada Anda.
+                                    <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                        {{ request()->query() ? 'Tidak ada ujian yang sesuai dengan filter.' : 'Belum ada ujian yang ditugaskan kepada Anda.' }}
                                     </td>
                                 </tr>
                             @endforelse
@@ -87,10 +110,12 @@
                     </table>
                 </div>
 
-                <div class="border-t border-slate-200 p-6">
-                    {{ $exams->links() }}
-                </div>
+                @if ($exams->hasPages())
+                    <div class="border-t border-slate-200 p-6">
+                        {{ $exams->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-app-layout>

@@ -15,6 +15,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
+            [x-cloak] {
+                display: none !important;
+            }
+
             aside.bg-slate-950 {
                 background: #fff !important;
                 border-right: 1px solid #dbe4ec;

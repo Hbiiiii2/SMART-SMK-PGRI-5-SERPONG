@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Services\Examination\ExamFilterService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -74,26 +75,43 @@ class GuruExamController extends Controller
     ]);
 }
 
-    public function index(Request $request): View
+    public function index(Request $request, ExamFilterService $examFilterService): View
     {
         $guru = $request->user()->guru;
         abort_unless($guru, 403);
 
-        $query = Exam::with(['mataPelajaran', 'kelasData'])
-            ->withCount('questions')
-            ->where(function ($q) use ($guru) {
-                $q->where('guru_id', $guru->id)
-                  ->orWhere('guru_pengawas_id', $guru->id);
-            });
+        $examFilterService->syncExpiredExams();
 
-        $totalExams = (clone $query)->count();
-        $activeExams = (clone $query)->where('status', 'aktif')->where('token_aktif', true)->count();
-        $draftExams = (clone $query)->where(function ($q) {
+        $baseQuery = Exam::where(function ($q) use ($guru) {
+            $q->where('guru_id', $guru->id)
+                ->orWhere('guru_pengawas_id', $guru->id);
+        });
+
+        $summary = $examFilterService->summarizeExams(clone $baseQuery);
+        $totalExams = $summary['total'];
+        $activeExams = (clone $baseQuery)->where('status', 'aktif')->where('token_aktif', true)->count();
+        $draftExams = (clone $baseQuery)->where(function ($q) {
             $q->where('status', '!=', 'aktif')->orWhere('token_aktif', false);
         })->count();
 
-        $exams = $query->latest()->paginate(10);
+        $filterOptions = $examFilterService->examFilterOptions($guru->id);
 
-        return view('guru.ujian.index', compact('exams', 'totalExams', 'activeExams', 'draftExams'));
+        $query = (clone $baseQuery)->with(['mataPelajaran', 'kelasData', 'guru', 'guruPengawas']);
+        $examFilterService->withExamCounts($query);
+        $examFilterService->applyExamFilters($query, $request, [
+            'allowGuruFilter' => false,
+            'allowGuruSearch' => false,
+        ]);
+
+        $exams = $query->paginate(12)->withQueryString();
+
+        return view('guru.ujian.index', compact(
+            'exams',
+            'totalExams',
+            'activeExams',
+            'draftExams',
+            'summary',
+            'filterOptions'
+        ));
     }
 }

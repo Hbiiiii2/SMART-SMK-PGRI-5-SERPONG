@@ -1,18 +1,22 @@
 #!/bin/sh
 set -e
 
-echo "[Smart-CBT] Starting container initialization..."
+echo "[Smart-CBT] Starting container initialization (role=${CONTAINER_ROLE:-primary}, cmd=$1)..."
 
-# 1. Sync public template assets to public volume if mounted
-if [ -d "/var/www/html/public_template/build" ]; then
-    echo "[Smart-CBT] Syncing Vite build assets to public volume..."
-    rm -rf /var/www/html/public/build
-    mkdir -p /var/www/html/public/build
-    cp -rf /var/www/html/public_template/build/. /var/www/html/public/build/ 2>/dev/null || true
+IS_PRIMARY=0
+if [ "$1" = "php-fpm" ] && [ "${CONTAINER_ROLE:-primary}" = "primary" ]; then
+    IS_PRIMARY=1
 fi
 
-# 2. Clear stale cache files to prevent class/config conflicts (only on primary runner)
-if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+# 1. Sync public template assets & clear stale cache ONLY on primary app container
+if [ "$IS_PRIMARY" = "1" ]; then
+    if [ -d "/var/www/html/public_template/build" ]; then
+        echo "[Smart-CBT] Syncing Vite build assets to public volume..."
+        rm -rf /var/www/html/public/build
+        mkdir -p /var/www/html/public/build
+        cp -rf /var/www/html/public_template/build/. /var/www/html/public/build/ 2>/dev/null || true
+    fi
+
     echo "[Smart-CBT] Clearing stale cache files..."
     rm -f /var/www/html/bootstrap/cache/*.php
 fi
@@ -38,12 +42,9 @@ for ($i = 1; $i <= $maxTries; $i++) {
                 PDO::ATTR_TIMEOUT => 3
             ]);
             $testDb = $db . "_testing";
-            if (getenv("RUN_MIGRATIONS") !== "false") {
-                $stmt = $pdo->prepare("SELECT 1 FROM pg_database WHERE datname = ?");
-                $stmt->execute([$testDb]);
-                if (! $stmt->fetchColumn()) {
-                    $pdo->exec("CREATE DATABASE \"{$testDb}\" OWNER \"{$user}\"");
-                }
+            $stmt = $pdo->query("SELECT 1 FROM pg_database WHERE datname = '{$testDb}'");
+            if (! $stmt->fetchColumn()) {
+                $pdo->exec("CREATE DATABASE \"{$testDb}\" OWNER \"{$user}\"");
             }
             echo "[Smart-CBT] PostgreSQL \"{$db}\" and \"{$testDb}\" ready on {$host}:{$port}.\n";
             $connected = true;
@@ -80,15 +81,12 @@ if (!$connected) {
 }
 '
 
-# 4. Run Laravel migrations (skip if running queue/scheduler or secondary replicas to avoid race condition)
-if [ "$1" = "php-fpm" ] && [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
+# 4. Run Laravel migrations & caching only on primary app container
+if [ "$IS_PRIMARY" = "1" ]; then
     if [ -z "$APP_KEY" ]; then
         echo "[Smart-CBT] Checking APP_KEY..."
         php artisan key:generate --force || true
     fi
-
-    echo "[Smart-CBT] Discovering Laravel packages..."
-    php artisan package:discover --ansi || true
 
     echo "[Smart-CBT] Running database migrations..."
     php artisan migrate --force || echo "[Smart-CBT] Migration step completed with notices."
@@ -104,14 +102,20 @@ if [ "$1" = "php-fpm" ] && [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
         php artisan view:cache || true
         php artisan event:cache || true
     fi
-elif [ "$1" = "php-fpm" ]; then
-    echo "[Smart-CBT] Secondary replica waiting for primary initialization..."
-    sleep 3
-fi
 
-# 5. Fix permissions for storage and bootstrap/cache
-chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
-chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
+    # Fix permissions for storage and bootstrap/cache on primary
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache 2>/dev/null || true
+else
+    if [ "$APP_ENV" = "production" ]; then
+        echo "[Smart-CBT] Waiting for primary container cache initialization..."
+        wait_tries=0
+        while [ ! -f /var/www/html/bootstrap/cache/config.php ] && [ "$wait_tries" -lt 20 ]; do
+            wait_tries=$((wait_tries + 1))
+            sleep 1
+        done
+    fi
+fi
 
 echo "[Smart-CBT] Container ready. Executing: $@"
 if [ "$1" = "php-fpm" ]; then

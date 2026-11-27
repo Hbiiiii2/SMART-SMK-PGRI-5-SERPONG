@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\AnswerAttachmentAccessController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MataPelajaranController;
+use App\Http\Controllers\SiswaAnswerAttachmentController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GuruExamController;
@@ -22,7 +24,10 @@ use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Exam;
+use App\Models\ExamAttempt;
+use App\Services\Examination\ExamFilterService;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -57,7 +62,7 @@ Route::get('/', function () {
 |
 */
 
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (Request $request, ExamFilterService $examFilterService) {
 
     /*
     |--------------------------------------------------------------------------
@@ -85,6 +90,8 @@ Route::get('/dashboard', function () {
     |--------------------------------------------------------------------------
     */
 
+    $examFilterService->syncExpiredExams();
+
     // Master Data
     $totalSiswa = Siswa::count();
     $totalGuru = Guru::count();
@@ -92,25 +99,30 @@ Route::get('/dashboard', function () {
     $totalMapel = MataPelajaran::count();
 
     // Statistik Ujian
-    $totalUjian = Exam::count();
+    $ujianSummary = $examFilterService->summarizeExams(Exam::query());
+    $totalUjian = $ujianSummary['total'];
+    $ujianAktif = $ujianSummary['aktif'];
+    $ujianDraft = $ujianSummary['draft'];
+    $ujianSelesai = $ujianSummary['selesai'];
 
-    $ujianAktif = Exam::where('status', 'aktif')->count();
+    $totalAttemptSelesai = ExamAttempt::whereIn('status', ['submitted', 'completed', 'needs_grading', 'expired'])->count();
+    $totalPerluNilaiEssay = ExamAttempt::where('status', 'needs_grading')->count();
 
-    $ujianDraft = Exam::where(function ($query) {
-        $query->where('status', 'draft')
-              ->orWhereNull('status');
-    })->count();
+    $filterOptions = $examFilterService->examFilterOptions();
 
-    $ujianSelesai = Exam::where('status', 'selesai')->count();
-
-    // Ujian terbaru untuk dashboard
-    $ujianTerbaru = Exam::with([
+    $ujianQuery = Exam::with([
         'mataPelajaran',
-        'kelasData'
-    ])
-    ->latest()
-    ->take(5)
-    ->get();
+        'kelasData',
+        'guru',
+        'guruPengawas',
+    ]);
+    $examFilterService->withExamCounts($ujianQuery);
+    $examFilterService->applyExamFilters($ujianQuery, $request, [
+        'allowGuruFilter' => true,
+        'allowGuruSearch' => true,
+    ]);
+
+    $ujianTerbaru = $ujianQuery->paginate(8)->withQueryString();
 
     return view('dashboard', compact(
         'totalSiswa',
@@ -121,6 +133,10 @@ Route::get('/dashboard', function () {
         'ujianAktif',
         'ujianDraft',
         'ujianSelesai',
+        'ujianSummary',
+        'totalAttemptSelesai',
+        'totalPerluNilaiEssay',
+        'filterOptions',
         'ujianTerbaru'
     ));
 
@@ -143,6 +159,9 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
+
+    Route::get('/lampiran-jawaban/{attachment}', [AnswerAttachmentAccessController::class, 'show'])
+        ->name('lampiran-jawaban.show');
 
 });
 
@@ -186,6 +205,18 @@ Route::middleware(['auth', 'siswa'])
         Route::post('/ujian/{ujian}/jawaban', [SiswaExamController::class, 'saveAnswers'])
             ->middleware('throttle:exam-autosave')
             ->name('ujian.answers');
+
+        Route::post('/ujian/{ujian}/soal/{question}/lampiran', [SiswaAnswerAttachmentController::class, 'store'])
+            ->middleware('throttle:exam-upload')
+            ->name('ujian.lampiran.store');
+
+        Route::delete('/ujian/{ujian}/lampiran/{attachment}', [SiswaAnswerAttachmentController::class, 'destroy'])
+            ->middleware('throttle:exam-upload')
+            ->name('ujian.lampiran.destroy');
+
+        Route::post('/ujian/{ujian}/soal/{question}/mode', [SiswaAnswerAttachmentController::class, 'updateMode'])
+            ->middleware('throttle:exam-autosave')
+            ->name('ujian.mode');
 
         Route::post('/ujian/{ujian}/keluar', [SiswaExamController::class, 'leave'])
             ->name('ujian.leave');

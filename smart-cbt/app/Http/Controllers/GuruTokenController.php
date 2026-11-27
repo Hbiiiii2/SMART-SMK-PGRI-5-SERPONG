@@ -3,22 +3,39 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Services\Examination\ExamFilterService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class GuruTokenController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, ExamFilterService $examFilterService): View
     {
         $guru = $request->user()->guru;
         abort_unless($guru, 403);
 
+        $examFilterService->syncExpiredExams();
+
+        $baseQuery = Exam::where(function ($q) use ($guru) {
+            $q->where('guru_id', $guru->id)
+                ->orWhere('guru_pengawas_id', $guru->id);
+        });
+
+        $summary = $examFilterService->summarizeExams(clone $baseQuery);
+        $filterOptions = $examFilterService->examFilterOptions($guru->id);
+
+        $query = (clone $baseQuery)->with(['mataPelajaran', 'kelasData']);
+        $examFilterService->withExamCounts($query);
+        $examFilterService->applyExamFilters($query, $request, [
+            'allowGuruFilter' => false,
+            'allowGuruSearch' => false,
+        ]);
+
         return view('guru.token-index', [
-            'exams' => Exam::where(function ($q) use ($guru) {
-                $q->where('guru_id', $guru->id)
-                  ->orWhere('guru_pengawas_id', $guru->id);
-            })->latest()->paginate(10)
+            'exams' => $query->paginate(12)->withQueryString(),
+            'summary' => $summary,
+            'filterOptions' => $filterOptions,
         ]);
     }
 

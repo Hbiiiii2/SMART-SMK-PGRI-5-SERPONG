@@ -32,7 +32,8 @@ class CbtApiController extends Controller
     {
         $requestId = 'req_' . Str::uuid();
 
-        $query = Exam::with(['guru:id,nama', 'mataPelajaran:id,nama', 'kelasData:id,nama_kelas']);
+        $query = Exam::with(['guru:id,nama', 'mataPelajaran:id,nama', 'kelasData:id,nama_kelas'])
+            ->withCount(['questions', 'examAttempts']);
 
         if ($request->filled('updated_since')) {
             $query->where('updated_at', '>=', $request->date('updated_since'));
@@ -72,6 +73,8 @@ class CbtApiController extends Controller
                 'semester' => $exam->semester,
                 'durasi_menit' => $exam->durasi_menit,
                 'status' => $exam->status,
+                'total_soal' => (int) ($exam->questions_count ?? 0),
+                'total_peserta' => (int) ($exam->exam_attempts_count ?? 0),
                 'mata_pelajaran' => [
                     'id' => $exam->mata_pelajaran_id,
                     'nama' => $exam->mataPelajaran?->nama,
@@ -134,6 +137,8 @@ class CbtApiController extends Controller
                 'semester' => $exam->semester,
                 'durasi_menit' => $exam->durasi_menit,
                 'status' => $exam->status,
+                'total_soal' => (int) ($exam->questions_count ?? 0),
+                'total_peserta' => (int) ($exam->exam_attempts_count ?? 0),
                 'mata_pelajaran' => [
                     'id' => $exam->mata_pelajaran_id,
                     'nama' => $exam->mataPelajaran?->nama,

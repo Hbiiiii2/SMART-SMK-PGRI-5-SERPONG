@@ -39,8 +39,10 @@ class Exam extends Model
         'tanggal_mulai' => 'datetime',
         'tanggal_selesai' => 'datetime',
         'komponen_soal' => 'array',
+        'durasi_menit' => 'integer',
         'token_aktif' => 'boolean',
         'acak_soal' => 'boolean',
+        'is_token_auto_rotate' => 'boolean',
         'token_dibuat_at' => 'datetime',
         'token_kedaluwarsa_at' => 'datetime',
     ];
@@ -161,5 +163,34 @@ class Exam extends Model
         return $this->belongsToMany(Guru::class, 'exam_supervisors')
             ->withPivot('ruangan')
             ->withTimestamps();
+    }
+
+    public function syncedQuestionBanks()
+    {
+        return $this->hasMany(QuestionBank::class, 'source_exam_id');
+    }
+
+    /**
+     * Compute effective exam status based on stored status and schedule window.
+     */
+    public function effectiveStatus(): string
+    {
+        if ($this->status === 'selesai') {
+            return 'selesai';
+        }
+
+        if ($this->status === 'aktif') {
+            if ($this->tanggal_selesai && $this->tanggal_selesai->lte(now())) {
+                return 'selesai';
+            }
+
+            if ($this->tanggal_mulai && now()->lessThan($this->tanggal_mulai)) {
+                return 'terjadwal';
+            }
+
+            return 'aktif';
+        }
+
+        return 'draft';
     }
 }

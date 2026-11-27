@@ -1,0 +1,114 @@
+name: Build SMART-CBT Mobile (iOS & Android)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'smart-cbt-mobile/**'
+      - '.github/workflows/build-mobile.yml'
+
+jobs:
+  build-ios:
+    name: Build iOS (macOS)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: smart-cbt-mobile/ios
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Swift Core Unit Tests
+        run: |
+          if ! swift test > swift_test.log 2>&1; then
+            ERR_LINES=$(tail -n 25 swift_test.log | tr '\n' ' ' | tr -d '\r' || true)
+            echo "::error title=SwiftTestError::$ERR_LINES"
+            cat swift_test.log
+            exit 1
+          fi
+          cat swift_test.log
+
+      - name: Build Unsigned iOS Device IPA (Sideloadly / AltStore / Re-Sign Ready)
+        run: |
+          IOS_OUT="$PWD/build-iphoneos"
+          if ! xcodebuild \
+            -project SmartCBT.xcodeproj \
+            -target SmartCBT \
+            -configuration Release \
+            -sdk iphoneos \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGN_ENTITLEMENTS="" \
+            CONFIGURATION_BUILD_DIR="$IOS_OUT" \
+            build > xcode_ios.log 2>&1; then
+            ERR_LINES=$(grep -iE "error:|fatal|BUILD FAILED" xcode_ios.log | head -n 25 | tr '\n' ' ' | tr -d '\r' || true)
+            TAIL_LINES=$(tail -n 25 xcode_ios.log | tr '\n' ' ' | tr -d '\r' || true)
+            echo "::error title=XcodeBuildError::$ERR_LINES"
+            echo "::error title=XcodeBuildTail::$TAIL_LINES"
+            cat xcode_ios.log
+            exit 1
+          fi
+          if [ ! -d "$IOS_OUT/SmartCBT.app" ]; then
+            OUT_LIST=$(ls -la "$IOS_OUT" 2>&1 | tr '\n' ' ' | tr -d '\r' || true)
+            echo "::error title=XcodeBuildError::SmartCBT.app not found in $IOS_OUT ($OUT_LIST)"
+            exit 1
+          fi
+          rm -rf build-ipa
+          mkdir -p build-ipa/Payload
+          cp -r "$IOS_OUT/SmartCBT.app" build-ipa/Payload/
+          cd build-ipa
+          zip -r "$OLDPWD/SMART-CBT-iOS-v1.0-unsigned.ipa" Payload
+
+      - name: Upload iOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SMART-CBT-iOS
+          path: |
+            smart-cbt-mobile/ios/SMART-CBT-iOS-v1.0-unsigned.ipa
+
+  build-android:
+    name: Build Android (Linux)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: smart-cbt-mobile/android
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK Platforms & Build Tools
+        run: |
+          SDKMANAGER="$(find "${ANDROID_HOME:-/usr/local/lib/android/sdk}/cmdline-tools" -name sdkmanager -type f | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager not found under ANDROID_HOME=$ANDROID_HOME"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;36.0.0"
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Run Unit Tests & Build APKs
+        run: ./gradlew testDebugUnitTest assembleDebug assembleRelease --no-daemon
+
+      - name: Upload Android Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: SMART-CBT-Android
+          path: |
+            smart-cbt-mobile/android/app/build/outputs/apk/debug/app-debug.apk
+            smart-cbt-mobile/android/app/build/outputs/apk/release/*.apk

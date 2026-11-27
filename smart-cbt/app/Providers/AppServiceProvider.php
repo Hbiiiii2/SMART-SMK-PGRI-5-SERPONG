@@ -22,10 +22,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (request()->server('HTTP_X_FORWARDED_PROTO') === 'https' || request()->header('x-forwarded-proto') === 'https') {
-            \Illuminate\Support\Facades\URL::forceScheme('https');
-        }
-
         // BLK-03 & Phase 9: User-keyed rate limiters for examination actions
         // Keyed strictly by authenticated user ID or session ID to eliminate whole-school lockout on shared NAT gateways.
         RateLimiter::for('exam-autosave', function (Request $request) {
@@ -41,6 +37,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('exam-submit', function (Request $request) {
             $key = 'submit_' . ($request->user()?->id ?? $request->session()->getId());
             return Limit::perMinute(30)->by($key);
+        });
+
+        RateLimiter::for('exam-upload', function (Request $request) {
+            $key = 'upload_' . ($request->user()?->id ?? $request->session()->getId());
+            return Limit::perMinute(60)->by($key);
         });
     }
 }
