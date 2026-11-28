@@ -23,7 +23,7 @@ class EraporDashboardController extends Controller
 
         $totalSiswa = Siswa::count();
         $totalMapel = MataPelajaran::count();
-        $classes = Siswa::select('kelas')->distinct()->pluck('kelas');
+        $classes = \App\Models\Rombel::classNames($tahunAjaranId ? (int) $tahunAjaranId : null);
 
         // Check CBT API Health status
         $cbtApiBaseUrl = config('services.cbt.base_url', env('CBT_API_BASE_URL', 'http://smart-cbt-web/api/v1'));

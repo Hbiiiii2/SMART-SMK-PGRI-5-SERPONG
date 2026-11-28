@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Rekapitulasi Nilai STS & Peringkat</h2>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Leger Raport</h2>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                 Kelas: <span class="font-semibold text-brand-600">{{ $selectedClass ?? '-' }}</span> | 
                 Tahun Ajaran: <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $selectedYear->nama ?? $activeYear->nama ?? '2026/2027' }}</span> - Semester {{ $semester }}
@@ -40,6 +40,12 @@
                     Sudah Difinalisasi ({{ $finalization->finalized_at->format('d/m/Y H:i') }})
                 </span>
             @endif
+
+            <!-- Cetak PDF Leger Button -->
+            <a href="{{ route('erapor.recap.print', ['kelas' => $selectedClass ?? 'none', 'tahun_ajaran_id' => $tahunAjaranId, 'semester' => $semester]) }}" target="_blank" class="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-rose-700 transition">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Cetak PDF
+            </a>
 
             <!-- Export Excel Button -->
             <a href="{{ route('erapor.recap.export', $selectedClass ?? 'none') }}?tahun_ajaran_id={{ $tahunAjaranId }}&semester={{ $semester }}" class="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
@@ -102,7 +108,7 @@
                                 {{ $mapel->nama }}
                             </th>
                         @endforeach
-                        <th class="py-3 px-2 text-center bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 min-w-[75px]">Total STS</th>
+                        <th class="py-3 px-2 text-center bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 min-w-[75px]">Jumlah Nilai</th>
                         <th class="py-3 px-2 text-center bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 min-w-[75px]">Rata-rata</th>
                         <th class="py-3 px-2 text-center bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 min-w-[65px]">Rank</th>
                         <th class="py-3 px-2 text-center bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 min-w-[50px]">S</th>
@@ -114,7 +120,9 @@
                     @forelse($students as $idx => $siswa)
                         @php
                             $scoresByMapel = $stsScores[$siswa->id] ?? collect();
-                            $scoreMap = $scoresByMapel->pluck('sts_score', 'mata_pelajaran_id');
+                            $scoreMap = $scoresByMapel->mapWithKeys(fn ($rec) => [
+                                $rec->mata_pelajaran_id => ($rec->final_score ?? $rec->asat_score ?? $rec->sts_score)
+                            ]);
                             $summary = $stsSummaries[$siswa->id] ?? null;
                             $att = $attendanceMap[$siswa->id] ?? ['sakit' => 0, 'izin' => 0, 'alfa' => 0];
                         @endphp
@@ -136,7 +144,7 @@
                                 {{ $summary?->total_score !== null ? number_format($summary->total_score, 1) : '-' }}
                             </td>
                             <td class="py-2.5 px-2 text-center font-bold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-900/10">
-                                {{ $summary?->average_score !== null ? number_format($summary->average_score, 2) : '-' }}
+                                {{ $summary?->average_score !== null ? number_format($summary->average_score, 1) : '-' }}
                             </td>
                             <td class="py-2.5 px-2 text-center font-bold font-mono text-purple-600 dark:text-purple-400 bg-purple-50/30 dark:bg-purple-900/10">
                                 {{ $summary?->rank ? '#' . $summary->rank : '-' }}

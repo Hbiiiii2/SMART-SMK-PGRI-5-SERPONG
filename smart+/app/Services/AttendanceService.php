@@ -517,7 +517,11 @@ class AttendanceService
     public function autoMarkAlphaSiswaForJadwal(Jadwal $jadwal, string $today): int
     {
         $marked = 0;
-        $siswaInClass = Siswa::where('kelas', $jadwal->kelas)->get();
+        $siswaInClass = Siswa::where('kelas', $jadwal->kelas)
+            ->where(function ($q) {
+                $q->where('status_siswa', 'aktif')->orWhereNull('status_siswa');
+            })
+            ->get();
 
         foreach ($siswaInClass as $siswa) {
             $exists = AbsensiSiswa::where('siswa_id', $siswa->id)
@@ -564,7 +568,7 @@ class AttendanceService
                         'status' => 'Alfa',
                         'jam_masuk' => null,
                         'jam_keluar' => null,
-                        'keterangan' => 'Tidak melakukan absensi',
+                        'keterangan' => 'Otomatis Alfa (Tidak melakukan absensi hingga batas waktu)',
                     ]);
                     $marked++;
                 }
@@ -577,18 +581,132 @@ class AttendanceService
     public function autoMarkAlphaSiswa(string $today): int
     {
         $marked = 0;
-        $dayName = match (Carbon::parse($today, 'Asia/Jakarta')->dayOfWeek) {
-            1 => 'Senin', 2 => 'Selasa', 3 => 'Rabu',
-            4 => 'Kamis', 5 => 'Jumat', default => 'Senin',
-        };
+        $dayName = $this->getDayName(Carbon::parse($today, 'Asia/Jakarta')->dayOfWeek);
 
         $jadwals = Jadwal::where('hari', $dayName)->get();
+        $scheduledClasses = [];
 
         foreach ($jadwals as $jadwal) {
+            $scheduledClasses[$jadwal->kelas] = true;
             $marked += $this->autoMarkAlphaSiswaForJadwal($jadwal, $today);
         }
 
+        // Also handle active students whose class has no schedule today when daily attendance is enabled
+        $settings = $this->getSettings();
+        if ($settings->izinkan_absen_tanpa_jadwal ?? true) {
+            $unscheduledStudents = Siswa::where(function ($q) {
+                $q->where('status_siswa', 'aktif')->orWhereNull('status_siswa');
+            })
+                ->when(!empty($scheduledClasses), fn ($q) => $q->whereNotIn('kelas', array_keys($scheduledClasses)))
+                ->get();
+
+            foreach ($unscheduledStudents as $siswa) {
+                $hasAnyToday = AbsensiSiswa::where('siswa_id', $siswa->id)
+                    ->whereDate('tanggal', $today)
+                    ->exists();
+
+                if (!$hasAnyToday) {
+                    AbsensiSiswa::create([
+                        'siswa_id' => $siswa->id,
+                        'jadwal_id' => null,
+                        'tanggal' => $today,
+                        'status' => 'Alfa',
+                        'jam_masuk' => null,
+                        'jam_keluar' => null,
+                        'keterangan' => 'Otomatis Alfa (Tidak melakukan absensi hingga batas waktu)',
+                    ]);
+                    $marked++;
+                }
+            }
+        }
+
         return $marked;
+    }
+
+    public function autoMarkAlphaStaff(string $today): int
+    {
+        $marked = 0;
+        $staffs = \App\Models\StaffAkademik::where('status_aktif', true)->get();
+
+        foreach ($staffs as $staff) {
+            $exists = \App\Models\AbsensiStaff::where('staff_akademik_id', $staff->id)
+                ->whereDate('tanggal', $today)
+                ->exists();
+
+            if (!$exists) {
+                \App\Models\AbsensiStaff::create([
+                    'staff_akademik_id' => $staff->id,
+                    'tanggal' => $today,
+                    'waktu_check_in' => null,
+                    'waktu_check_out' => null,
+                    'status' => 'Alfa',
+                    'keterangan' => 'Tidak melakukan absensi hari ini',
+                ]);
+                $marked++;
+            }
+        }
+
+        return $marked;
+    }
+
+    public function autoMarkAlphaIfPastCutoff(?Carbon $now = null): array
+    {
+        $now = $now ? $now->copy()->timezone('Asia/Jakarta') : Carbon::now('Asia/Jakarta');
+        $today = $now->toDateString();
+
+        // Always reload latest school settings
+        $this->settings = null;
+        $settings = $this->getSettings();
+
+        if ($settings->isWeekendHoliday($now) || HariLibur::isLibur($today)) {
+            return [
+                'skipped' => true,
+                'reason' => HariLibur::isLibur($today) ? 'holiday' : 'weekend',
+                'guru' => 0,
+                'siswa' => 0,
+                'staff' => 0,
+                'cutoffs' => [],
+            ];
+        }
+
+        $guruCutoff = $settings->getEffectiveAlphaCutoffForRole('guru', $now);
+        $siswaCutoff = $settings->getEffectiveAlphaCutoffForRole('siswa', $now);
+        $staffCutoff = $settings->getEffectiveAlphaCutoffForRole('staff_akademik', $now);
+
+        $guruMarked = $now->greaterThan($guruCutoff) ? $this->autoMarkAlphaGuru($today) : 0;
+        $siswaMarked = $now->greaterThan($siswaCutoff) ? $this->autoMarkAlphaSiswa($today) : 0;
+        $staffMarked = $now->greaterThan($staffCutoff) ? $this->autoMarkAlphaStaff($today) : 0;
+
+        if ($guruMarked > 0 || $siswaMarked > 0 || $staffMarked > 0) {
+            Cache::forget('live_stats_' . $today);
+            Cache::forget('ks_dashboard_' . $today);
+            Cache::forget('dashboard_monitoring_' . $today);
+        }
+
+        return [
+            'skipped' => false,
+            'guru' => $guruMarked,
+            'siswa' => $siswaMarked,
+            'staff' => $staffMarked,
+            'cutoffs' => [
+                'guru' => $guruCutoff->format('H:i'),
+                'siswa' => $siswaCutoff->format('H:i'),
+                'staff' => $staffCutoff->format('H:i'),
+            ],
+        ];
+    }
+
+    public function runLazyAutoMarkIfNeeded(?Carbon $now = null): void
+    {
+        $now = $now ? $now->copy()->timezone('Asia/Jakarta') : Carbon::now('Asia/Jakarta');
+        $today = $now->toDateString();
+        $lockKey = 'lazy_auto_alpha_lock_' . $today;
+
+        if (!Cache::add($lockKey, 1, 60)) {
+            return;
+        }
+
+        $this->autoMarkAlphaIfPastCutoff($now);
     }
 
     public function getLiveStats(string $date = null): array

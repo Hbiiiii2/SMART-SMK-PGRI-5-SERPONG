@@ -20,7 +20,7 @@ class MenuHelper
             return self::getGuruMenuGroups();
         }
 
-        $cacheKey = 'sidebar_menu_v2_' . $user->role;
+        $cacheKey = 'sidebar_menu_v5_' . $user->role;
 
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
             return match ($user->role) {
@@ -36,13 +36,13 @@ class MenuHelper
 
     public static function flushCache(): void
     {
-        Cache::forget('sidebar_menu_super_admin');
-        Cache::forget('sidebar_menu_admin_sekolah');
-        Cache::forget('sidebar_menu_kepala_sekolah');
-        Cache::forget('sidebar_menu_guru');
-        Cache::forget('sidebar_menu_siswa');
-        Cache::forget('sidebar_menu_direktur');
-        Cache::forget('sidebar_menu_staff_akademik');
+        foreach (['super_admin', 'admin_sekolah', 'kepala_sekolah', 'guru', 'siswa', 'direktur', 'staff_akademik'] as $role) {
+            Cache::forget('sidebar_menu_' . $role);
+            Cache::forget('sidebar_menu_v2_' . $role);
+            Cache::forget('sidebar_menu_v3_' . $role);
+            Cache::forget('sidebar_menu_v4_' . $role);
+            Cache::forget('sidebar_menu_v5_' . $role);
+        }
     }
 
     public static function getAdminMenuGroups(): array
@@ -69,7 +69,7 @@ class MenuHelper
                     ['icon' => 'book', 'name' => 'Buku Nilai Mapel', 'path' => '/erapor/buku-nilai'],
                     ['icon' => 'sync', 'name' => 'Integrasi CBT', 'path' => '/erapor/cbt'],
                     ['icon' => 'report', 'name' => 'Capaian Kompetensi', 'path' => '/erapor/capaian-kompetensi', 'new' => true],
-                    ['icon' => 'rekap', 'name' => 'Rekap & Peringkat STS', 'path' => '/erapor/recap'],
+                    ['icon' => 'rekap', 'name' => 'Leger Raport', 'path' => '/erapor/recap'],
                     ['icon' => 'guru', 'name' => 'Catatan Wali Kelas', 'path' => '/erapor/cetak-rapor/catatan-wali-kelas', 'new' => true],
                     ['icon' => 'report', 'name' => 'Cetak Rapor Siswa', 'path' => '/erapor/cetak-rapor', 'new' => true],
                     ['icon' => 'settings', 'name' => 'Format & TTD Rapor', 'path' => '/erapor/cetak-rapor/pengaturan', 'new' => true],
@@ -80,6 +80,22 @@ class MenuHelper
                 'title' => 'Manajemen Pengguna',
                 'items' => [
                     ['icon' => 'calendar', 'name' => 'Tahun Ajaran', 'path' => '/admin/tahun-ajaran'],
+                    [
+                        'icon' => 'book',
+                        'name' => 'Data Jurusan / Kejuruan',
+                        'subItems' => [
+                            ['name' => 'Daftar Jurusan', 'path' => '/admin/jurusan'],
+                            ['name' => 'Tambah Jurusan', 'path' => '/admin/jurusan/create'],
+                        ]
+                    ],
+                    [
+                        'icon' => 'book',
+                        'name' => 'Data Kelas / Rombel',
+                        'subItems' => [
+                            ['name' => 'Daftar Kelas', 'path' => '/admin/kelas'],
+                            ['name' => 'Tambah Kelas', 'path' => '/admin/kelas/create'],
+                        ]
+                    ],
                     [
                         'icon' => 'guru',
                         'name' => 'Manajemen Guru',
@@ -94,7 +110,8 @@ class MenuHelper
                         'subItems' => [
                             ['name' => 'Index Siswa', 'path' => '/admin/siswa'],
                             ['name' => 'Create Siswa', 'path' => '/admin/siswa/create'],
-                            ['name' => 'Kenaikan Kelas', 'path' => '/admin/siswa/kenaikan-kelas', 'new' => true],
+                            ['name' => 'Impor & Sinkron Dapodik', 'path' => '/admin/siswa/dapodik', 'new' => true],
+                            ['name' => 'Kenaikan Kelas', 'path' => '/admin/siswa/kenaikan-kelas'],
                         ]
                     ],
                 ],
@@ -199,7 +216,7 @@ class MenuHelper
         $eraporItems = [
             ['icon' => 'book', 'name' => 'Buku Nilai Mapel', 'path' => '/erapor/buku-nilai'],
             ['icon' => 'report', 'name' => 'Capaian Kompetensi', 'path' => '/erapor/capaian-kompetensi', 'new' => true],
-            ['icon' => 'rekap', 'name' => 'Rekap & Peringkat STS', 'path' => '/erapor/recap'],
+            ['icon' => 'rekap', 'name' => 'Leger Raport', 'path' => '/erapor/recap'],
         ];
 
         if ($isWaliKelas) {
@@ -269,7 +286,7 @@ class MenuHelper
                     ['icon' => 'book', 'name' => 'Buku Nilai Mapel', 'path' => '/erapor/buku-nilai'],
                     ['icon' => 'sync', 'name' => 'Integrasi CBT', 'path' => '/erapor/cbt'],
                     ['icon' => 'report', 'name' => 'Capaian Kompetensi', 'path' => '/erapor/capaian-kompetensi'],
-                    ['icon' => 'rekap', 'name' => 'Rekap & Peringkat STS', 'path' => '/erapor/recap'],
+                    ['icon' => 'rekap', 'name' => 'Leger Raport', 'path' => '/erapor/recap'],
                     ['icon' => 'guru', 'name' => 'Catatan Wali Kelas', 'path' => '/erapor/cetak-rapor/catatan-wali-kelas'],
                     ['icon' => 'report', 'name' => 'Cetak Rapor Siswa', 'path' => '/erapor/cetak-rapor', 'new' => true],
                     ['icon' => 'settings', 'name' => 'Format & TTD Rapor', 'path' => '/erapor/cetak-rapor/pengaturan', 'new' => true],

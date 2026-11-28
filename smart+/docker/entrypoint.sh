@@ -3,12 +3,17 @@ set -e
 
 echo "[SMART+] Initializing container environment..."
 
-# 1. Sync compiled Vite assets to public volume if mounted
+# 1. Sync compiled Vite assets & official rapor logos to public volume if mounted
 if [ -d "/var/www/html/public_template/build" ]; then
     echo "[SMART+] Syncing Vite build assets to public volume..."
     rm -rf /var/www/html/public/build
     mkdir -p /var/www/html/public/build
     cp -rf /var/www/html/public_template/build/. /var/www/html/public/build/ 2>/dev/null || true
+fi
+if [ -d "/var/www/html/public_template/images/rapor" ]; then
+    echo "[SMART+] Syncing rapor logo assets to public volume..."
+    mkdir -p /var/www/html/public/images/rapor
+    cp -rf /var/www/html/public_template/images/rapor/. /var/www/html/public/images/rapor/ 2>/dev/null || true
 fi
 
 # 2. Clear stale cache files to prevent class/config conflicts

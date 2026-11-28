@@ -10,6 +10,7 @@ use App\Models\Guru;
 use App\Models\Jadwal;
 use App\Models\MataPelajaran;
 use App\Models\PengaturanSekolah;
+use App\Models\RaporArchive;
 use App\Models\RaporSetting;
 use App\Models\ReportFinalization;
 use App\Models\Siswa;
@@ -19,6 +20,7 @@ use App\Models\SubjectGradeSummary;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use App\Services\OpenRouterService;
+use App\Services\RaporArchiveService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -73,29 +75,30 @@ class CetakRaporController extends Controller
         $activeYear = TahunAjaran::where('is_aktif', true)->first() ?? TahunAjaran::first();
         $allYears = TahunAjaran::orderBy('id', 'desc')->get();
         $tahunId = (int) $request->query('tahun_ajaran_id', $activeYear?->id ?? 1);
+        $semesterRaw = ucfirst(strtolower(trim((string) $request->query('semester', 'Ganjil'))));
+        $semester = ($semesterRaw === 'Genap') ? 'Genap' : 'Ganjil';
+        $jenisRapor = ($semester === 'Genap') ? 'uas' : 'sts';
 
         $allowedHomerooms = $this->resolveAllowedHomeroomClasses($tahunId);
+        $archiveService = app(RaporArchiveService::class);
 
-        $classes = Siswa::select('kelas')->distinct()->whereNotNull('kelas')->orderBy('kelas')->pluck('kelas');
+        $classes = $archiveService->resolveClassesForPeriod($tahunId, $semester);
         if ($allowedHomerooms !== null) {
             $classes = $classes->filter(fn ($c) => in_array($c, $allowedHomerooms, true))->values();
         }
 
-        $kelas = $request->query('kelas', $classes->first() ?? ($allowedHomerooms[0] ?? '7-A'));
+        $kelas = $request->query('kelas', $classes->first() ?? ($allowedHomerooms[0] ?? 'X AK'));
         if ($allowedHomerooms !== null && !in_array($kelas, $allowedHomerooms, true)) {
             $kelas = $allowedHomerooms[0];
-        }
-        $semester = $request->query('semester', 'Ganjil');
-        $jenisRapor = $request->query('jenis_rapor', 'sts'); // sts | uas
-        if ($jenisRapor === 'akhir') {
-            $jenisRapor = 'uas';
         }
 
         $targetYear = TahunAjaran::find($tahunId) ?? $activeYear;
         $raporSettings = RaporSetting::instance();
+        $schoolSettings = PengaturanSekolah::first();
 
-        // Fetch students in class
-        $students = Siswa::where('kelas', $kelas)
+        // Fetch cohort students using historical class first, fallback to current class
+        $cohortIds = $archiveService->resolveCohortStudentIds($kelas, $tahunId, $semester);
+        $students = Siswa::whereIn('id', $cohortIds)
             ->orderBy('nama_lengkap', 'asc')
             ->get();
 
@@ -109,14 +112,20 @@ class CetakRaporController extends Controller
             ->get()
             ->keyBy('siswa_id');
 
-        // Check finalization status
+        // Check finalization status & existing immutable archives
         $finalization = ReportFinalization::where('kelas', $kelas)
             ->where('tahun_ajaran_id', $tahunId)
             ->where('semester', $semester)
             ->first();
 
-        // Total subjects for completeness check
-        $totalSubjectsCount = MataPelajaran::count();
+        $archivedMap = RaporArchive::whereIn('siswa_id', $students->pluck('id'))
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->get()
+            ->keyBy(fn ($a) => "{$a->siswa_id}_{$a->jenis_rapor}");
+
+        // Total subjects relevant to this class (major + level + schedule)
+        $totalSubjectsCount = MataPelajaran::forClass($kelas, $tahunId, $semester)->count();
 
         return view('pages.erapor.cetak-rapor', compact(
             'classes',
@@ -126,11 +135,51 @@ class CetakRaporController extends Controller
             'semester',
             'jenisRapor',
             'raporSettings',
+            'schoolSettings',
             'students',
             'stsSummaries',
             'finalization',
+            'archivedMap',
             'totalSubjectsCount'
         ));
+    }
+
+    /**
+     * Finalize and freeze digital rapor archives for all students in a class & period.
+     */
+    public function archiveClass(Request $request)
+    {
+        $validated = $request->validate([
+            'kelas' => 'required|string|max:50',
+            'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
+            'semester' => 'required|in:Ganjil,Genap',
+            'jenis_rapor' => 'nullable|in:all,sts,uas',
+        ]);
+
+        $kelas = $validated['kelas'];
+        $tahunId = (int) $validated['tahun_ajaran_id'];
+        $semester = $validated['semester'];
+        $jenisScope = $validated['jenis_rapor'] ?? 'all';
+        $jenisList = $jenisScope === 'all' ? ['sts', 'uas'] : [$jenisScope];
+
+        ReportFinalization::updateOrCreate(
+            [
+                'kelas' => $kelas,
+                'tahun_ajaran_id' => $tahunId,
+                'semester' => $semester,
+            ],
+            [
+                'status' => 'final',
+                'reviewed_by' => auth()->id(),
+                'approved_by' => auth()->id(),
+                'finalized_at' => now(),
+                'notes' => 'Difinalisasi dan diarsipkan dari halaman Cetak Rapor.',
+            ]
+        );
+
+        $count = app(RaporArchiveService::class)->archiveClass($kelas, $tahunId, $semester, $jenisList, auth()->id());
+
+        return back()->with('success', "Berhasil mengarsipkan {$count} dokumen rapor digital kelas {$kelas} ({$semester}). Arsip kini terkunci permanen dengan QR verifikasi.");
     }
 
     /**
@@ -141,23 +190,25 @@ class CetakRaporController extends Controller
         $activeYear = TahunAjaran::where('is_aktif', true)->first() ?? TahunAjaran::first();
         $allYears = TahunAjaran::orderBy('id', 'desc')->get();
         $tahunId = (int) $request->query('tahun_ajaran_id', $activeYear?->id ?? 1);
+        $semester = $request->query('semester', 'Ganjil');
 
         $allowedHomerooms = $this->resolveAllowedHomeroomClasses($tahunId);
+        $archiveService = app(RaporArchiveService::class);
 
-        $classes = Siswa::select('kelas')->distinct()->whereNotNull('kelas')->orderBy('kelas')->pluck('kelas');
+        $classes = $archiveService->resolveClassesForPeriod($tahunId, $semester);
         if ($allowedHomerooms !== null) {
             $classes = $classes->filter(fn ($c) => in_array($c, $allowedHomerooms, true))->values();
         }
 
-        $kelas = $request->query('kelas', $classes->first() ?? ($allowedHomerooms[0] ?? '7-A'));
+        $kelas = $request->query('kelas', $classes->first() ?? ($allowedHomerooms[0] ?? 'X AK'));
         if ($allowedHomerooms !== null && !in_array($kelas, $allowedHomerooms, true)) {
             $kelas = $allowedHomerooms[0];
         }
-        $semester = $request->query('semester', 'Ganjil');
 
         $targetYear = TahunAjaran::find($tahunId) ?? $activeYear;
+        $cohortIds = $archiveService->resolveCohortStudentIds($kelas, $tahunId, $semester);
 
-        $students = Siswa::where('kelas', $kelas)
+        $students = Siswa::whereIn('id', $cohortIds)
             ->orderBy('nama_lengkap', 'asc')
             ->get();
 
@@ -168,11 +219,9 @@ class CetakRaporController extends Controller
             ->keyBy('siswa_id');
 
         $attQuery = AbsensiSiswa::whereIn('siswa_id', $students->pluck('id'));
-        if ($targetYear?->tanggal_mulai && $targetYear?->tanggal_selesai) {
-            $attQuery->whereBetween('tanggal', [
-                \Carbon\Carbon::parse($targetYear->tanggal_mulai)->toDateString(),
-                \Carbon\Carbon::parse($targetYear->tanggal_selesai)->toDateString(),
-            ]);
+        $dateRange = $archiveService->resolveSemesterDateRange($targetYear, $semester);
+        if ($dateRange !== null) {
+            $attQuery->whereBetween('tanggal', $dateRange);
         }
         $attendances = $attQuery->selectRaw("
                 siswa_id,
@@ -206,31 +255,118 @@ class CetakRaporController extends Controller
             'semester' => 'required|string',
             'kelas' => 'required|string',
             'catatan' => 'array',
+            'ekskul' => 'nullable|array',
+            'keputusan_status' => 'nullable|array',
+            'keputusan_status.*' => 'nullable|string|in:naik,tinggal,lulus,tidak_lulus',
+            'keputusan_kelas' => 'nullable|array',
+            'keputusan_kelas.*' => 'nullable|string|max:60',
         ]);
 
         $tahunId = (int) $request->input('tahun_ajaran_id');
         $semester = $request->input('semester');
         $this->resolveAllowedHomeroomClasses($tahunId, $request->input('kelas'));
         $catatanList = $request->input('catatan', []);
+        $ekskulInput = $request->input('ekskul', []);
+        $keputusanStatusInput = $request->input('keputusan_status', []);
+        $keputusanKelasInput = $request->input('keputusan_kelas', []);
 
-        foreach ($catatanList as $siswaId => $text) {
-            StudentStsSummary::updateOrCreate(
-                [
-                    'siswa_id' => $siswaId,
-                    'tahun_ajaran_id' => $tahunId,
-                    'semester' => $semester,
-                ],
-                [
-                    'catatan_wali_kelas' => trim($text),
-                ]
-            );
+        $hasEkskulInput = $request->has('ekskul');
+        $hasKeputusanStatusInput = $request->has('keputusan_status');
+        $hasKeputusanKelasInput = $request->has('keputusan_kelas');
+
+        $allStudentIds = collect(array_keys($catatanList))
+            ->merge(array_keys($ekskulInput))
+            ->merge(array_keys($keputusanStatusInput))
+            ->merge(array_keys($keputusanKelasInput))
+            ->unique()
+            ->values();
+
+        foreach ($allStudentIds as $siswaId) {
+            $payload = [];
+
+            if (array_key_exists($siswaId, $catatanList)) {
+                $payload['catatan_wali_kelas'] = trim((string) ($catatanList[$siswaId] ?? ''));
+            }
+
+            if ($hasEkskulInput) {
+                $rows = $ekskulInput[$siswaId] ?? [];
+                $cleanedEkskul = [];
+                if (is_array($rows)) {
+                    foreach ($rows as $row) {
+                        if (!is_array($row)) {
+                            continue;
+                        }
+                        $nama = trim((string) ($row['nama'] ?? ''));
+                        $ket = trim((string) ($row['keterangan'] ?? ''));
+                        if ($nama === '' && $ket === '') {
+                            continue;
+                        }
+                        if ($nama === '-' && $ket === '-') {
+                            continue;
+                        }
+                        $cleanedEkskul[] = [
+                            'nama' => $nama !== '' ? $nama : '-',
+                            'keterangan' => $ket !== '' ? $ket : '-',
+                        ];
+                    }
+                }
+                $payload['ekstrakurikuler'] = $cleanedEkskul;
+            }
+
+            if ($hasKeputusanStatusInput) {
+                $statusVal = trim((string) ($keputusanStatusInput[$siswaId] ?? ''));
+                $payload['keputusan_status'] = $statusVal !== '' ? $statusVal : null;
+            }
+
+            if ($hasKeputusanKelasInput) {
+                $kelasVal = trim((string) ($keputusanKelasInput[$siswaId] ?? ''));
+                $payload['keputusan_kelas'] = $kelasVal !== '' ? $kelasVal : null;
+            }
+
+            if (!empty($payload)) {
+                $payload['kelas'] = $request->input('kelas');
+                StudentStsSummary::updateOrCreate(
+                    [
+                        'siswa_id' => $siswaId,
+                        'tahun_ajaran_id' => $tahunId,
+                        'semester' => $semester,
+                    ],
+                    $payload
+                );
+            }
+        }
+
+        // Auto-sync existing archives ONLY for active academic year & active students (keep alumni/past years immutable)
+        $targetYear = TahunAjaran::find($tahunId);
+        if ($targetYear?->is_aktif && $allStudentIds->isNotEmpty()) {
+            $archiveService = app(RaporArchiveService::class);
+            $activeStudents = Siswa::whereIn('id', $allStudentIds)
+                ->where(function ($q) {
+                    $q->where('status_siswa', 'aktif')->orWhereNull('status_siswa');
+                })
+                ->get()
+                ->keyBy('id');
+
+            if ($activeStudents->isNotEmpty()) {
+                $existingArchives = RaporArchive::whereIn('siswa_id', $activeStudents->keys())
+                    ->where('tahun_ajaran_id', $tahunId)
+                    ->where('semester', $semester)
+                    ->get();
+
+                foreach ($existingArchives as $arch) {
+                    $stModel = $activeStudents->get($arch->siswa_id);
+                    if ($stModel) {
+                        $archiveService->archiveStudent($stModel, $tahunId, $semester, $arch->jenis_rapor, auth()->id(), recalculate: false);
+                    }
+                }
+            }
         }
 
         return redirect()->route('erapor.cetak.catatan-wali', [
             'kelas' => $request->input('kelas'),
             'tahun_ajaran_id' => $tahunId,
             'semester' => $semester,
-        ])->with('success', 'Catatan Wali Kelas berhasil disimpan dan akan langsung dicetak pada Lembar Rapor Siswa.');
+        ])->with('success', 'Catatan Wali Kelas, Ekstrakurikuler & Keputusan Rapor berhasil disimpan dan langsung disinkronkan.');
     }
 
     /**
@@ -247,15 +383,21 @@ class CetakRaporController extends Controller
         $siswa = Siswa::findOrFail($request->input('siswa_id'));
         $tahunId = (int) $request->input('tahun_ajaran_id');
         $semester = $request->input('semester');
-        $this->resolveAllowedHomeroomClasses($tahunId, $siswa->kelas);
+        $archiveService = app(RaporArchiveService::class);
+        $kelasHistoris = $archiveService->resolveHistoricalClass($siswa, $tahunId, $semester);
+        $this->resolveAllowedHomeroomClasses($tahunId, $kelasHistoris);
 
         $stsSummary = StudentStsSummary::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunId)
             ->where('semester', $semester)
             ->first();
 
-        $att = AbsensiSiswa::where('siswa_id', $siswa->id)
-            ->selectRaw("
+        $attQuery = AbsensiSiswa::where('siswa_id', $siswa->id);
+        $dateRange = $archiveService->resolveSemesterDateRange(TahunAjaran::find($tahunId), $semester);
+        if ($dateRange !== null) {
+            $attQuery->whereBetween('tanggal', $dateRange);
+        }
+        $att = $attQuery->selectRaw("
                 COUNT(DISTINCT CASE WHEN LOWER(status) = 'sakit' THEN tanggal END) as s,
                 COUNT(DISTINCT CASE WHEN LOWER(status) = 'izin' THEN tanggal END) as i,
                 COUNT(DISTINCT CASE WHEN LOWER(status) IN ('alfa', 'alpha') THEN tanggal END) as a
@@ -270,7 +412,7 @@ class CetakRaporController extends Controller
 
         $aiNote = $aiService->generateCatatanWaliKelas(
             $siswa,
-            $stsSummary?->avg_score,
+            $stsSummary?->average_score,
             $stsSummary?->rank,
             $attendance
         );
@@ -296,7 +438,7 @@ class CetakRaporController extends Controller
         $raporSettings = RaporSetting::instance();
 
         // Get all unique classes registered in students
-        $classes = Siswa::select('kelas')->distinct()->whereNotNull('kelas')->orderBy('kelas')->pluck('kelas');
+        $classes = \App\Models\Rombel::classNames($tahunId);
 
         // All teachers for homeroom dropdown
         $teachers = Guru::orderBy('nama_lengkap', 'asc')->get();
@@ -350,6 +492,7 @@ class CetakRaporController extends Controller
             'header_sekolah' => 'nullable|string|max:150',
             'ttd_kepala_sekolah' => 'nullable|image|max:2048',
             'stempel_sekolah' => 'nullable|image|max:2048',
+            'logo_yayasan' => 'nullable|image|max:2048',
         ]);
 
         $settings = RaporSetting::instance();
@@ -414,6 +557,13 @@ class CetakRaporController extends Controller
                 Storage::disk('public')->delete($settings->stempel_sekolah);
             }
             $data['stempel_sekolah'] = $request->file('stempel_sekolah')->store('rapor/stempel', 'public');
+        }
+
+        if ($request->hasFile('logo_yayasan')) {
+            if ($settings->logo_yayasan && Storage::disk('public')->exists($settings->logo_yayasan)) {
+                Storage::disk('public')->delete($settings->logo_yayasan);
+            }
+            $data['logo_yayasan'] = $request->file('logo_yayasan')->store('rapor/logo', 'public');
         }
 
         $settings->update($data);
@@ -487,288 +637,35 @@ class CetakRaporController extends Controller
     }
 
     /**
-     * Print single student formal report card (A4 portrait).
+     * Print single student formal report card (A4 portrait), serving immutable RaporArchive snapshot when available.
      */
     public function printSiswa(Request $request, Siswa $siswa)
     {
         $activeYear = TahunAjaran::where('is_aktif', true)->first() ?? TahunAjaran::first();
         $tahunId = (int) $request->query('tahun_ajaran_id', $siswa->tahun_ajaran_id ?? $activeYear?->id ?? 1);
-        $this->resolveAllowedHomeroomClasses($tahunId, $siswa->kelas);
-        $semester = $request->query('semester', 'Ganjil');
-        $jenisRapor = $request->query('jenis_rapor', 'sts');
+        $semesterRaw = ucfirst(strtolower(trim((string) $request->query('semester', 'Ganjil'))));
+        $semester = ($semesterRaw === 'Genap') ? 'Genap' : 'Ganjil';
+        $defaultJenis = ($semester === 'Genap') ? 'uas' : 'sts';
+        $jenisRapor = $request->query('jenis_rapor', $defaultJenis);
         if ($jenisRapor === 'akhir') {
             $jenisRapor = 'uas';
         }
 
-        $targetYear = TahunAjaran::find($tahunId) ?? $activeYear;
-        $schoolSettings = PengaturanSekolah::first();
+        $archiveService = app(RaporArchiveService::class);
+        $kelasHistoris = $archiveService->resolveHistoricalClass($siswa, $tahunId, $semester);
+        $this->resolveAllowedHomeroomClasses($tahunId, $kelasHistoris);
 
-        // Fetch student's grades for all subjects
-        $subjects = MataPelajaran::orderBy('nama', 'asc')->get();
-        $summaries = SubjectGradeSummary::where('siswa_id', $siswa->id)
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->get()
-            ->keyBy('mata_pelajaran_id');
+        $preferArchive = $request->query('mode') !== 'live';
+        $viewData = $archiveService->resolveViewDataForPrint(
+            $siswa,
+            $tahunId,
+            $semester,
+            $jenisRapor,
+            preferArchive: $preferArchive,
+            trackReprint: true
+        );
 
-        // Ensure class STS summary & rankings are up-to-date before printing
-        if ($siswa->kelas) {
-            app(\App\Services\GradingCalculationService::class)->recalculateClassSTS($siswa->kelas, $tahunId, $semester);
-        }
-
-        // Student overall STS / semester stats
-        $stsSummary = StudentStsSummary::where('siswa_id', $siswa->id)
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->first();
-
-        // Attendance stats (distinct days per status in the academic year)
-        $attQuery = AbsensiSiswa::where('siswa_id', $siswa->id);
-        if ($targetYear?->tanggal_mulai && $targetYear?->tanggal_selesai) {
-            $attQuery->whereBetween('tanggal', [
-                \Carbon\Carbon::parse($targetYear->tanggal_mulai)->toDateString(),
-                \Carbon\Carbon::parse($targetYear->tanggal_selesai)->toDateString(),
-            ]);
-        }
-        $attendance = $attQuery->selectRaw("
-                COUNT(DISTINCT CASE WHEN LOWER(status) = 'sakit' THEN tanggal END) as s,
-                COUNT(DISTINCT CASE WHEN LOWER(status) = 'izin' THEN tanggal END) as i,
-                COUNT(DISTINCT CASE WHEN LOWER(status) IN ('alfa', 'alpha') THEN tanggal END) as a
-            ")
-            ->first();
-
-        // Wali Kelas & Kepala Sekolah
-        $raporSettings = RaporSetting::instance();
-        $homeroom = ClassHomeroom::where('kelas', $siswa->kelas)
-            ->where('tahun_ajaran_id', $tahunId)
-            ->with('guru')
-            ->first();
-
-        $waliKelas = $homeroom?->guru ?? Jadwal::where('kelas', $siswa->kelas)
-            ->where('tahun_ajaran_id', $tahunId)
-            ->with('guru')
-            ->first()?->guru;
-
-        $kepalaSekolah = User::where('role', 'kepala_sekolah')->first();
-        $tanggalRaporFormatted = $raporSettings->tanggal_rapor 
-            ? $raporSettings->tanggal_rapor->translatedFormat('d F Y') 
-            : date('d F Y');
-
-        // Map subject teacher names for this class (with fallback to general subject teacher)
-        $jadwalGuruMap = [];
-        $classJadwals = Jadwal::where('kelas', $siswa->kelas)
-            ->with('guru')
-            ->orderByRaw('tahun_ajaran_id = ? DESC', [$tahunId])
-            ->get();
-        foreach ($classJadwals as $j) {
-            if ($j->mata_pelajaran_id && $j->guru && !isset($jadwalGuruMap[$j->mata_pelajaran_id])) {
-                $jadwalGuruMap[$j->mata_pelajaran_id] = $j->guru->nama_lengkap;
-            }
-        }
-        $fallbackJadwals = Jadwal::with('guru')->orderBy('id', 'desc')->get();
-        foreach ($fallbackJadwals as $j) {
-            if ($j->mata_pelajaran_id && $j->guru && !isset($jadwalGuruMap[$j->mata_pelajaran_id])) {
-                $jadwalGuruMap[$j->mata_pelajaran_id] = $j->guru->nama_lengkap;
-            }
-        }
-
-        // Fetch individual assessment items & scores for this student (UH 1-3, Tugas 1-3, Praktek 1-2, Projek 1-2, Portofolio 1-2, STS)
-        $assessmentItems = AssessmentItem::with('component')
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->get();
-        $studentScoresByItem = StudentAssessmentScore::where('siswa_id', $siswa->id)
-            ->whereIn('assessment_item_id', $assessmentItems->pluck('id'))
-            ->get()
-            ->keyBy('assessment_item_id');
-        $itemsBySubject = $assessmentItems->groupBy('mata_pelajaran_id');
-
-        // Prepare grade items with competence descriptions & granular component scores
-        $gradeItems = [];
-        $totalNilai = 0;
-        $filledCount = 0;
-
-        foreach ($subjects as $mapel) {
-            $sum = $summaries->get($mapel->id);
-            $subjectItems = $itemsBySubject->get($mapel->id, collect());
-
-            $uhScores = [1 => null, 2 => null, 3 => null];
-            $tugasScores = [1 => null, 2 => null, 3 => null];
-            $praktekScores = [1 => null, 2 => null];
-            $projekScores = [1 => null, 2 => null];
-            $portofolioScores = [1 => null, 2 => null];
-            $stsItemScore = null;
-
-            foreach ($subjectItems as $item) {
-                $code = strtolower($item->component?->code ?? '');
-                if ($code === '' && !empty($item->title)) {
-                    $tLower = strtolower($item->title);
-                    if (str_starts_with($tLower, 'tugas')) $code = 'tugas';
-                    elseif (str_starts_with($tLower, 'uh') || str_contains($tLower, 'ulangan')) $code = 'uh';
-                    elseif (str_starts_with($tLower, 'praktek') || str_starts_with($tLower, 'praktik')) $code = 'praktek';
-                    elseif (str_starts_with($tLower, 'projek') || str_starts_with($tLower, 'proyek')) $code = 'projek';
-                    elseif (str_starts_with($tLower, 'portofolio')) $code = 'portofolio';
-                    elseif (str_starts_with($tLower, 'sts') || str_starts_with($tLower, 'pts')) $code = 'sts';
-                }
-
-                $seq = (int) $item->sequence;
-                if ($seq <= 0 && preg_match('/\d+/', $item->title, $m)) {
-                    $seq = (int) $m[0];
-                }
-
-                $val = $studentScoresByItem->get($item->id)?->score;
-                if ($val === null) {
-                    continue;
-                }
-
-                if ($code === 'uh') {
-                    $targetSeq = ($seq >= 1 && $seq <= 3) ? $seq : null;
-                    if ($targetSeq === null || $uhScores[$targetSeq] !== null) {
-                        foreach ($uhScores as $k => $v) {
-                            if ($v === null) { $targetSeq = $k; break; }
-                        }
-                    }
-                    if ($targetSeq !== null && array_key_exists($targetSeq, $uhScores)) {
-                        $uhScores[$targetSeq] = (float) $val;
-                    }
-                } elseif ($code === 'tugas') {
-                    $targetSeq = ($seq >= 1 && $seq <= 3) ? $seq : null;
-                    if ($targetSeq === null || $tugasScores[$targetSeq] !== null) {
-                        foreach ($tugasScores as $k => $v) {
-                            if ($v === null) { $targetSeq = $k; break; }
-                        }
-                    }
-                    if ($targetSeq !== null && array_key_exists($targetSeq, $tugasScores)) {
-                        $tugasScores[$targetSeq] = (float) $val;
-                    }
-                } elseif ($code === 'praktek') {
-                    $targetSeq = ($seq >= 1 && $seq <= 2) ? $seq : null;
-                    if ($targetSeq === null || $praktekScores[$targetSeq] !== null) {
-                        foreach ($praktekScores as $k => $v) {
-                            if ($v === null) { $targetSeq = $k; break; }
-                        }
-                    }
-                    if ($targetSeq !== null && array_key_exists($targetSeq, $praktekScores)) {
-                        $praktekScores[$targetSeq] = (float) $val;
-                    }
-                } elseif ($code === 'projek') {
-                    $targetSeq = ($seq >= 1 && $seq <= 2) ? $seq : null;
-                    if ($targetSeq === null || $projekScores[$targetSeq] !== null) {
-                        foreach ($projekScores as $k => $v) {
-                            if ($v === null) { $targetSeq = $k; break; }
-                        }
-                    }
-                    if ($targetSeq !== null && array_key_exists($targetSeq, $projekScores)) {
-                        $projekScores[$targetSeq] = (float) $val;
-                    }
-                } elseif ($code === 'portofolio') {
-                    $targetSeq = ($seq >= 1 && $seq <= 2) ? $seq : null;
-                    if ($targetSeq === null || $portofolioScores[$targetSeq] !== null) {
-                        foreach ($portofolioScores as $k => $v) {
-                            if ($v === null) { $targetSeq = $k; break; }
-                        }
-                    }
-                    if ($targetSeq !== null && array_key_exists($targetSeq, $portofolioScores)) {
-                        $portofolioScores[$targetSeq] = (float) $val;
-                    }
-                } elseif ($code === 'sts') {
-                    $stsItemScore = (float) $val;
-                }
-            }
-
-            // Fallback to summary averages in sequence 1 if no granular item score was recorded yet
-            if (empty(array_filter($uhScores, fn($v) => $v !== null)) && $sum?->uh_avg !== null) {
-                $uhScores[1] = (float) $sum->uh_avg;
-            }
-            if (empty(array_filter($tugasScores, fn($v) => $v !== null)) && $sum?->tugas_avg !== null) {
-                $tugasScores[1] = (float) $sum->tugas_avg;
-            }
-            if (empty(array_filter($praktekScores, fn($v) => $v !== null)) && $sum?->praktek_avg !== null) {
-                $praktekScores[1] = (float) $sum->praktek_avg;
-            }
-            if (empty(array_filter($projekScores, fn($v) => $v !== null)) && $sum?->projek_avg !== null) {
-                $projekScores[1] = (float) $sum->projek_avg;
-            }
-            if (empty(array_filter($portofolioScores, fn($v) => $v !== null)) && $sum?->portofolio_avg !== null) {
-                $portofolioScores[1] = (float) $sum->portofolio_avg;
-            }
-
-            $formatif = null;
-            if ($sum) {
-                $components = array_filter([$sum->uh_avg, $sum->tugas_avg, $sum->praktek_avg, $sum->projek_avg, $sum->portofolio_avg], fn($v) => $v !== null);
-                if (!empty($components)) {
-                    $formatif = round(array_sum($components) / count($components), 1);
-                }
-            }
-
-            $sumatif = $stsItemScore ?? $sum?->sts_score;
-            // Nilai STS / PTS murni untuk cetak Rapor STS (fallback ke final_score jika sts_score belum dipisah)
-            $nilaiSts = $sumatif ?? $sum?->final_score ?? $formatif;
-            // Nilai Akhir (UAS) menggabungkan komponen proses (Tugas, Portofolio, UH, Projek) dengan Sumatif/CBT
-            $nilaiRapor = $sum?->final_score ?? $sumatif ?? $formatif;
-
-            $acuanSkor = ($jenisRapor === 'sts') ? $nilaiSts : $nilaiRapor;
-
-            if ($acuanSkor !== null) {
-                $totalNilai += $acuanSkor;
-                $filledCount++;
-            }
-
-            $predikat = self::calculatePredikat($acuanSkor);
-            $deskripsi = !empty($sum?->capaian_kompetensi) 
-                ? $sum->capaian_kompetensi 
-                : self::generateDeskripsi($mapel->nama, $acuanSkor, $predikat);
-
-            $gradeItems[] = [
-                'nama' => $mapel->nama,
-                'guru_nama' => $jadwalGuruMap[$mapel->id] ?? null,
-                'kode' => $mapel->kode ?? '-',
-                'kkm' => $homeroom ? $homeroom->getKkmForSubject($mapel->id, $mapel->kkm ?? $raporSettings->default_kkm ?? 75) : ($mapel->kkm !== null ? (float) $mapel->kkm : (float) ($raporSettings->default_kkm ?? 75)),
-                'uh' => $uhScores,
-                'tugas' => $tugasScores,
-                'praktek' => $praktekScores,
-                'projek' => $projekScores,
-                'portofolio' => $portofolioScores,
-                'formatif' => $formatif,
-                'sumatif' => $sumatif,
-                'nilai_sts' => $nilaiSts,
-                'nilai_rapor' => $nilaiRapor,
-                'predikat' => $predikat,
-                'deskripsi' => $deskripsi,
-            ];
-        }
-
-        $rataRata = $filledCount > 0 ? round($totalNilai / $filledCount, 1) : null;
-        $totalSiswaKelas = Siswa::where('kelas', $siswa->kelas)->count();
-
-        $classAvgRaw = StudentStsSummary::whereIn('siswa_id', Siswa::where('kelas', $siswa->kelas)->pluck('id'))
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->whereNotNull('average_score')
-            ->avg('average_score');
-        $rataRataKelas = $classAvgRaw !== null ? round((float) $classAvgRaw, 1) : $rataRata;
-        $showKkm = (bool) ($raporSettings->show_kkm ?? false);
-
-        return view('pages.erapor.cetak-rapor-print', compact(
-            'siswa',
-            'targetYear',
-            'semester',
-            'jenisRapor',
-            'schoolSettings',
-            'raporSettings',
-            'showKkm',
-            'homeroom',
-            'tanggalRaporFormatted',
-            'gradeItems',
-            'totalNilai',
-            'rataRata',
-            'rataRataKelas',
-            'stsSummary',
-            'attendance',
-            'waliKelas',
-            'kepalaSekolah',
-            'totalSiswaKelas'
-        ));
+        return view('pages.erapor.cetak-rapor-print', $viewData);
     }
 
     /**
@@ -779,272 +676,53 @@ class CetakRaporController extends Controller
         $activeYear = TahunAjaran::where('is_aktif', true)->first() ?? TahunAjaran::first();
         $tahunId = (int) $request->query('tahun_ajaran_id', $activeYear?->id ?? 1);
         $this->resolveAllowedHomeroomClasses($tahunId, $kelas);
-        $semester = $request->query('semester', 'Ganjil');
-        $jenisRapor = $request->query('jenis_rapor', 'sts');
+        $semesterRaw = ucfirst(strtolower(trim((string) $request->query('semester', 'Ganjil'))));
+        $semester = ($semesterRaw === 'Genap') ? 'Genap' : 'Ganjil';
+        $defaultJenis = ($semester === 'Genap') ? 'uas' : 'sts';
+        $jenisRapor = $request->query('jenis_rapor', $defaultJenis);
         if ($jenisRapor === 'akhir') {
             $jenisRapor = 'uas';
         }
 
-        $targetYear = TahunAjaran::find($tahunId) ?? $activeYear;
-        $schoolSettings = PengaturanSekolah::first();
-        $subjects = MataPelajaran::orderBy('nama', 'asc')->get();
-
-        $students = Siswa::where('kelas', $kelas)
+        $archiveService = app(RaporArchiveService::class);
+        $preferArchive = $request->query('mode') !== 'live';
+        $cohortIds = $archiveService->resolveCohortStudentIds($kelas, $tahunId, $semester);
+        $students = Siswa::whereIn('id', $cohortIds)
             ->orderBy('nama_lengkap', 'asc')
             ->get();
 
-        $allSummaries = SubjectGradeSummary::whereIn('siswa_id', $students->pluck('id'))
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->get()
-            ->groupBy('siswa_id');
-
-        // Ensure class STS summary & rankings are up-to-date before bulk printing
-        app(\App\Services\GradingCalculationService::class)->recalculateClassSTS($kelas, $tahunId, $semester);
-
-        $stsSummaries = StudentStsSummary::whereIn('siswa_id', $students->pluck('id'))
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->get()
-            ->keyBy('siswa_id');
-
+        $targetYear = TahunAjaran::find($tahunId) ?? $activeYear;
+        $schoolSettings = PengaturanSekolah::first();
         $raporSettings = RaporSetting::instance();
         $homeroom = ClassHomeroom::where('kelas', $kelas)
             ->where('tahun_ajaran_id', $tahunId)
             ->with('guru')
             ->first();
-
         $waliKelas = $homeroom?->guru ?? Jadwal::where('kelas', $kelas)
             ->where('tahun_ajaran_id', $tahunId)
             ->with('guru')
             ->first()?->guru;
-
-        $kepalaSekolah = User::where('role', 'kepala_sekolah')->first();
-        $tanggalRaporFormatted = $raporSettings->tanggal_rapor 
-            ? $raporSettings->tanggal_rapor->translatedFormat('d F Y') 
+        $kepalaSekolah = User::where('role', 'kepala_sekolah')->with('guru')->first();
+        $tanggalRaporFormatted = $raporSettings->tanggal_rapor
+            ? $raporSettings->tanggal_rapor->translatedFormat('d F Y')
             : date('d F Y');
         $totalSiswaKelas = $students->count();
+        $showKkm = (bool) ($raporSettings->show_kkm ?? false);
+        $rataRataKelas = null;
 
-        // Map subject teacher names for this class (with fallback)
-        $jadwalGuruMap = [];
-        $classJadwals = Jadwal::where('kelas', $kelas)
-            ->with('guru')
-            ->orderByRaw('tahun_ajaran_id = ? DESC', [$tahunId])
-            ->get();
-        foreach ($classJadwals as $j) {
-            if ($j->mata_pelajaran_id && $j->guru && !isset($jadwalGuruMap[$j->mata_pelajaran_id])) {
-                $jadwalGuruMap[$j->mata_pelajaran_id] = $j->guru->nama_lengkap;
-            }
-        }
-        $fallbackJadwals = Jadwal::with('guru')->orderBy('id', 'desc')->get();
-        foreach ($fallbackJadwals as $j) {
-            if ($j->mata_pelajaran_id && $j->guru && !isset($jadwalGuruMap[$j->mata_pelajaran_id])) {
-                $jadwalGuruMap[$j->mata_pelajaran_id] = $j->guru->nama_lengkap;
-            }
-        }
-
-        // Fetch individual assessment items & scores for all students in this class
-        $assessmentItems = AssessmentItem::with('component')
-            ->where('tahun_ajaran_id', $tahunId)
-            ->where('semester', $semester)
-            ->get();
-        $allStudentScores = StudentAssessmentScore::whereIn('siswa_id', $students->pluck('id'))
-            ->whereIn('assessment_item_id', $assessmentItems->pluck('id'))
-            ->get()
-            ->groupBy('siswa_id');
-        $itemsBySubject = $assessmentItems->groupBy('mata_pelajaran_id');
-
-        $classAvgRaw = $stsSummaries->whereNotNull('average_score')->avg('average_score');
-        $rataRataKelas = $classAvgRaw !== null ? round((float) $classAvgRaw, 1) : null;
-
-        // Build data per student
         $raporData = [];
         foreach ($students as $siswa) {
-            $studentSummaries = $allSummaries->get($siswa->id, collect())->keyBy('mata_pelajaran_id');
-            $studentScoresByItem = $allStudentScores->get($siswa->id, collect())->keyBy('assessment_item_id');
-            $sts = $stsSummaries->get($siswa->id);
-
-            $attQuery = AbsensiSiswa::where('siswa_id', $siswa->id);
-            if ($targetYear?->tanggal_mulai && $targetYear?->tanggal_selesai) {
-                $attQuery->whereBetween('tanggal', [
-                    \Carbon\Carbon::parse($targetYear->tanggal_mulai)->toDateString(),
-                    \Carbon\Carbon::parse($targetYear->tanggal_selesai)->toDateString(),
-                ]);
-            }
-            $attendance = $attQuery->selectRaw("
-                    COUNT(DISTINCT CASE WHEN LOWER(status) = 'sakit' THEN tanggal END) as s,
-                    COUNT(DISTINCT CASE WHEN LOWER(status) = 'izin' THEN tanggal END) as i,
-                    COUNT(DISTINCT CASE WHEN LOWER(status) IN ('alfa', 'alpha') THEN tanggal END) as a
-                ")
-                ->first();
-
-            $gradeItems = [];
-            $totalNilai = 0;
-            $filledCount = 0;
-
-            foreach ($subjects as $mapel) {
-                $sum = $studentSummaries->get($mapel->id);
-                $subjectItems = $itemsBySubject->get($mapel->id, collect());
-
-                $uhScores = [1 => null, 2 => null, 3 => null];
-                $tugasScores = [1 => null, 2 => null, 3 => null];
-                $praktekScores = [1 => null, 2 => null];
-                $projekScores = [1 => null, 2 => null];
-                $portofolioScores = [1 => null, 2 => null];
-                $stsItemScore = null;
-
-                foreach ($subjectItems as $item) {
-                    $code = strtolower($item->component?->code ?? '');
-                    if ($code === '' && !empty($item->title)) {
-                        $tLower = strtolower($item->title);
-                        if (str_starts_with($tLower, 'tugas')) $code = 'tugas';
-                        elseif (str_starts_with($tLower, 'uh') || str_contains($tLower, 'ulangan')) $code = 'uh';
-                        elseif (str_starts_with($tLower, 'praktek') || str_starts_with($tLower, 'praktik')) $code = 'praktek';
-                        elseif (str_starts_with($tLower, 'projek') || str_starts_with($tLower, 'proyek')) $code = 'projek';
-                        elseif (str_starts_with($tLower, 'portofolio')) $code = 'portofolio';
-                        elseif (str_starts_with($tLower, 'sts') || str_starts_with($tLower, 'pts')) $code = 'sts';
-                    }
-
-                    $seq = (int) $item->sequence;
-                    if ($seq <= 0 && preg_match('/\d+/', $item->title, $m)) {
-                        $seq = (int) $m[0];
-                    }
-
-                    $val = $studentScoresByItem->get($item->id)?->score;
-                    if ($val === null) {
-                        continue;
-                    }
-
-                    if ($code === 'uh') {
-                        $targetSeq = ($seq >= 1 && $seq <= 3) ? $seq : null;
-                        if ($targetSeq === null || $uhScores[$targetSeq] !== null) {
-                            foreach ($uhScores as $k => $v) {
-                                if ($v === null) { $targetSeq = $k; break; }
-                            }
-                        }
-                        if ($targetSeq !== null && array_key_exists($targetSeq, $uhScores)) {
-                            $uhScores[$targetSeq] = (float) $val;
-                        }
-                    } elseif ($code === 'tugas') {
-                        $targetSeq = ($seq >= 1 && $seq <= 3) ? $seq : null;
-                        if ($targetSeq === null || $tugasScores[$targetSeq] !== null) {
-                            foreach ($tugasScores as $k => $v) {
-                                if ($v === null) { $targetSeq = $k; break; }
-                            }
-                        }
-                        if ($targetSeq !== null && array_key_exists($targetSeq, $tugasScores)) {
-                            $tugasScores[$targetSeq] = (float) $val;
-                        }
-                    } elseif ($code === 'praktek') {
-                        $targetSeq = ($seq >= 1 && $seq <= 2) ? $seq : null;
-                        if ($targetSeq === null || $praktekScores[$targetSeq] !== null) {
-                            foreach ($praktekScores as $k => $v) {
-                                if ($v === null) { $targetSeq = $k; break; }
-                            }
-                        }
-                        if ($targetSeq !== null && array_key_exists($targetSeq, $praktekScores)) {
-                            $praktekScores[$targetSeq] = (float) $val;
-                        }
-                    } elseif ($code === 'projek') {
-                        $targetSeq = ($seq >= 1 && $seq <= 2) ? $seq : null;
-                        if ($targetSeq === null || $projekScores[$targetSeq] !== null) {
-                            foreach ($projekScores as $k => $v) {
-                                if ($v === null) { $targetSeq = $k; break; }
-                            }
-                        }
-                        if ($targetSeq !== null && array_key_exists($targetSeq, $projekScores)) {
-                            $projekScores[$targetSeq] = (float) $val;
-                        }
-                    } elseif ($code === 'portofolio') {
-                        $targetSeq = ($seq >= 1 && $seq <= 2) ? $seq : null;
-                        if ($targetSeq === null || $portofolioScores[$targetSeq] !== null) {
-                            foreach ($portofolioScores as $k => $v) {
-                                if ($v === null) { $targetSeq = $k; break; }
-                            }
-                        }
-                        if ($targetSeq !== null && array_key_exists($targetSeq, $portofolioScores)) {
-                            $portofolioScores[$targetSeq] = (float) $val;
-                        }
-                    } elseif ($code === 'sts') {
-                        $stsItemScore = (float) $val;
-                    }
-                }
-
-                if (empty(array_filter($uhScores, fn($v) => $v !== null)) && $sum?->uh_avg !== null) {
-                    $uhScores[1] = (float) $sum->uh_avg;
-                }
-                if (empty(array_filter($tugasScores, fn($v) => $v !== null)) && $sum?->tugas_avg !== null) {
-                    $tugasScores[1] = (float) $sum->tugas_avg;
-                }
-                if (empty(array_filter($praktekScores, fn($v) => $v !== null)) && $sum?->praktek_avg !== null) {
-                    $praktekScores[1] = (float) $sum->praktek_avg;
-                }
-                if (empty(array_filter($projekScores, fn($v) => $v !== null)) && $sum?->projek_avg !== null) {
-                    $projekScores[1] = (float) $sum->projek_avg;
-                }
-                if (empty(array_filter($portofolioScores, fn($v) => $v !== null)) && $sum?->portofolio_avg !== null) {
-                    $portofolioScores[1] = (float) $sum->portofolio_avg;
-                }
-
-                $formatif = null;
-                if ($sum) {
-                    $components = array_filter([$sum->uh_avg, $sum->tugas_avg, $sum->praktek_avg, $sum->projek_avg, $sum->portofolio_avg], fn($v) => $v !== null);
-                    if (!empty($components)) {
-                        $formatif = round(array_sum($components) / count($components), 1);
-                    }
-                }
-
-                $sumatif = $stsItemScore ?? $sum?->sts_score;
-                // Nilai STS murni untuk cetak Rapor STS
-                $nilaiSts = $sumatif ?? $sum?->final_score ?? $formatif;
-                // Nilai Akhir (UAS) menggabungkan komponen proses (Tugas, Portofolio, UH, Projek) dengan Sumatif/CBT
-                $nilaiRapor = $sum?->final_score ?? $sumatif ?? $formatif;
-
-                $acuanSkor = ($jenisRapor === 'sts') ? $nilaiSts : $nilaiRapor;
-
-                if ($acuanSkor !== null) {
-                    $totalNilai += $acuanSkor;
-                    $filledCount++;
-                }
-
-                $predikat = self::calculatePredikat($acuanSkor);
-                $deskripsi = !empty($sum?->capaian_kompetensi)
-                    ? $sum->capaian_kompetensi
-                    : self::generateDeskripsi($mapel->nama, $acuanSkor, $predikat);
-
-                $gradeItems[] = [
-                    'nama' => $mapel->nama,
-                    'guru_nama' => $jadwalGuruMap[$mapel->id] ?? null,
-                    'kode' => $mapel->kode ?? '-',
-                    'kkm' => $homeroom ? $homeroom->getKkmForSubject($mapel->id, $mapel->kkm ?? $raporSettings->default_kkm ?? 75) : ($mapel->kkm !== null ? (float) $mapel->kkm : (float) ($raporSettings->default_kkm ?? 75)),
-                    'uh' => $uhScores,
-                    'tugas' => $tugasScores,
-                    'praktek' => $praktekScores,
-                    'projek' => $projekScores,
-                    'portofolio' => $portofolioScores,
-                    'formatif' => $formatif,
-                    'sumatif' => $sumatif,
-                    'nilai_sts' => $nilaiSts,
-                    'nilai_rapor' => $nilaiRapor,
-                    'predikat' => $predikat,
-                    'deskripsi' => $deskripsi,
-                ];
-            }
-
-            $rataRata = $filledCount > 0 ? round($totalNilai / $filledCount, 1) : null;
-
-            $raporData[] = [
-                'siswa' => $siswa,
-                'gradeItems' => $gradeItems,
-                'totalNilai' => $totalNilai,
-                'rataRata' => $rataRata,
-                'rataRataKelas' => $rataRataKelas ?? $rataRata,
-                'stsSummary' => $sts,
-                'attendance' => $attendance,
-            ];
+            $item = $archiveService->resolveViewDataForPrint(
+                $siswa,
+                $tahunId,
+                $semester,
+                $jenisRapor,
+                preferArchive: $preferArchive,
+                trackReprint: true
+            );
+            $rataRataKelas = $item['rataRataKelas'] ?? $rataRataKelas;
+            $raporData[] = $item;
         }
-
-        $showKkm = (bool) ($raporSettings->show_kkm ?? false);
 
         return view('pages.erapor.cetak-rapor-kelas-print', compact(
             'kelas',
@@ -1094,10 +772,10 @@ class CetakRaporController extends Controller
         }
 
         return match ($predikat) {
-            'A' => "Menunjukkan penguasaan materi {$mapelNama} yang sangat baik dan melampaui kriteria ketercapaian tujuan pembelajaran.",
-            'B' => "Menunjukkan penguasaan materi {$mapelNama} yang baik dan telah mencapai tujuan pembelajaran yang ditetapkan.",
-            'C' => "Cukup mampu menguasai materi {$mapelNama}, disarankan untuk terus berlatih dan memperdalam pemahaman.",
-            'D' => "Perlu bimbingan dan pendampingan intensif dalam mencapai tujuan pembelajaran materi {$mapelNama}.",
+            'A' => "Menunjukkan penguasaan yang sangat baik dengan pemahaman materi {$mapelNama} secara mendalam dan melampaui kriteria ketercapaian tujuan pembelajaran.",
+            'B' => "Menunjukkan penguasaan yang baik dengan pemahaman materi {$mapelNama} secara menyeluruh serta telah mencapai tujuan pembelajaran yang ditetapkan.",
+            'C' => "Menunjukkan pemahaman yang cukup baik pada materi {$mapelNama} dan telah mencapai tujuan pembelajaran dasar, disarankan untuk terus berlatih memperdalam materi.",
+            'D' => "Memerlukan bimbingan dan pendampingan lebih lanjut untuk meningkatkan pemahaman materi {$mapelNama} agar dapat mencapai kriteria ketercapaian tujuan pembelajaran.",
             default => "Capaian pembelajaran materi {$mapelNama} memenuhi standar minimal.",
         };
     }

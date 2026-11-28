@@ -14,57 +14,57 @@
                     Wali Kelas
                 </span>
                 <span class="text-xs text-gray-400">•</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">SMP Al Madinah</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">E-Rapor</span>
             </div>
-            <h2 class="mt-1 text-2xl font-bold text-gray-800 dark:text-white">Form Input Catatan Wali Kelas</h2>
+            <h2 class="mt-1 text-2xl font-bold text-gray-800 dark:text-white">Form Input Catatan Wali Kelas &amp; Ekstrakurikuler</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                Input catatan bimbingan, motivasi, dan apresiasi wali kelas untuk lembar rapor resmi siswa kelas <span class="font-semibold text-brand-600 dark:text-brand-400">{{ $kelas }}</span>.
+                Input catatan bimbingan, kegiatan ekstrakurikuler, dan keputusan kenaikan/kelulusan untuk lembar rapor resmi siswa kelas <span class="font-semibold text-brand-600 dark:text-brand-400">{{ $kelas }}</span>.
             </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('erapor.cetak.index', ['kelas' => $kelas, 'semester' => $semester, 'tahun_ajaran_id' => $targetYear->id]) }}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700 transition">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                Lihat Lembar Cetak Rapor
-            </a>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('erapor.cetak.index', ['kelas' => $kelas, 'semester' => $semester, 'tahun_ajaran_id' => $targetYear->id]) }}" class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-4 py-2.5 text-xs font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-700 transition">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    Lihat Lembar Cetak Rapor
+                </a>
+            </div>
         </div>
-    </div>
 
-    <!-- Success Message -->
-    @if(session('success'))
-        <div class="mb-6 flex items-center justify-between gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
-            <div class="flex items-center gap-3">
-                <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-sm">✓</span>
-                <p class="text-sm font-semibold">{{ session('success') }}</p>
+        <!-- Success Message -->
+        @if(session('success'))
+            <div class="mb-6 flex items-center justify-between gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white font-bold text-sm">✓</span>
+                    <p class="text-sm font-semibold">{{ session('success') }}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400">&times;</button>
             </div>
-            <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-800 dark:text-emerald-400">&times;</button>
-        </div>
-    @endif
+        @endif
 
-    <!-- Filter Card -->
-    <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
-        <form method="GET" action="{{ route('erapor.cetak.catatan-wali') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <!-- Kelas -->
-            <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Rombel / Kelas</label>
-                <select name="kelas" class="w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                    @foreach($classes as $c)
-                        <option value="{{ $c }}" {{ $kelas === $c ? 'selected' : '' }}>{{ $c }}</option>
-                    @endforeach
-                </select>
-            </div>
+        <!-- Filter Card -->
+        <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-800 dark:bg-white/[0.03]">
+            <form method="GET" action="{{ route('erapor.cetak.catatan-wali') }}" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Kelas -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Rombel / Kelas</label>
+                    <select name="kelas" class="w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                        @foreach($classes as $c)
+                            <option value="{{ $c }}" {{ $kelas === $c ? 'selected' : '' }}>{{ $c }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            <!-- Tahun Ajaran -->
-            <div>
-                <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Tahun Ajaran</label>
-                <select name="tahun_ajaran_id" class="w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white">
-                    @foreach($allYears as $y)
-                        <option value="{{ $y->id }}" {{ $targetYear->id == $y->id ? 'selected' : '' }}>
-                            {{ $y->tahun }} {{ $y->is_aktif ? '(Aktif)' : '' }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
+                <!-- Tahun Ajaran -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 mb-1">Tahun Ajaran</label>
+                    <select name="tahun_ajaran_id" class="w-full rounded-xl border border-gray-300 p-2.5 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                        @foreach($allYears as $y)
+                            <option value="{{ $y->id }}" {{ $targetYear->id == $y->id ? 'selected' : '' }}>
+                                {{ $y->nama }} {{ $y->is_aktif ? '(Aktif)' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
 
             <!-- Semester -->
             <div>
@@ -143,8 +143,11 @@
                             @php
                                 $sts = $stsSummaries->get($s->id);
                                 $att = $attendances->get($s->id);
-                                $rataRata = $sts?->avg_score;
+                                $rataRata = $sts?->average_score;
                                 $rank = $sts?->rank;
+                                $ekskulRows = old('ekskul.' . $s->id, is_array($sts?->ekstrakurikuler) ? $sts->ekstrakurikuler : []);
+                                $kepStatus = old('keputusan_status.' . $s->id, $sts?->keputusan_status ?? '');
+                                $kepKelas = old('keputusan_kelas.' . $s->id, $sts?->keputusan_kelas ?? '');
 
                                 // Suggestion calculation
                                 if ($rataRata && $rataRata >= 85) {
@@ -173,9 +176,14 @@
                                                 {{ $s->nama_lengkap }}
                                             </div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
-                                                <span>NIS: {{ $s->nis ?? '-' }}</span>
+                                                <span>NIPD: {{ $s->nipd ?? '-' }}</span>
                                                 <span>•</span>
                                                 <span>NISN: {{ $s->nisn ?? '-' }}</span>
+                                            </div>
+                                            <div class="mt-1.5">
+                                                <a href="{{ route('erapor.cetak.siswa', ['siswa' => $s->id, 'tahun_ajaran_id' => $targetYear->id, 'semester' => $semester, 'jenis_rapor' => $semester === 'Genap' ? 'uas' : 'sts']) }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700 hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-300 transition">
+                                                    Cetak Rapor {{ $semester === 'Genap' ? 'UAS' : 'UTS' }} &rarr;
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -237,6 +245,62 @@
                                                 </button>
                                             </div>
                                             <span class="text-[11px] text-gray-400">Maks 300 karakter</span>
+                                        </div>
+
+                                        <!-- Ekstrakurikuler & Keputusan Rapor UAS -->
+                                        <div class="mt-2.5 grid grid-cols-1 lg:grid-cols-12 gap-2.5 rounded-xl border border-gray-100 bg-gray-50/70 p-2.5 dark:border-gray-800 dark:bg-gray-900/40">
+                                            <div class="lg:col-span-7 space-y-1.5">
+                                                <div class="text-[11px] font-bold uppercase text-gray-600 dark:text-gray-300">
+                                                    Ekstrakurikuler (Halaman 2 Rapor UAS)
+                                                </div>
+                                                @for($ei = 0; $ei < 3; $ei++)
+                                                    @php
+                                                        $ekRow = $ekskulRows[$ei] ?? [];
+                                                    @endphp
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="w-4 text-[11px] text-gray-400 font-semibold text-center">{{ $ei + 1 }}.</span>
+                                                        <input
+                                                            type="text"
+                                                            name="ekskul[{{ $s->id }}][{{ $ei }}][nama]"
+                                                            value="{{ $ekRow['nama'] ?? '' }}"
+                                                            placeholder="Kegiatan (cth: Paskibra)"
+                                                            class="flex-1 rounded-lg border border-gray-300 px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                                        >
+                                                        <input
+                                                            type="text"
+                                                            name="ekskul[{{ $s->id }}][{{ $ei }}][keterangan]"
+                                                            value="{{ $ekRow['keterangan'] ?? '' }}"
+                                                            placeholder="Ket (A / Baik)"
+                                                            class="w-24 rounded-lg border border-gray-300 px-2 py-1 text-xs text-center dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                                        >
+                                                    </div>
+                                                @endfor
+                                            </div>
+                                            <div class="lg:col-span-5 space-y-1.5">
+                                                <div class="text-[11px] font-bold uppercase text-gray-600 dark:text-gray-300">
+                                                    Keputusan Kenaikan / Kelulusan
+                                                </div>
+                                                <select
+                                                    name="keputusan_status[{{ $s->id }}]"
+                                                    class="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                                >
+                                                    <option value="" {{ $kepStatus === '' ? 'selected' : '' }}>Otomatis (Sesuai Semester &amp; Tingkat)</option>
+                                                    <option value="naik" {{ $kepStatus === 'naik' ? 'selected' : '' }}>Naik ke kelas</option>
+                                                    <option value="tinggal" {{ $kepStatus === 'tinggal' ? 'selected' : '' }}>Tinggal di kelas</option>
+                                                    <option value="lulus" {{ $kepStatus === 'lulus' ? 'selected' : '' }}>Lulus</option>
+                                                    <option value="tidak_lulus" {{ $kepStatus === 'tidak_lulus' ? 'selected' : '' }}>Tidak Lulus</option>
+                                                </select>
+                                                <input
+                                                    type="text"
+                                                    name="keputusan_kelas[{{ $s->id }}]"
+                                                    value="{{ $kepKelas }}"
+                                                    placeholder="Label kelas (opsional, cth: 12 (Dua belas))"
+                                                    class="w-full rounded-lg border border-gray-300 px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                                                >
+                                                <p class="text-[10px] text-gray-400 leading-tight">
+                                                    Kosongkan untuk otomatis saat Semester Genap (X&rarr;11, XI&rarr;12, XII&rarr;Lulus).
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>

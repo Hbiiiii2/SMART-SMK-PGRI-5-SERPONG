@@ -31,6 +31,7 @@ class RaporSetting extends Model
         'nip_kepala_sekolah',
         'ttd_kepala_sekolah',
         'stempel_sekolah',
+        'logo_yayasan',
         'header_yayasan',
         'header_sekolah',
     ];
@@ -58,9 +59,10 @@ class RaporSetting extends Model
                 $missingTipeJudul = !Schema::hasColumn('rapor_settings', 'tipe_judul_rapor');
                 $missingJudulSts = !Schema::hasColumn('rapor_settings', 'judul_rapor_sts');
                 $missingJudulAkhir = !Schema::hasColumn('rapor_settings', 'judul_rapor_akhir');
+                $missingLogoYayasan = !Schema::hasColumn('rapor_settings', 'logo_yayasan');
 
-                if ($missingPaper || $missingRanking || $missingShowKkm || $missingDefaultKkm || $missingTipeJudul || $missingJudulSts || $missingJudulAkhir) {
-                    Schema::table('rapor_settings', function (Blueprint $table) use ($missingPaper, $missingRanking, $missingShowKkm, $missingDefaultKkm, $missingTipeJudul, $missingJudulSts, $missingJudulAkhir) {
+                if ($missingPaper || $missingRanking || $missingShowKkm || $missingDefaultKkm || $missingTipeJudul || $missingJudulSts || $missingJudulAkhir || $missingLogoYayasan) {
+                    Schema::table('rapor_settings', function (Blueprint $table) use ($missingPaper, $missingRanking, $missingShowKkm, $missingDefaultKkm, $missingTipeJudul, $missingJudulSts, $missingJudulAkhir, $missingLogoYayasan) {
                         if ($missingPaper) {
                             $table->string('ukuran_kertas', 20)->default('A4')->after('show_fase');
                         }
@@ -81,6 +83,9 @@ class RaporSetting extends Model
                         }
                         if ($missingJudulAkhir) {
                             $table->string('judul_rapor_akhir', 191)->nullable()->after('judul_rapor_sts');
+                        }
+                        if ($missingLogoYayasan) {
+                            $table->string('logo_yayasan')->nullable()->after('stempel_sekolah');
                         }
                     });
                 }
@@ -114,9 +119,9 @@ class RaporSetting extends Model
                 'fase_text' => 'Fase D',
                 'ukuran_kertas' => 'A4',
                 'show_ranking' => true,
-                'kota_pembagian' => 'Bogor',
-                'header_yayasan' => 'YAYASAN KELUARGA BESAR MASYARAKAT BANTEN (KKMB)',
-                'header_sekolah' => 'SMP AL - MADINAH ISLAMIC CENTER',
+                'kota_pembagian' => 'Kota Tangerang Selatan',
+                'header_yayasan' => 'YAYASAN PEMBINA LEMBAGA PENDIDIKAN (YPLP)',
+                'header_sekolah' => 'SMK PGRI 5 SERPONG',
             ]
         );
     }
@@ -137,6 +142,6 @@ class RaporSetting extends Model
 
         return ($jenisRapor === 'sts')
             ? 'LAPORAN PENILAIAN SUMATIF TENGAH SEMESTER (STS)'
-            : 'LAPORAN CAPAIAN HASIL BELAJAR PESERTA DIDIK';
+            : 'LAPORAN HASIL BELAJAR';
     }
 }

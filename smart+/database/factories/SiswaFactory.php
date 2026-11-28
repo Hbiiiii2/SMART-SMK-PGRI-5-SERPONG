@@ -15,7 +15,8 @@ class SiswaFactory extends Factory
     {
         return [
             'user_id' => User::factory()->siswa(),
-            'nisn' => $this->faker->numerify('##############'),
+            'nisn' => $this->faker->numerify('00########'),
+            'nipd' => $this->faker->numerify('2627.###'),
             'nama_lengkap' => $this->faker->name(),
             'jenis_kelamin' => $this->faker->randomElement(['L', 'P']),
             'tanggal_lahir' => $this->faker->dateTimeBetween('-18 years', '-13 years'),
@@ -23,6 +24,7 @@ class SiswaFactory extends Factory
             'no_telepon' => $this->faker->numerify('08##########'),
             'foto' => null,
             'tahun_ajaran_id' => TahunAjaran::factory(),
+            'status_siswa' => 'aktif',
         ];
     }
 }

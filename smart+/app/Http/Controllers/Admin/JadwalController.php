@@ -77,12 +77,12 @@ class JadwalController extends Controller
 
     public function create()
     {
-        $kelasOptions = \App\Models\Siswa::distinct()->pluck('kelas')
+        $kelasOptions = \App\Models\Rombel::classNames()
             ->merge(\App\Models\Jadwal::distinct()->pluck('kelas'))
             ->filter()
             ->unique()
-            ->values()
-            ->sort();
+            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
 
         return view('pages.admin.jadwal.create', [
             'title' => 'Tambah Jadwal',
@@ -107,12 +107,12 @@ class JadwalController extends Controller
 
     public function edit(Jadwal $jadwal)
     {
-        $kelasOptions = \App\Models\Siswa::distinct()->pluck('kelas')
+        $kelasOptions = \App\Models\Rombel::classNames()
             ->merge(\App\Models\Jadwal::distinct()->pluck('kelas'))
             ->filter()
             ->unique()
-            ->values()
-            ->sort();
+            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
 
         return view('pages.admin.jadwal.edit', [
             'title' => 'Edit Jadwal',

@@ -60,24 +60,6 @@ class AttendanceGpsController extends Controller
             ], 403);
         }
 
-        $wajibFoto = (bool) ($pengaturan->wajib_foto_gps ?? true);
-
-        $request->validate([
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'foto' => $wajibFoto ? 'required|string' : 'nullable|string',
-            'accuracy' => 'nullable|numeric|min:0',
-            'altitude' => 'nullable|numeric',
-            'altitude_accuracy' => 'nullable|numeric',
-            'speed' => 'nullable|numeric',
-            'heading' => 'nullable|numeric',
-            'gps_timestamp' => 'nullable|numeric',
-            'client_timestamp' => 'nullable|numeric',
-            'samples' => 'nullable|array|max:10',
-            'device_token' => 'nullable|string|max:64',
-            'is_mock' => 'nullable|boolean',
-        ]);
-
         $now = Carbon::now('Asia/Jakarta');
         $today = $now->toDateString();
 
@@ -95,6 +77,38 @@ class AttendanceGpsController extends Controller
                 'success' => false,
                 'message' => 'Hari ini adalah hari libur, absensi tidak dapat dilakukan.',
             ], 400);
+        }
+
+        $isLateCheckInCutoff = ($type === 'in') && $now->greaterThan($this->getBatasAlpha($now, $pengaturan));
+        $wajibFoto = (bool) ($pengaturan->wajib_foto_gps ?? true);
+
+        $request->validate([
+            'latitude' => $isLateCheckInCutoff ? 'nullable|numeric|between:-90,90' : 'required|numeric|between:-90,90',
+            'longitude' => $isLateCheckInCutoff ? 'nullable|numeric|between:-180,180' : 'required|numeric|between:-180,180',
+            'foto' => ($wajibFoto && !$isLateCheckInCutoff) ? 'required|string' : 'nullable|string',
+            'accuracy' => 'nullable|numeric|min:0',
+            'altitude' => 'nullable|numeric',
+            'altitude_accuracy' => 'nullable|numeric',
+            'speed' => 'nullable|numeric',
+            'heading' => 'nullable|numeric',
+            'gps_timestamp' => 'nullable|numeric',
+            'client_timestamp' => 'nullable|numeric',
+            'samples' => 'nullable|array|max:10',
+            'device_token' => 'nullable|string|max:64',
+            'is_mock' => 'nullable|boolean',
+        ]);
+
+        // 2b. Jika sudah melewati batas toleransi alpha saat Check-In, langsung catat Alfa/Alpha
+        // tanpa tertahan validasi radius/foto (kecuali jika sudah Check-In sebelumnya).
+        if ($isLateCheckInCutoff) {
+            if ($user->isSiswa()) {
+                return $this->saveSiswaAttendance($user, $today, $now, null, null, $pengaturan, $type, (float) ($request->latitude ?? 0), (float) ($request->longitude ?? 0), []);
+            }
+            if ($user->isGuru()) {
+                return $this->saveGuruAttendance($user, $today, $now, null, null, $pengaturan, $type, (float) ($request->latitude ?? 0), (float) ($request->longitude ?? 0), []);
+            }
+
+            return $this->saveStaffAttendance($user, $today, $now, null, null, $pengaturan, $type, (float) ($request->latitude ?? 0), (float) ($request->longitude ?? 0), []);
         }
 
         // 3. Verifikasi Lokasi & Zonasi
@@ -596,9 +610,10 @@ class AttendanceGpsController extends Controller
 
             $batasAlpha = $this->getBatasAlpha($now, $pengaturan);
             if ($now->greaterThan($batasAlpha)) {
-                if (!$absensi->exists) {
-                    $absensi->status = 'Alpha';
+                if (!$absensi->exists || !$absensi->waktu_check_in) {
+                    $absensi->status = 'Alfa';
                     $absensi->waktu_check_in = null;
+                    $absensi->keterangan = 'Otomatis Alfa (Melewati batas waktu absen GPS ' . $batasAlpha->format('H:i') . ')';
                     $absensi->save();
                     Cache::forget('live_stats_' . $today);
                     Cache::forget('ks_dashboard_' . $today);
@@ -650,12 +665,7 @@ class AttendanceGpsController extends Controller
 
     private function getBatasAlpha(Carbon $now, PengaturanSekolah $pengaturan): Carbon
     {
-        $terlambatMenit = (int) ($pengaturan->toleransi_terlambat_menit ?? 15);
-        $alphaRaw = (int) ($pengaturan->toleransi_alpha_menit ?? 30);
-        $alphaMenit = $alphaRaw > $terlambatMenit ? $alphaRaw : ($terlambatMenit + max(15, $alphaRaw));
-
-        return Carbon::parse($now->toDateString() . ' ' . ($pengaturan->jam_masuk ?: '07:00:00'), 'Asia/Jakarta')
-            ->addMinutes($alphaMenit);
+        return $pengaturan->getGpsAlphaCutoff($now);
     }
 
     private function determineStatus(Carbon $now, PengaturanSekolah $pengaturan): string

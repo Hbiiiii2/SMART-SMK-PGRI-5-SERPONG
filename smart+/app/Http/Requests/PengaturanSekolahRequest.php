@@ -15,6 +15,7 @@ class PengaturanSekolahRequest extends FormRequest
     {
         return [
             'nama_sekolah' => 'required|string|max:255',
+            'npsn' => 'nullable|string|max:20',
             'alamat_sekolah' => 'nullable|string',
             'no_telepon_sekolah' => 'nullable|string|max:20',
             'email_sekolah' => 'nullable|email',
@@ -37,6 +38,10 @@ class PengaturanSekolahRequest extends FormRequest
             'maks_akurasi_gps_meter' => 'sometimes|required|integer|min:10|max:1000',
             'mode_deteksi_perangkat_bersama' => 'sometimes|required|in:nonaktif,tandai,blokir',
             'batas_akun_per_perangkat' => 'sometimes|required|integer|min:2|max:10',
+            'dapodik_url' => 'nullable|url|max:255',
+            'dapodik_token' => 'nullable|string|max:1000',
+            'dapodik_semester_id' => 'nullable|string|max:10',
+            'dapodik_auto_sync' => 'nullable|boolean',
         ];
     }
 

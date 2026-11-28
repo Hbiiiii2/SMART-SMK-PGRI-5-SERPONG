@@ -11,6 +11,7 @@ class DashboardController extends Controller
     public function index()
     {
         $today = Carbon::now('Asia/Jakarta')->toDateString();
+        app(\App\Services\AttendanceService::class)->runLazyAutoMarkIfNeeded();
 
         $viewData = CacheService::dashboardMonitoring($today);
 

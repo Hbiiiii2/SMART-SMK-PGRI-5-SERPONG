@@ -7,6 +7,7 @@ use App\Models\AbsensiSiswa;
 use App\Models\EraporAuditLog;
 use App\Models\MataPelajaran;
 use App\Models\PengaturanSekolah;
+use App\Models\RaporArchive;
 use App\Models\RiwayatKelasSiswa;
 use App\Models\Siswa;
 use App\Models\StudentStsSummary;
@@ -32,49 +33,79 @@ class BukuIndukController extends Controller
         $status = $request->get('status', 'semua');
         $kelasFilter = $request->get('kelas', 'semua');
         $tahunFilter = $request->get('tahun_ajaran_id', 'semua');
+        $tahunLulusFilter = $request->get('tahun_lulus', 'semua');
 
         // High-level Statistics for School Archive
         $totalStudents = Siswa::count();
-        $activeStudents = Siswa::where('kelas', 'not like', '%alumni%')
-            ->where('kelas', 'not like', '%lulus%')
+        $activeStudents = Siswa::where(function ($q) {
+            $q->where('status_siswa', 'aktif')->orWhereNull('status_siswa');
+        })
+            ->where(function ($q) {
+                $q->whereNull('kelas')
+                    ->orWhere(function ($q2) {
+                        $q2->where('kelas', 'not like', '%alumni%')
+                            ->where('kelas', 'not like', '%lulus%');
+                    });
+            })
             ->count();
         $alumniStudents = Siswa::where(function ($q) {
-            $q->where('kelas', 'like', '%alumni%')
+            $q->whereIn('status_siswa', ['lulus', 'mutasi_keluar', 'drop_out', 'mengundurkan_diri', 'wafat'])
+                ->orWhere('kelas', 'like', '%alumni%')
                 ->orWhere('kelas', 'like', '%lulus%');
         })->count();
         $totalGradesRecorded = SubjectGradeSummary::count();
+        $totalArchivedRapors = RaporArchive::count();
 
-        // Query students with relations
-        $query = Siswa::query()->with(['tahunAjaran', 'riwayatKelas.tahunAjaran']);
+        // Query students with relations & archive count
+        $query = Siswa::query()
+            ->with(['tahunAjaran', 'tahunAjaranLulus', 'rombel', 'riwayatKelas.tahunAjaran'])
+            ->withCount('raporArchives');
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                    ->orWhere('nisn', 'like', "%{$search}%");
+                    ->orWhere('nisn', 'like', "%{$search}%")
+                    ->orWhere('nipd', 'like', "%{$search}%");
             });
         }
 
         if ($status === 'aktif') {
-            $query->where('kelas', 'not like', '%alumni%')
-                ->where('kelas', 'not like', '%lulus%');
+            $query->where(function ($q) {
+                $q->where('status_siswa', 'aktif')->orWhereNull('status_siswa');
+            })->where(function ($q) {
+                $q->whereNull('kelas')
+                    ->orWhere(function ($q2) {
+                        $q2->where('kelas', 'not like', '%alumni%')
+                            ->where('kelas', 'not like', '%lulus%');
+                    });
+            });
         } elseif ($status === 'alumni') {
             $query->where(function ($q) {
-                $q->where('kelas', 'like', '%alumni%')
+                $q->whereIn('status_siswa', ['lulus', 'mutasi_keluar', 'drop_out', 'mengundurkan_diri', 'wafat'])
+                    ->orWhere('kelas', 'like', '%alumni%')
                     ->orWhere('kelas', 'like', '%lulus%');
             });
         }
 
         if ($kelasFilter !== 'semua' && !empty($kelasFilter)) {
-            $query->where('kelas', $kelasFilter);
+            $query->where(function ($q) use ($kelasFilter) {
+                $q->where('kelas', $kelasFilter)
+                    ->orWhereHas('riwayatKelas', fn ($r) => $r->where('kelas', $kelasFilter));
+            });
         }
 
         if ($tahunFilter !== 'semua' && !empty($tahunFilter)) {
             $query->where(function ($q) use ($tahunFilter) {
                 $q->where('tahun_ajaran_id', $tahunFilter)
+                    ->orWhere('tahun_ajaran_lulus_id', $tahunFilter)
                     ->orWhereHas('riwayatKelas', function ($r) use ($tahunFilter) {
                         $r->where('tahun_ajaran_id', $tahunFilter);
                     });
             });
+        }
+
+        if ($tahunLulusFilter !== 'semua' && is_numeric($tahunLulusFilter)) {
+            $query->where('tahun_lulus', (int) $tahunLulusFilter);
         }
 
         $students = $query->orderBy('kelas')->orderBy('nama_lengkap')->paginate(20)->withQueryString();
@@ -82,14 +113,20 @@ class BukuIndukController extends Controller
         // Calculate cumulative averages for students in the current page
         $studentIds = $students->pluck('id');
         $summariesByStudent = SubjectGradeSummary::whereIn('siswa_id', $studentIds)
-            ->whereNotNull('sts_score')
+            ->where(function ($q) {
+                $q->whereNotNull('final_score')
+                    ->orWhereNotNull('asat_score')
+                    ->orWhereNotNull('sts_score');
+            })
             ->get()
             ->groupBy('siswa_id');
 
         $studentStats = [];
         foreach ($students as $s) {
-            $scores = $summariesByStudent[$s->id] ?? collect();
-            $avg = $scores->isNotEmpty() ? round($scores->avg('sts_score'), 1) : null;
+            $scores = ($summariesByStudent[$s->id] ?? collect())
+                ->map(fn ($rec) => $rec->final_score ?? $rec->asat_score ?? $rec->sts_score)
+                ->filter(fn ($v) => $v !== null);
+            $avg = $scores->isNotEmpty() ? round($scores->avg(), 1) : null;
             $periodsCount = $s->riwayatKelas->count();
             $studentStats[$s->id] = [
                 'cumulative_avg' => $avg,
@@ -98,8 +135,13 @@ class BukuIndukController extends Controller
             ];
         }
 
-        $classes = Siswa::select('kelas')->distinct()->pluck('kelas')->sort()->values();
+        $classes = \App\Models\Rombel::classNames(null, true, false);
         $allYears = TahunAjaran::orderBy('id', 'desc')->get();
+        $graduationYears = Siswa::whereNotNull('tahun_lulus')
+            ->distinct()
+            ->orderByDesc('tahun_lulus')
+            ->pluck('tahun_lulus');
+        $schoolSettings = PengaturanSekolah::first();
 
         return view('pages.erapor.buku-induk', [
             'title' => 'Buku Induk & Arsip Siswa / Alumni',
@@ -107,14 +149,18 @@ class BukuIndukController extends Controller
             'studentStats' => $studentStats,
             'classes' => $classes,
             'allYears' => $allYears,
+            'graduationYears' => $graduationYears,
+            'schoolSettings' => $schoolSettings,
             'search' => $search,
             'status' => $status,
             'kelasFilter' => $kelasFilter,
             'tahunFilter' => $tahunFilter,
+            'tahunLulusFilter' => $tahunLulusFilter,
             'totalStudents' => $totalStudents,
             'activeStudents' => $activeStudents,
             'alumniStudents' => $alumniStudents,
             'totalGradesRecorded' => $totalGradesRecorded,
+            'totalArchivedRapors' => $totalArchivedRapors,
         ]);
     }
 
@@ -123,14 +169,27 @@ class BukuIndukController extends Controller
      */
     public function show(Siswa $siswa)
     {
-        $siswa->load(['tahunAjaran', 'riwayatKelas.tahunAjaran']);
+        $siswa->load(['tahunAjaran', 'tahunAjaranLulus', 'rombel.waliKelas', 'profil', 'orangTuas', 'latestPeriodik', 'riwayatKelas.tahunAjaran']);
 
-        // Academic periods recorded in history
-        $periods = RiwayatKelasSiswa::where('siswa_id', $siswa->id)
+        // Academic periods recorded in history (preferring real class entries over generic Alumni/Lulus placeholder rows)
+        $rawPeriods = RiwayatKelasSiswa::where('siswa_id', $siswa->id)
             ->with('tahunAjaran')
-            ->orderBy('tahun_ajaran_id')
-            ->orderBy('semester')
-            ->get();
+            ->get()
+            ->sortBy(function ($p) {
+                $start = $p->tahunAjaran?->tanggal_mulai
+                    ? \Carbon\Carbon::parse($p->tahunAjaran->tanggal_mulai)->format('Y-m-d')
+                    : ($p->tahunAjaran?->nama ?? '9999');
+                $semOrd = strtolower((string) $p->semester) === 'ganjil' ? '1' : '2';
+                return "{$start}_{$semOrd}";
+            })
+            ->values();
+
+        $realPeriods = $rawPeriods->filter(function ($p) {
+            $k = strtolower(trim((string) $p->kelas));
+            return $k !== '' && !str_starts_with($k, 'alumni') && !str_starts_with($k, 'lulus');
+        })->values();
+
+        $periods = $realPeriods->isNotEmpty() ? $realPeriods : $rawPeriods;
 
         if ($periods->isEmpty()) {
             $activeYear = TahunAjaran::where('is_aktif', true)->first();
@@ -143,8 +202,13 @@ class BukuIndukController extends Controller
             ]]);
         }
 
-        // Subjects list
-        $subjects = MataPelajaran::orderBy('nama')->get();
+        // Load archived immutable snapshots keyed by "{tahun_ajaran_id}_{semester}_{jenis_rapor}"
+        $archives = RaporArchive::where('siswa_id', $siswa->id)
+            ->get()
+            ->keyBy(fn ($a) => "{$a->tahun_ajaran_id}_{$a->semester}_{$a->jenis_rapor}");
+
+        // Subjects relevant to student's historical classes & grades
+        $subjects = MataPelajaran::forStudentHistory($siswa, $periods);
 
         // All grade summaries for this student
         $allSummaries = SubjectGradeSummary::where('siswa_id', $siswa->id)->get();
@@ -153,7 +217,6 @@ class BukuIndukController extends Controller
             ->keyBy(fn($item) => $item->tahun_ajaran_id . '_' . $item->semester);
 
         // Attendance stats per period
-        $attendanceMap = [];
         $attResults = AbsensiSiswa::where('siswa_id', $siswa->id)
             ->selectRaw("
                 COUNT(DISTINCT CASE WHEN LOWER(status) = 'sakit' THEN tanggal END) as s,
@@ -165,13 +228,16 @@ class BukuIndukController extends Controller
         $schoolSettings = PengaturanSekolah::first();
 
         // Calculate overall cumulative score
-        $allScores = $allSummaries->pluck('sts_score')->filter(fn($v) => $v !== null);
-        $cumulativeAvg = $allScores->isNotEmpty() ? round($allScores->avg(), 2) : null;
+        $allScores = $allSummaries
+            ->map(fn ($rec) => $rec->final_score ?? $rec->asat_score ?? $rec->sts_score)
+            ->filter(fn ($v) => $v !== null);
+        $cumulativeAvg = $allScores->isNotEmpty() ? round($allScores->avg(), 1) : null;
 
         return view('pages.erapor.buku-induk-detail', [
             'title' => "Buku Induk & Transkrip - {$siswa->nama_lengkap}",
             'siswa' => $siswa,
             'periods' => $periods,
+            'archives' => $archives,
             'subjects' => $subjects,
             'allSummaries' => $allSummaries,
             'stsSummaries' => $stsSummaries,
@@ -186,13 +252,23 @@ class BukuIndukController extends Controller
      */
     public function print(Siswa $siswa)
     {
-        $siswa->load(['tahunAjaran', 'riwayatKelas.tahunAjaran']);
+        $siswa->load(['tahunAjaran', 'rombel.waliKelas', 'profil', 'orangTuas', 'latestPeriodik', 'riwayatKelas.tahunAjaran']);
 
         $periods = RiwayatKelasSiswa::where('siswa_id', $siswa->id)
             ->with('tahunAjaran')
-            ->orderBy('tahun_ajaran_id')
-            ->orderBy('semester')
-            ->get();
+            ->get()
+            ->filter(function ($p) {
+                $k = strtolower(trim((string) $p->kelas));
+                return $k !== '' && !str_starts_with($k, 'alumni') && !str_starts_with($k, 'lulus');
+            })
+            ->sortBy(function ($p) {
+                $start = $p->tahunAjaran?->tanggal_mulai
+                    ? \Carbon\Carbon::parse($p->tahunAjaran->tanggal_mulai)->format('Y-m-d')
+                    : ($p->tahunAjaran?->nama ?? '9999');
+                $semOrd = strtolower((string) $p->semester) === 'ganjil' ? '1' : '2';
+                return "{$start}_{$semOrd}";
+            })
+            ->values();
 
         if ($periods->isEmpty()) {
             $activeYear = TahunAjaran::where('is_aktif', true)->first();
@@ -205,7 +281,7 @@ class BukuIndukController extends Controller
             ]]);
         }
 
-        $subjects = MataPelajaran::orderBy('nama')->get();
+        $subjects = MataPelajaran::forStudentHistory($siswa, $periods);
         $allSummaries = SubjectGradeSummary::where('siswa_id', $siswa->id)->get();
         $stsSummaries = StudentStsSummary::where('siswa_id', $siswa->id)
             ->get()
@@ -220,8 +296,10 @@ class BukuIndukController extends Controller
             ->first();
 
         $schoolSettings = PengaturanSekolah::first();
-        $allScores = $allSummaries->pluck('sts_score')->filter(fn($v) => $v !== null);
-        $cumulativeAvg = $allScores->isNotEmpty() ? round($allScores->avg(), 2) : null;
+        $allScores = $allSummaries
+            ->map(fn ($rec) => $rec->final_score ?? $rec->asat_score ?? $rec->sts_score)
+            ->filter(fn ($v) => $v !== null);
+        $cumulativeAvg = $allScores->isNotEmpty() ? round($allScores->avg(), 1) : null;
 
         EraporAuditLog::record(
             action: 'export',

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Guru;
 use App\Models\Lokasi;
 use App\Models\MataPelajaran;
+use App\Models\Rombel;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use Illuminate\Support\Facades\Cache;
@@ -57,6 +58,26 @@ class CacheService
         });
     }
 
+    public static function rombelList(?int $tahunAjaranId = null): \Illuminate\Support\Collection
+    {
+        $key = 'dropdown_rombel_' . ($tahunAjaranId ?? 'all');
+
+        return Cache::remember($key, self::MEDIUM, function () use ($tahunAjaranId) {
+            return Rombel::with('waliKelas', 'tahunAjaran')
+                ->where('is_aktif', true)
+                ->when($tahunAjaranId, fn ($q) => $q->where('tahun_ajaran_id', $tahunAjaranId))
+                ->orderBy('nama')
+                ->get();
+        });
+    }
+
+    public static function classNames(?int $tahunAjaranId = null): \Illuminate\Support\Collection
+    {
+        $key = 'dropdown_kelas_' . ($tahunAjaranId ?? 'all');
+
+        return Cache::remember($key, self::MEDIUM, fn () => Rombel::classNames($tahunAjaranId));
+    }
+
     public static function guruCount(): int
     {
         return Cache::remember('count_guru', self::SHORT, fn () => Guru::count());
@@ -81,6 +102,13 @@ class CacheService
         Cache::forget('dropdown_tahun_ajaran');
         Cache::forget('dropdown_mapel');
         Cache::forget('dropdown_lokasi');
+        Cache::forget('dropdown_rombel_all');
+        Cache::forget('dropdown_kelas_all');
+        $activeTaId = TahunAjaran::where('is_aktif', true)->value('id');
+        if ($activeTaId) {
+            Cache::forget("dropdown_rombel_{$activeTaId}");
+            Cache::forget("dropdown_kelas_{$activeTaId}");
+        }
         Cache::forget('tahun_ajaran_aktif');
         Cache::forget('count_guru');
         Cache::forget('count_siswa');

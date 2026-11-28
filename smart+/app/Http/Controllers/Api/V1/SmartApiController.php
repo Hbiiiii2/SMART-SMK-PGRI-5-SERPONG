@@ -65,10 +65,18 @@ class SmartApiController extends Controller
     {
         $requestId = 'req_' . Str::uuid();
 
-        $query = Siswa::with('tahunAjaran');
+        $query = Siswa::with(['tahunAjaran', 'rombel']);
+
+        if (!$request->boolean('include_inactive')) {
+            $query->aktif();
+        }
 
         if ($request->filled('kelas')) {
             $query->where('kelas', $request->string('kelas'));
+        }
+
+        if ($request->filled('rombel_id')) {
+            $query->where('rombel_id', $request->integer('rombel_id'));
         }
 
         if ($request->filled('tahun_ajaran_id')) {
@@ -83,7 +91,8 @@ class SmartApiController extends Controller
             $search = $request->string('search');
             $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('nisn', 'like', "%{$search}%");
+                  ->orWhere('nisn', 'like', "%{$search}%")
+                  ->orWhere('nipd', 'like', "%{$search}%");
             });
         }
 
@@ -94,11 +103,15 @@ class SmartApiController extends Controller
             return [
                 'id' => $siswa->id,
                 'external_id' => (string) $siswa->id,
+                'dapodik_peserta_didik_id' => $siswa->dapodik_peserta_didik_id,
+                'nipd' => $siswa->nipd,
                 'nisn' => $siswa->nisn,
-                'nis' => $siswa->nisn, // SMART uses NISN as primary student number
+                'nis' => $siswa->nipd ?: $siswa->nisn,
                 'nama' => $siswa->nama_lengkap,
                 'jenis_kelamin' => $siswa->jenis_kelamin,
+                'rombel_id' => $siswa->rombel_id,
                 'kelas' => $siswa->kelas,
+                'status_siswa' => $siswa->status_siswa ?? 'aktif',
                 'tahun_ajaran' => [
                     'id' => $siswa->tahun_ajaran_id,
                     'nama' => $siswa->tahunAjaran?->nama,
@@ -129,25 +142,46 @@ class SmartApiController extends Controller
 
         $activeYear = TahunAjaran::where('is_aktif', true)->first();
 
-        $classes = Siswa::select('kelas', DB::raw('count(*) as total_siswa'))
+        $studentCounts = Siswa::aktif()
+            ->whereNotNull('kelas')
+            ->where('kelas', '!=', '')
+            ->select('kelas', DB::raw('count(*) as total_siswa'))
             ->groupBy('kelas')
-            ->orderBy('kelas')
-            ->get()
-            ->map(function ($row) use ($activeYear) {
-                // Extract grade level if present (e.g., VII, VIII, IX)
-                preg_match('/(VII|VIII|IX|\d+)/i', $row->kelas, $matches);
-                $tingkat = $matches[0] ?? '-';
+            ->pluck('total_siswa', 'kelas');
 
-                return [
-                    'id' => $row->kelas,
-                    'external_id' => $row->kelas,
-                    'nama_kelas' => $row->kelas,
-                    'tingkat' => $tingkat,
-                    'total_siswa' => (int) $row->total_siswa,
-                    'tahun_ajaran' => $activeYear?->nama,
-                    'status' => 'aktif',
-                ];
-            });
+        $rombels = \App\Models\Rombel::where('is_aktif', true)
+            ->orderBy('tingkat')
+            ->orderBy('nama')
+            ->get()
+            ->keyBy('nama');
+
+        $allClassNames = $rombels->keys()
+            ->merge($studentCounts->keys())
+            ->unique()
+            ->sort(SORT_NATURAL | SORT_FLAG_CASE)
+            ->values();
+
+        $classes = $allClassNames->map(function (string $className) use ($rombels, $studentCounts, $activeYear) {
+            $rombel = $rombels->get($className);
+            $tingkat = $rombel?->tingkat;
+            if (!$tingkat) {
+                preg_match('/(XII|XI|IX|VIII|VII|X|\d+)/i', $className, $matches);
+                $tingkat = isset($matches[0]) ? strtoupper($matches[0]) : '-';
+            }
+
+            return [
+                'id' => $className,
+                'rombel_id' => $rombel?->id,
+                'dapodik_rombongan_belajar_id' => $rombel?->dapodik_rombongan_belajar_id,
+                'external_id' => $className,
+                'nama_kelas' => $className,
+                'tingkat' => $tingkat,
+                'kompetensi_keahlian' => $rombel?->kompetensi_keahlian,
+                'total_siswa' => (int) ($studentCounts[$className] ?? 0),
+                'tahun_ajaran' => $rombel?->tahunAjaran?->nama ?? $activeYear?->nama,
+                'status' => 'aktif',
+            ];
+        });
 
         return response()->json([
             'data' => $classes,

@@ -75,9 +75,10 @@ COPY . /var/www/html
 COPY --from=vendor /app/vendor /var/www/html/vendor
 COPY --from=node_builder /app/public/build /var/www/html/public/build
 
-# Preserve a template copy of public/build for volume sync on container startup
-RUN mkdir -p /var/www/html/public_template \
-    && cp -r /var/www/html/public/build /var/www/html/public_template/build
+# Preserve a template copy of public/build and public/images/rapor for volume sync on container startup
+RUN mkdir -p /var/www/html/public_template/images \
+    && cp -r /var/www/html/public/build /var/www/html/public_template/build \
+    && cp -r /var/www/html/public/images/rapor /var/www/html/public_template/images/rapor
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \

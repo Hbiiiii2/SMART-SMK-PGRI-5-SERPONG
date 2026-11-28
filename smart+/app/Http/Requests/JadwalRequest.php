@@ -17,7 +17,7 @@ class JadwalRequest extends FormRequest
             'guru_id' => 'required|exists:guru,id',
             'mata_pelajaran_id' => 'required|exists:mata_pelajaran,id',
             'tahun_ajaran_id' => 'required|exists:tahun_ajaran,id',
-            'kelas' => 'required|string|max:20',
+            'kelas' => 'required|string|max:50',
             'hari' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu',
             'jam_mulai' => 'required|regex:/^\d{2}:\d{2}(:\d{2})?$/',
             'jam_selesai' => 'required|regex:/^\d{2}:\d{2}(:\d{2})?$/|after:jam_mulai',

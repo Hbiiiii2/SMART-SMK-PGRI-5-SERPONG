@@ -115,7 +115,7 @@ class CbtIntegrationService
         string $semester = 'Ganjil',
         ?string $kelas = null,
         ?int $targetAssessmentItemId = null,
-        string $componentCode = 'sts',
+        string $componentCode = 'asat',
         string $syncMode = 'highest' // 'highest' (default: susulan/remedial), 'replace', 'fill_empty'
     ): array {
         $baseUrl = rtrim(config('services.cbt.base_url', env('CBT_API_BASE_URL', 'http://smart-cbt-web/api/v1')), '/');
@@ -246,9 +246,13 @@ class CbtIntegrationService
             'imported_by' => auth()->id(),
         ]);
 
+        $defaultName = in_array(strtolower($componentCode), ['asat', 'sts'], true)
+            ? 'Nilai Murni ASAT (UAS)'
+            : strtoupper($componentCode);
+
         $targetComponent = AssessmentComponent::where('code', $componentCode)->first() ?? AssessmentComponent::firstOrCreate(
             ['code' => $componentCode],
-            ['name' => strtoupper($componentCode), 'default_count' => 1, 'default_weight' => 20.0, 'order' => 6]
+            ['name' => $defaultName, 'default_count' => 1, 'default_weight' => 100.0, 'order' => 3]
         );
 
         $syncedCount = 0;
@@ -309,6 +313,14 @@ class CbtIntegrationService
             if ($targetAssessmentItemId) {
                 $assessmentItem = AssessmentItem::find($targetAssessmentItemId);
             } else {
+                $resolvedGroup = match (true) {
+                    $componentCode === 'tugas' => 'tugas',
+                    in_array(strtolower($componentCode), ['asat', 'sts'], true) => 'asat',
+                    default => 'sumatif',
+                };
+                $resolvedBlock = $resolvedGroup === 'asat' ? null : 1;
+                $resolvedTitle = $resolvedGroup === 'asat' ? 'Nilai Murni ASAT' : $targetComponent->name;
+
                 $cacheKey = "{$targetComponent->id}_{$mapelId}_{$activeYear->id}_{$semester}";
                 $assessmentItem = $assessmentItemCache[$cacheKey] ??= AssessmentItem::firstOrCreate(
                     [
@@ -318,7 +330,9 @@ class CbtIntegrationService
                         'semester' => $semester,
                     ],
                     [
-                        'title' => $targetComponent->name,
+                        'daily_block' => $resolvedBlock,
+                        'weight_group' => $resolvedGroup,
+                        'title' => $resolvedTitle,
                         'sequence' => 1,
                         'max_score' => 100.0,
                         'cbt_exam_external_id' => $item['exam_external_id'] ?? null,
@@ -468,9 +482,9 @@ class CbtIntegrationService
             'imported_by' => auth()->id(),
         ]);
 
-        $stsComponent = AssessmentComponent::firstOrCreate(
-            ['code' => 'sts'],
-            ['name' => 'STS 1', 'default_count' => 1, 'default_weight' => 20.0, 'order' => 6]
+        $asatComponent = AssessmentComponent::firstOrCreate(
+            ['code' => 'asat'],
+            ['name' => 'Nilai Murni ASAT (UAS)', 'default_count' => 1, 'default_weight' => 100.0, 'is_active' => true, 'order' => 3]
         );
 
         $syncedCount = 0;
@@ -530,16 +544,18 @@ class CbtIntegrationService
             }
 
             // Get or create AssessmentItem for this subject
-            $cacheKey = "{$stsComponent->id}_{$targetMapelId}_{$activeYear->id}_{$semester}";
+            $cacheKey = "{$asatComponent->id}_{$targetMapelId}_{$activeYear->id}_{$semester}";
             $assessmentItem = $assessmentItemCache[$cacheKey] ??= AssessmentItem::firstOrCreate(
                 [
-                    'assessment_component_id' => $stsComponent->id,
+                    'assessment_component_id' => $asatComponent->id,
                     'mata_pelajaran_id' => $targetMapelId,
                     'tahun_ajaran_id' => $activeYear->id,
                     'semester' => $semester,
                 ],
                 [
-                    'title' => 'STS 1',
+                    'daily_block' => null,
+                    'weight_group' => 'asat',
+                    'title' => 'Nilai Murni ASAT',
                     'sequence' => 1,
                     'max_score' => 100.0,
                 ]
@@ -635,7 +651,9 @@ class CbtIntegrationService
         int $mataPelajaranId,
         int $tahunAjaranId,
         string $semester = 'Ganjil',
-        int $sequence = 1
+        int $sequence = 1,
+        int $dailyBlock = 1,
+        ?int $targetAssessmentItemId = null
     ): array {
         $tugas = Tugas::findOrFail($tugasId);
         $submissions = PengumpulanTugas::where('tugas_id', $tugasId)
@@ -649,25 +667,31 @@ class CbtIntegrationService
             ];
         }
 
-        $tugasComponent = AssessmentComponent::firstOrCreate(
-            ['code' => 'tugas'],
-            ['name' => 'Tugas', 'default_count' => 6, 'default_weight' => 20.0, 'order' => 2]
-        );
+        if ($targetAssessmentItemId) {
+            $assessmentItem = AssessmentItem::findOrFail($targetAssessmentItemId);
+        } else {
+            $tugasComponent = AssessmentComponent::firstOrCreate(
+                ['code' => 'tugas'],
+                ['name' => 'Tugas', 'default_count' => 1, 'default_weight' => 40.0, 'is_active' => true, 'order' => 1]
+            );
 
-        $assessmentItem = AssessmentItem::firstOrCreate(
-            [
-                'assessment_component_id' => $tugasComponent->id,
-                'mata_pelajaran_id' => $mataPelajaranId,
-                'tahun_ajaran_id' => $tahunAjaranId,
-                'semester' => $semester,
-                'tugas_id' => $tugasId,
-            ],
-            [
-                'title' => 'Tugas ' . $sequence . ' (' . $tugas->judul . ')',
-                'sequence' => $sequence,
-                'max_score' => 100.0,
-            ]
-        );
+            $assessmentItem = AssessmentItem::firstOrCreate(
+                [
+                    'assessment_component_id' => $tugasComponent->id,
+                    'mata_pelajaran_id' => $mataPelajaranId,
+                    'tahun_ajaran_id' => $tahunAjaranId,
+                    'semester' => $semester,
+                    'daily_block' => $dailyBlock,
+                    'weight_group' => 'tugas',
+                    'tugas_id' => $tugasId,
+                ],
+                [
+                    'title' => 'Tugas ' . $sequence . ' (' . $tugas->judul . ')',
+                    'sequence' => $sequence,
+                    'max_score' => 100.0,
+                ]
+            );
+        }
 
         $synced = 0;
         foreach ($submissions as $sub) {

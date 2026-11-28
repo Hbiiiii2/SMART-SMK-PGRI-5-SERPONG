@@ -39,7 +39,7 @@
         }
 
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: {{ $isSts ? "'Times New Roman', Times, serif" : "Arial, Helvetica, sans-serif" }};
             color: #000;
             background: #fff;
             margin: 0;
@@ -53,8 +53,72 @@
             max-width: 780px;
             margin: 0 auto;
             padding-top: 4px;
+        }
+
+        .rapor-page.sts-mode {
             page-break-inside: avoid;
             break-inside: avoid;
+        }
+
+        /* ==================== UAS 2-PAGE OFFICIAL FORMAT ==================== */
+        .uas-sheet {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 8.8pt;
+            line-height: 1.25;
+            color: #000;
+        }
+        .uas-page-2 {
+            margin-top: 28px;
+            padding-top: 14px;
+            border-top: 2px dashed #cbd5e1;
+        }
+        .uas-kop-table { width: 100%; border-collapse: collapse; }
+        .uas-kop-table td { vertical-align: middle; }
+        .uas-kop-logo { width: 82px; text-align: center; }
+        .uas-kop-logo img { max-width: 68px; max-height: 68px; object-fit: contain; }
+        .uas-kop-center { text-align: center; line-height: 1.25; }
+        .uas-kop-yayasan { font-size: 10pt; font-weight: bold; text-transform: uppercase; }
+        .uas-kop-sekolah { font-size: 13.5pt; font-weight: bold; color: #0033cc; text-transform: uppercase; letter-spacing: 0.3px; margin: 1px 0; }
+        .uas-kop-alamat { font-size: 8.3pt; color: #111; }
+        .uas-kop-judul { font-size: 10.5pt; font-weight: bold; text-transform: uppercase; margin-top: 3px; }
+        .uas-kop-tahun { font-size: 9.2pt; margin-top: 1px; }
+        .uas-line-top { border-top: 1.5px solid #000; margin: 5px 0 6px 0; }
+        .uas-line-bottom { border-bottom: 1.5px solid #000; margin: 5px 0 9px 0; }
+        .uas-biodata { width: 100%; border-collapse: collapse; font-size: 8.6pt; font-weight: bold; }
+        .uas-biodata td { padding: 1.5px 0; vertical-align: top; }
+        .uas-bio-l1 { width: 19%; }
+        .uas-bio-col { width: 2%; text-align: center; }
+        .uas-bio-v1 { width: 41%; }
+        .uas-bio-l2 { width: 11%; }
+        .uas-bio-v2 { width: 25%; }
+        .uas-section-heading { font-weight: bold; font-size: 9pt; margin-bottom: 5px; }
+        .uas-grade-table { width: 100%; border-collapse: collapse; font-size: 8.1pt; }
+        .uas-grade-table th, .uas-grade-table td { border: 1px solid #000; padding: 3px 5px; line-height: 1.18; }
+        .uas-grade-table th { background-color: #d9d9d9; font-weight: bold; text-align: center; padding: 5px 4px; vertical-align: middle; }
+        .uas-group-row { font-weight: bold; background-color: #fff; padding: 3px 5px !important; font-size: 8.1pt; }
+        .uas-capaian-cell { font-size: 7.5pt; line-height: 1.16 !important; text-align: left; }
+        .uas-summary-row td { padding: 3.5px 6px; }
+        .uas-simple-table { width: 100%; border-collapse: collapse; font-size: 8.6pt; }
+        .uas-simple-table th, .uas-simple-table td { border: 1px solid #000; padding: 3.5px 6px; }
+        .uas-simple-table th { font-weight: bold; background-color: #fff; }
+        .uas-catatan-box { border: 1px solid #000; padding: 8px 10px; min-height: 36px; font-size: 8.6pt; font-style: italic; line-height: 1.35; margin-bottom: 20px; }
+        .uas-bottom-grid { width: 100%; border-collapse: collapse; font-size: 8.6pt; page-break-inside: avoid; break-inside: avoid; }
+        .uas-bottom-grid > tbody > tr > td { vertical-align: top; }
+        .uas-bottom-left { width: 48%; padding-top: 6px; padding-right: 16px; }
+        .uas-bottom-right { width: 52%; }
+        .uas-keputusan-box { border: 1px solid #000; padding: 8px 12px 12px 12px; line-height: 1.32; }
+        .uas-keputusan-rows { border-collapse: collapse; margin-top: 2px; }
+        .uas-keputusan-rows td { padding: 1px 6px 1px 0; border: none; }
+        .uas-kepsek-sign { margin-top: 22px; padding-left: 36%; }
+        .uas-ttd-space { height: 52px; display: flex; align-items: center; }
+        @media print {
+            .uas-page-2 {
+                margin-top: 0 !important;
+                padding-top: 0 !important;
+                border-top: none !important;
+                page-break-before: always;
+                break-before: page;
+            }
         }
 
         /* Page Break for Bulk Print */
@@ -326,17 +390,17 @@
 <body>
 
 <!-- Action Toolbar (hidden on print) -->
+@php
+    $schoolNameGlobal = $schoolSettings?->nama_sekolah ?? 'SMKS PGRI 5 Serpong';
+@endphp
 <div class="no-print">
     <div>
-        <strong>SMP Al Madinah</strong> — Cetak Masal Rapor {{ strtoupper($jenisRapor) }} Kelas {{ $kelas }} ({{ count($raporData) }} Siswa • Kertas {{ $paperSize }})
+        <strong>{{ $schoolNameGlobal }}</strong> — Cetak Masal Rapor {{ strtoupper($jenisRapor) }} Kelas {{ $kelas }} ({{ count($raporData) }} Siswa • Kertas {{ $paperSize }})
     </div>
     <div style="display: flex; align-items: center;">
-        <a href="{{ route('erapor.cetak.kelas', ['kelas' => $kelas, 'semester' => $semester, 'tahun_ajaran_id' => $targetYear->id, 'jenis_rapor' => 'sts']) }}" style="text-decoration: none; color: #fff; background: {{ $jenisRapor === 'sts' ? '#d97706' : 'rgba(255,255,255,0.15)' }}; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-left: 6px;">
-            Opsi 1: Rapor STS
-        </a>
-        <a href="{{ route('erapor.cetak.kelas', ['kelas' => $kelas, 'semester' => $semester, 'tahun_ajaran_id' => $targetYear->id, 'jenis_rapor' => 'uas']) }}" style="text-decoration: none; color: #fff; background: {{ $jenisRapor !== 'sts' ? '#2563eb' : 'rgba(255,255,255,0.15)' }}; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-left: 6px;">
-            Opsi 2: Rapor UAS
-        </a>
+        <span style="background: {{ $jenisRapor === 'sts' ? '#d97706' : '#2563eb' }}; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: bold;">
+            {{ $jenisRapor === 'sts' ? 'Format Rapor UTS (Semester Ganjil)' : 'Format Rapor UAS (Semester Genap)' }}
+        </span>
         <button onclick="window.print()">🖨️ Cetak Semua ({{ count($raporData) }} Lembar {{ $paperSize }})</button>
         <button onclick="window.close()" style="background: rgba(255,255,255,0.2);">Tutup</button>
     </div>
@@ -345,82 +409,96 @@
 @foreach($raporData as $dataIdx => $item)
     @php
         $siswa = $item['siswa'];
+        $studentData = $item['studentData'] ?? [];
+        $schoolData = $item['schoolData'] ?? [];
+        $formatData = $item['formatData'] ?? [];
+        $itemRaporSettings = $item['raporSettings'] ?? $raporSettings;
+        $itemSchoolSettings = $item['schoolSettings'] ?? $schoolSettings;
+        $itemHomeroom = $item['homeroom'] ?? $homeroom;
+        $itemWali = $item['waliKelas'] ?? $waliKelas;
+        $itemKepsek = $item['kepalaSekolah'] ?? $kepalaSekolah;
+        $itemTanggal = $item['tanggalRaporFormatted'] ?? $tanggalRaporFormatted;
+        $itemSchoolName = $schoolData['nama_sekolah'] ?? $itemSchoolSettings?->nama_sekolah ?? $schoolNameGlobal;
+        $displayClass = $item['kelasHistoris'] ?? $studentData['kelas'] ?? $kelas;
+        $displayNisnNipd = trim(($studentData['nipd'] ?? $siswa->nipd ?? '') . ' / ' . ($studentData['nisn'] ?? $siswa->nisn ?? ''), ' /');
         $gradeItems = $item['gradeItems'];
         $totalNilai = $item['totalNilai'];
         $rataRata = $item['rataRata'];
         $rataRataKelasItem = $item['rataRataKelas'] ?? $rataRataKelas ?? null;
         $stsSummary = $item['stsSummary'];
         $attendance = $item['attendance'];
+        $itemArchive = $item['archive'] ?? null;
+        $itemQrSvg = $item['qrSvg'] ?? null;
         $isLast = $dataIdx === (count($raporData) - 1);
     @endphp
 
-    <div class="rapor-page {{ !$isLast ? 'page-break' : '' }}">
-        <!-- Kop Surat Resmi -->
-        <table class="kop-table">
-            <tr>
-                <td class="kop-logo">
-                    @if($logoSrc)
-                        <img src="{{ $logoSrc }}" alt="Logo">
-                    @else
-                        <div class="kop-logo-badge">AM</div>
-                    @endif
-                </td>
-                <td class="kop-text">
-                    <h4>{{ $raporSettings?->header_yayasan ?? 'YAYASAN KELUARGA BESAR MASYARAKAT BANTEN (KKMB)' }}</h4>
-                    <h2>{{ $raporSettings?->header_sekolah ?? 'SMP AL - MADINAH ISLAMIC CENTER' }}</h2>
-                    <p>{{ $schoolSettings?->alamat_sekolah ?? 'JL. PUSPITA RAYA BLOK L1 No.IA Sektor III.2 BSD City' }}</p>
-                    <p>Telp: {{ $schoolSettings?->no_telepon_sekolah ?? '08970555677' }} | Email: {{ $schoolSettings?->email_sekolah ?? 'smpamickkmb@gmail.com' }}</p>
-                </td>
-            </tr>
-        </table>
-        <div class="kop-divider"></div>
-
-        <!-- Judul Dokumen -->
-        <div class="doc-title">
-            <h3>
-                {{ $raporSettings?->getEffectiveJudulRapor($jenisRapor) ?? ($jenisRapor === 'sts' ? 'LAPORAN PENILAIAN SUMATIF TENGAH SEMESTER (STS)' : 'LAPORAN CAPAIAN HASIL BELAJAR PESERTA DIDIK') }}
-            </h3>
-            <p>
-                @if($raporSettings?->show_kurikulum && !empty($raporSettings?->nama_kurikulum))
-                    {{ strtoupper($raporSettings->nama_kurikulum) }} — 
-                @endif
-                TAHUN AJARAN {{ strtoupper($targetYear->nama) }}
-            </p>
-        </div>
-
-        <!-- Identitas Peserta Didik -->
-        <table class="biodata-table">
-            <tr>
-                <td class="biodata-label">Nama Peserta Didik</td>
-                <td class="biodata-colon">:</td>
-                <td class="biodata-val">{{ strtoupper($siswa->nama_lengkap) }}</td>
-
-                <td class="biodata-label-right">Kelas{{ $raporSettings?->show_fase ? ' / Fase' : '' }}</td>
-                <td class="biodata-colon">:</td>
-                <td class="biodata-val-right">{{ $siswa->kelas }}{{ $raporSettings?->show_fase ? ' / ' . ($raporSettings->fase_text ?: 'Fase D') : '' }}</td>
-            </tr>
-            <tr>
-                <td class="biodata-label">NISN / NIS</td>
-                <td class="biodata-colon">:</td>
-                <td class="biodata-val">{{ $siswa->nisn }}</td>
-
-                <td class="biodata-label-right">Semester</td>
-                <td class="biodata-colon">:</td>
-                <td class="biodata-val-right">{{ $semester }} ({{ $semester === 'Ganjil' ? 'Satu' : 'Dua' }})</td>
-            </tr>
-            <tr>
-                <td class="biodata-label">Nama Sekolah</td>
-                <td class="biodata-colon">:</td>
-                <td class="biodata-val">SMP Al Madinah</td>
-
-                <td class="biodata-label-right">Tahun Pelajaran</td>
-                <td class="biodata-colon">:</td>
-                <td class="biodata-val-right">{{ $targetYear->nama }}</td>
-            </tr>
-        </table>
-
-        <!-- Tabel Capaian Nilai Akademik -->
+    <div class="rapor-page {{ $isSts ? 'sts-mode' : 'uas-mode' }} {{ !$isLast ? 'page-break' : '' }}">
         @if($jenisRapor === 'sts')
+            <!-- Kop Surat Resmi (STS) -->
+            <table class="kop-table">
+                <tr>
+                    <td class="kop-logo">
+                        @if($logoSrc)
+                            <img src="{{ $logoSrc }}" alt="Logo">
+                        @else
+                            <div class="kop-logo-badge">{{ strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $itemSchoolName), 0, 2) ?: 'SM') }}</div>
+                        @endif
+                    </td>
+                    <td class="kop-text">
+                        <h4>{{ $itemRaporSettings?->header_yayasan ?? 'YAYASAN PEMBINA LEMBAGA PENDIDIKAN (YPLP) PGRI' }}</h4>
+                        <h2>{{ $itemRaporSettings?->header_sekolah ?? strtoupper($itemSchoolName) }}</h2>
+                        <p>{{ $schoolData['alamat_sekolah'] ?? $itemSchoolSettings?->alamat_sekolah ?? '-' }}</p>
+                        <p>Telp: {{ $schoolData['no_telepon_sekolah'] ?? $itemSchoolSettings?->no_telepon_sekolah ?? '-' }} | Email: {{ $schoolData['email_sekolah'] ?? $itemSchoolSettings?->email_sekolah ?? '-' }}</p>
+                    </td>
+                </tr>
+            </table>
+            <div class="kop-divider"></div>
+
+            <!-- Judul Dokumen (STS) -->
+            <div class="doc-title">
+                <h3>
+                    {{ $formatData['judul_rapor'] ?? $itemRaporSettings?->getEffectiveJudulRapor($jenisRapor) ?? 'LAPORAN PENILAIAN SUMATIF TENGAH SEMESTER (STS)' }}
+                </h3>
+                <p>
+                    @if($itemRaporSettings?->show_kurikulum && !empty($itemRaporSettings?->nama_kurikulum))
+                        {{ strtoupper($itemRaporSettings->nama_kurikulum) }} — 
+                    @endif
+                    TAHUN AJARAN {{ strtoupper($targetYear->nama) }}
+                </p>
+            </div>
+
+            <!-- Identitas Peserta Didik (STS) -->
+            <table class="biodata-table">
+                <tr>
+                    <td class="biodata-label">Nama Peserta Didik</td>
+                    <td class="biodata-colon">:</td>
+                    <td class="biodata-val">{{ strtoupper($studentData['nama_lengkap'] ?? $siswa->nama_lengkap) }}</td>
+
+                    <td class="biodata-label-right">Kelas{{ $itemRaporSettings?->show_fase ? ' / Fase' : '' }}</td>
+                    <td class="biodata-colon">:</td>
+                    <td class="biodata-val-right">{{ $displayClass }}{{ $itemRaporSettings?->show_fase ? ' / ' . ($itemRaporSettings->fase_text ?: 'Fase E') : '' }}</td>
+                </tr>
+                <tr>
+                    <td class="biodata-label">NISN / NIS</td>
+                    <td class="biodata-colon">:</td>
+                    <td class="biodata-val">{{ $displayNisnNipd ?: '-' }}</td>
+
+                    <td class="biodata-label-right">Semester</td>
+                    <td class="biodata-colon">:</td>
+                    <td class="biodata-val-right">{{ $semester }} ({{ $semester === 'Ganjil' ? 'Satu' : 'Dua' }})</td>
+                </tr>
+                <tr>
+                    <td class="biodata-label">Nama Sekolah</td>
+                    <td class="biodata-colon">:</td>
+                    <td class="biodata-val">{{ $itemSchoolName }}</td>
+
+                    <td class="biodata-label-right">Tahun Pelajaran</td>
+                    <td class="biodata-colon">:</td>
+                    <td class="biodata-val-right">{{ $targetYear->nama }}</td>
+                </tr>
+            </table>
+
+            <!-- Tabel Capaian Nilai Akademik (STS) -->
             @php
                 $fmtScore = function ($val) {
                     if ($val === null || $val === '') return '-';
@@ -462,10 +540,31 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $stsColspan = !empty($showKkm) ? 16 : 15;
+                        $groupTitles = [
+                            'umum' => 'A. KELOMPOK MATA PELAJARAN UMUM',
+                            'kejuruan' => 'B. KELOMPOK MATA PELAJARAN KEJURUAN',
+                            'konsentrasi' => 'C. KONSENTRASI KEAHLIAN',
+                            'pilihan' => 'D. MATA PELAJARAN PILIHAN',
+                            'mulok' => 'E. MUATAN LOKAL',
+                        ];
+                        $distinctGroups = collect($gradeItems)->pluck('kelompok')->filter()->unique()->count();
+                        $lastGroup = null;
+                    @endphp
                     @foreach($gradeItems as $idx => $g)
                         @php
+                            $grp = $g['kelompok'] ?? 'umum';
                             $skorSts = $g['nilai_sts'] ?? $g['sumatif'] ?? $g['nilai_rapor'];
                         @endphp
+                        @if($distinctGroups > 1 && $grp !== $lastGroup)
+                            <tr>
+                                <td colspan="{{ $stsColspan }}" style="padding: 3.5px 6px; font-weight: bold; background-color: #eef2f7; font-size: 8pt;">
+                                    {{ $g['kelompok_heading'] ?? ($groupTitles[$grp] ?? strtoupper($g['kelompok_label'] ?? $grp)) }}
+                                </td>
+                            </tr>
+                            @php $lastGroup = $grp; @endphp
+                        @endif
                         <tr>
                             <td class="text-center" style="padding: 3px 2px;">{{ $idx + 1 }}</td>
                             <td style="padding: 3px 6px; font-weight: 600;">{{ $g['nama'] }}</td>
@@ -568,156 +667,61 @@
                             <strong>( ..................................................... )</strong>
                         </td>
                         <td style="width: 50%; text-align: center;">
-                            {{ $raporSettings?->kota_pembagian ?? 'Bogor' }}, {{ $tanggalRaporFormatted }}<br>
-                            Wali Kelas
+                            {{ $itemRaporSettings?->kota_pembagian ?? 'Kota Tangerang Selatan' }}, {{ $itemTanggal }}<br>
+                            Wali Kelas {{ $displayClass }}
                             <div class="sig-space" style="display: flex; align-items: center; justify-content: center;">
-                                @if(!empty($homeroom?->ttd_wali_kelas))
-                                    <img src="{{ asset('storage/' . $homeroom->ttd_wali_kelas) }}" alt="TTD Wali Kelas" style="max-height: 45px; max-width: 125px; object-fit: contain;">
+                                @if(!empty($itemHomeroom?->ttd_wali_kelas))
+                                    <img src="{{ asset('storage/' . $itemHomeroom->ttd_wali_kelas) }}" alt="TTD Wali Kelas" style="max-height: 45px; max-width: 125px; object-fit: contain;">
                                 @endif
                             </div>
-                            <strong>( {{ $homeroom?->effective_nama ?? $waliKelas?->nama_lengkap ?? 'Wali Kelas' }} )</strong>
+                            <strong>( {{ $itemHomeroom?->effective_nama ?? $itemWali?->nama_lengkap ?? 'Wali Kelas' }} )</strong>
                         </td>
                     </tr>
                 </table>
             </div>
         @else
-            <table class="grade-table">
-                <thead>
-                    <tr>
-                        <th style="width: 24px;">No</th>
-                        <th style="width: 138px; text-align: left;">Mata Pelajaran</th>
-                        <th style="width: 48px;">Formatif<br>(UH/Tgs)</th>
-                        <th style="width: 48px;">Sumatif<br>(UAS)</th>
-                        <th style="width: 44px;">Nilai<br>Akhir</th>
-                        <th style="width: 40px;">Predikat</th>
-                        <th>Capaian Kompetensi / Catatan Pembelajaran</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($gradeItems as $idx => $g)
-                        <tr>
-                            <td class="text-center">{{ $idx + 1 }}</td>
-                            <td style="font-weight: bold;">{{ $g['nama'] }}</td>
-                            <td class="text-center">{{ $g['formatif'] !== null ? number_format($g['formatif'], 1) : '-' }}</td>
-                            <td class="text-center font-bold">{{ $g['sumatif'] !== null ? number_format($g['sumatif'], 1) : '-' }}</td>
-                            <td class="text-center font-bold" style="background-color: #fafafa;">
-                                {{ $g['nilai_rapor'] !== null ? number_format($g['nilai_rapor'], 1) : '-' }}
-                            </td>
-                            <td class="text-center font-bold">{{ $g['predikat'] }}</td>
-                            <td style="font-size: 8pt; line-height: 1.18;">{{ $g['deskripsi'] }}</td>
-                        </tr>
-                    @endforeach
+            @include('pages.erapor.partials.rapor-uas-pages', [
+                'siswa' => $siswa,
+                'studentData' => $studentData,
+                'schoolData' => $schoolData,
+                'formatData' => $formatData,
+                'itemRaporSettings' => $itemRaporSettings,
+                'itemSchoolSettings' => $itemSchoolSettings,
+                'itemHomeroom' => $itemHomeroom,
+                'itemWali' => $itemWali,
+                'itemKepsek' => $itemKepsek,
+                'itemTanggal' => $itemTanggal,
+                'itemSchoolName' => $itemSchoolName,
+                'displayClass' => $displayClass,
+                'displayNisnNipd' => $displayNisnNipd,
+                'targetYear' => $targetYear,
+                'semester' => $semester,
+                'gradeItems' => $gradeItems,
+                'totalNilai' => $totalNilai,
+                'rataRata' => $rataRata,
+                'showRanking' => $showRanking,
+                'stsSummary' => $stsSummary,
+                'totalSiswaKelas' => $totalSiswaKelas,
+                'attendance' => $attendance,
+                'ekstrakurikuler' => $item['ekstrakurikuler'] ?? null,
+                'keputusan' => $item['keputusan'] ?? null,
+                'resolvedFase' => $item['resolvedFase'] ?? null,
+                'konsentrasiKeahlian' => $item['konsentrasiKeahlian'] ?? null,
+                'itemArchive' => $itemArchive,
+                'itemQrSvg' => $itemQrSvg,
+            ])
+        @endif
 
-                    <!-- Row Total & Rata-rata (Mode UAS) -->
-                    <tr style="background-color: #f2f2f2; font-weight: bold;">
-                        <td colspan="4" class="text-right" style="padding-right: 10px;">JUMLAH NILAI</td>
-                        <td class="text-center">{{ $totalNilai > 0 ? number_format($totalNilai, 1) : '-' }}</td>
-                        <td colspan="2"></td>
-                    </tr>
-                    <tr style="background-color: #f2f2f2; font-weight: bold;">
-                        <td colspan="4" class="text-right" style="padding-right: 10px;">RATA-RATA NILAI</td>
-                        <td class="text-center">{{ $rataRata !== null ? number_format($rataRata, 1) : '-' }}</td>
-                        <td class="text-center">
-                            {{ \App\Http\Controllers\Erapor\CetakRaporController::calculatePredikat($rataRata) }}
-                        </td>
-                        <td style="font-size: 8pt;">
-                            @if($showRanking)
-                                @if($stsSummary?->rank)
-                                    <strong>Peringkat ke-{{ $stsSummary->rank }}</strong> dari {{ $totalSiswaKelas }} siswa di kelas {{ $siswa->kelas }}.
-                                @else
-                                    <strong>Peringkat Kelas: - (Belum ada nilai)</strong> dari {{ $totalSiswaKelas }} siswa di kelas {{ $siswa->kelas }}.
-                                @endif
-                            @else
-                                Rata-rata kumulatif seluruh mata pelajaran yang telah dinilai.
-                            @endif
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Kehadiran, Catatan Wali Kelas & Tanda Tangan (Dijaga 1 Halaman - Mode UAS) -->
-            <div class="footer-keep-together">
-                <table class="info-grid">
-                    <tr>
-                        <!-- Ketidakhadiran SMART+ -->
-                        <td class="info-box-cell" style="width: 38%;">
-                            <div class="sub-box-title">KETIDAKHADIRAN (PRESENSI SMART+)</div>
-                            <table style="width: 100%; font-size: 8.5pt; border-collapse: collapse;">
-                                <tr>
-                                    <td style="width: 62%; padding: 2px 0;">1. Sakit (S)</td>
-                                    <td style="width: 5%; padding: 2px 0;">:</td>
-                                    <td style="font-weight: bold; padding: 2px 0;">{{ $attendance->s ?? 0 }} hari</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 2px 0;">2. Izin (I)</td>
-                                    <td style="padding: 2px 0;">:</td>
-                                    <td style="font-weight: bold; padding: 2px 0;">{{ $attendance->i ?? 0 }} hari</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 2px 0;">3. Tanpa Keterangan (A)</td>
-                                    <td style="padding: 2px 0;">:</td>
-                                    <td style="font-weight: bold; padding: 2px 0;">{{ $attendance->a ?? 0 }} hari</td>
-                                </tr>
-                            </table>
-                        </td>
-
-                        <!-- Spacer antar kotak -->
-                        <td class="info-spacer-cell"></td>
-
-                        <!-- Catatan Wali Kelas -->
-                        <td class="info-box-cell" style="width: 60%;">
-                            <div class="sub-box-title">CATATAN WALI KELAS</div>
-                            <p style="margin: 3px 0 0 0; font-size: 8.5pt; font-style: italic; line-height: 1.35;">
-                                @if(!empty($stsSummary?->catatan_wali_kelas))
-                                    "{{ $stsSummary->catatan_wali_kelas }}"
-                                @elseif($rataRata && $rataRata >= 85)
-                                    "Prestasi belajar sangat memuaskan. Pertahankan semangat belajar, ketekunan, dan akhlak mulia dalam setiap kegiatan di sekolah."
-                                @elseif($rataRata && $rataRata >= 75)
-                                    "Pencapaian belajar sudah baik. Tingkatkan terus kedisiplinan dan konsistensi dalam menyelesaikan tugas-tugas akademik."
-                                @else
-                                    "Tingkatkan motivasi dan waktu belajar di rumah. Jangan ragu berdiskusi dengan guru pengampu jika menemui kesulitan materi."
-                                @endif
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Tanda Tangan Pengesahan (3 Kolom) -->
-                <table class="sig-table" style="margin-top: 20px;">
-                    <tr>
-                        <td>
-                            Mengetahui,<br>
-                            Orang Tua / Wali Peserta Didik
-                            <div class="sig-space"></div>
-                            <strong>( ..................................................... )</strong>
-                        </td>
-                        <td>
-                            {{ $raporSettings?->kota_pembagian ?? 'Bogor' }}, {{ $tanggalRaporFormatted }}<br>
-                            Wali Kelas {{ $siswa->kelas }}
-                            <div class="sig-space" style="display: flex; align-items: center; justify-content: center;">
-                                @if(!empty($homeroom?->ttd_wali_kelas))
-                                    <img src="{{ asset('storage/' . $homeroom->ttd_wali_kelas) }}" alt="TTD Wali Kelas" style="max-height: 45px; max-width: 125px; object-fit: contain;">
-                                @endif
-                            </div>
-                            <strong><u>{{ $homeroom?->effective_nama ?? $waliKelas?->nama_lengkap ?? 'Wali Kelas' }}</u></strong><br>
-                            <span>NIP: {{ $homeroom?->effective_nip ?? $waliKelas?->nip ?? '-' }}</span>
-                        </td>
-                        <td>
-                            Mengetahui,<br>
-                            Kepala {{ $schoolSettings?->nama_sekolah ?? 'SMP Al Madinah' }}
-                            <div class="sig-space" style="position: relative; display: flex; align-items: center; justify-content: center;">
-                                @if(!empty($raporSettings?->ttd_kepala_sekolah))
-                                    <img src="{{ asset('storage/' . $raporSettings->ttd_kepala_sekolah) }}" alt="TTD Kepala Sekolah" style="max-height: 45px; max-width: 125px; object-fit: contain;">
-                                @endif
-                                @if(!empty($raporSettings?->stempel_sekolah))
-                                    <img src="{{ asset('storage/' . $raporSettings->stempel_sekolah) }}" alt="Stempel" style="max-height: 50px; position: absolute; left: 10px; top: -4px; opacity: 0.85; pointer-events: none;">
-                                @endif
-                            </div>
-                            <strong><u>{{ $raporSettings?->nama_kepala_sekolah ?? $kepalaSekolah?->name ?? 'Kepala Sekolah' }}</u></strong><br>
-                            <span>NIP: {{ $raporSettings?->nip_kepala_sekolah ?? $kepalaSekolah?->guru?->nip ?? '-' }}</span>
-                        </td>
-                    </tr>
-                </table>
+        @if($jenisRapor === 'sts' && $itemArchive && $itemQrSvg)
+            <div class="footer-keep-together" style="margin-top: 14px; border-top: 1px dashed #64748b; padding-top: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="font-size: 7.5pt; color: #334155; line-height: 1.35;">
+                    <strong>ARSIP RAPOR DIGITAL RESMI — {{ strtoupper($itemSchoolName) }}</strong><br>
+                    No. Arsip: <span style="font-family: monospace;">{{ $itemArchive->archive_number }}</span> · Versi: v{{ $itemArchive->version }} · Disahkan: {{ $itemArchive->finalized_at?->translatedFormat('d M Y H:i') }} WIB<br>
+                    Sidik Jari Digital (SHA-256): <span style="font-family: monospace;">{{ substr($itemArchive->document_hash, 0, 24) }}...</span>
+                </div>
+                <div style="flex-shrink: 0; border: 1px solid #cbd5e1; padding: 3px; background: #fff;">
+                    {!! $itemQrSvg !!}
+                </div>
             </div>
         @endif
     </div>

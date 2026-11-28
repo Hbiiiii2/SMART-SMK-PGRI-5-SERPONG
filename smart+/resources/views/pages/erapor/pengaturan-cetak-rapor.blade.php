@@ -14,7 +14,7 @@
                     Konfigurasi Cetak
                 </span>
                 <span class="text-xs text-gray-400">•</span>
-                <span class="text-xs text-gray-500 dark:text-gray-400">SMP Al Madinah</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">E-Rapor</span>
             </div>
             <h2 class="mt-1 text-2xl font-bold text-gray-800 dark:text-white">Pengaturan Format Rapor & Wali Kelas</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -144,7 +144,7 @@
                         <!-- Preview Saat Mode Template -->
                         <div id="judul_template_box" class="rounded-xl border border-dashed border-gray-300 bg-white/70 p-2.5 text-[11px] text-gray-600 dark:border-gray-700 dark:bg-gray-900/60 dark:text-gray-400 space-y-1" style="{{ $currentTipeJudul === 'template' ? '' : 'display: none;' }}">
                             <div>• <strong>Rapor UTS / STS:</strong> <span class="font-mono text-gray-800 dark:text-gray-200">LAPORAN PENILAIAN SUMATIF TENGAH SEMESTER (STS)</span></div>
-                            <div>• <strong>Rapor Akhir / UAS:</strong> <span class="font-mono text-gray-800 dark:text-gray-200">LAPORAN CAPAIAN HASIL BELAJAR PESERTA DIDIK</span></div>
+                            <div>• <strong>Rapor Akhir / UAS:</strong> <span class="font-mono text-gray-800 dark:text-gray-200">LAPORAN HASIL BELAJAR</span></div>
                         </div>
 
                         <!-- Form Input Saat Mode Custom -->
@@ -306,7 +306,7 @@
                                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">
                                                 Quick Edit: KKM Standar Per Kelas
                                             </span>
-                                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">T.A. {{ $targetYear->tahun }}</span>
+                                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">T.A. {{ $targetYear->nama }}</span>
                                         </div>
                                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                             @foreach($classes as $c)
@@ -448,6 +448,20 @@
                                 class="w-full rounded-xl border border-gray-300 p-2 text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                             >
                         </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Logo Yayasan (Kiri Kop Rapor UAS - Opsional)</label>
+                            <input
+                                type="file"
+                                name="logo_yayasan"
+                                accept="image/*"
+                                class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100 dark:file:bg-gray-800 dark:file:text-brand-300"
+                            >
+                            @if(!empty($raporSettings->logo_yayasan))
+                                <div class="mt-2 p-1.5 border border-dashed rounded-lg inline-block bg-gray-50 dark:bg-gray-800">
+                                    <img src="{{ asset('storage/' . $raporSettings->logo_yayasan) }}" alt="Logo Yayasan" class="h-10 max-w-[100px] object-contain">
+                                </div>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="pt-3">
@@ -469,7 +483,7 @@
                             Daftar Wali Kelas, KKM & TTD per Rombel
                         </h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                            Atur wali kelas, nilai KKM khusus per kelas / mapel, serta tanda tangan digital per rombel untuk T.A. <strong>{{ $targetYear->tahun }}</strong>.
+                            Atur wali kelas, nilai KKM khusus per kelas / mapel, serta tanda tangan digital per rombel untuk T.A. <strong>{{ $targetYear->nama }}</strong>.
                         </p>
                     </div>
 
@@ -478,7 +492,7 @@
                         <select name="tahun_ajaran_id" onchange="this.form.submit()" class="rounded-xl border border-gray-300 p-2 text-xs dark:bg-gray-800 dark:border-gray-700 dark:text-white font-semibold">
                             @foreach($allYears as $y)
                                 <option value="{{ $y->id }}" {{ $targetYear->id == $y->id ? 'selected' : '' }}>
-                                    T.A. {{ $y->tahun }} {{ $y->is_aktif ? '(Aktif)' : '' }}
+                                    T.A. {{ $y->nama }} {{ $y->is_aktif ? '(Aktif)' : '' }}
                                 </option>
                             @endforeach
                         </select>

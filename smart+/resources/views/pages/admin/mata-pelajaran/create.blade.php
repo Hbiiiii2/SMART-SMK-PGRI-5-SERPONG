@@ -10,41 +10,89 @@
         <form action="{{ route('admin.mata-pelajaran.store') }}" method="POST">
             @csrf
 
-            <div class="grid grid-cols-1 gap-6">
+            <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Kode <span class="text-error-500">*</span></label>
-                    <input type="text" name="kode" value="{{ old('kode') }}"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                    @error('kode')
-                        <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
-                    @enderror
+                    <input type="text" name="kode" value="{{ old('kode') }}" required
+                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                    @error('kode') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Nama <span class="text-error-500">*</span></label>
-                    <input type="text" name="nama" value="{{ old('nama') }}"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                    @error('nama')
-                        <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
-                    @enderror
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Nama Mata Pelajaran <span class="text-error-500">*</span></label>
+                    <input type="text" name="nama" value="{{ old('nama') }}" required
+                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                    @error('nama') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
-                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Nilai KKM (Kriteria Ketuntasan Minimal)</label>
-                    <input type="number" step="0.5" min="0" max="100" name="kkm" value="{{ old('kkm', 75) }}"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
-                    @error('kkm')
-                        <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
-                    @enderror
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Kelompok Mata Pelajaran <span class="text-error-500">*</span></label>
+                    <select name="kelompok"
+                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        @foreach($kelompokOptions as $kKey => $kLabel)
+                            <option value="{{ $kKey }}" {{ old('kelompok', 'umum') === $kKey ? 'selected' : '' }}>{{ $kLabel }}</option>
+                        @endforeach
+                    </select>
+                    @error('kelompok') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
                 </div>
 
                 <div>
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Khusus Jurusan <span class="text-xs text-gray-400">(Kosongkan jika mapel umum semua jurusan)</span></label>
+                    <select name="jurusan_id"
+                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                        <option value="">Umum — Semua Jurusan</option>
+                        @foreach($jurusans as $jurusan)
+                            <option value="{{ $jurusan->id }}" {{ old('jurusan_id') == $jurusan->id ? 'selected' : '' }}>
+                                {{ $jurusan->kode }} — {{ $jurusan->nama }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('jurusan_id') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Berlaku Untuk Tingkat <span class="text-xs text-gray-400">(Kosong = semua tingkat)</span></label>
+                    <div class="flex flex-wrap gap-4 pt-2">
+                        @foreach($tingkatOptions as $t)
+                            <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                <input type="checkbox" name="tingkat[]" value="{{ $t }}" {{ in_array($t, old('tingkat', []), true) ? 'checked' : '' }}
+                                    class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
+                                Kelas {{ $t }}
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('tingkat') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Nilai KKM</label>
+                        <input type="number" step="0.5" min="0" max="100" name="kkm" value="{{ old('kkm', 75) }}"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        @error('kkm') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                    </div>
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Urutan Rapor</label>
+                        <input type="number" min="1" max="999" name="urutan" value="{{ old('urutan', 100) }}"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        @error('urutan') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <input type="hidden" name="tampil_di_rapor" value="0">
+                    <label class="inline-flex cursor-pointer items-center gap-2.5 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" name="tampil_di_rapor" value="1" {{ old('tampil_di_rapor', '1') ? 'checked' : '' }}
+                            class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
+                        Tampilkan Mata Pelajaran Ini di Buku Nilai &amp; Cetak Rapor (E-Rapor)
+                    </label>
+                </div>
+
+                <div class="md:col-span-2">
                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Deskripsi</label>
-                    <textarea name="deskripsi" rows="4"
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">{{ old('deskripsi') }}</textarea>
-                    @error('deskripsi')
-                        <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
-                    @enderror
+                    <textarea name="deskripsi" rows="3"
+                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">{{ old('deskripsi') }}</textarea>
+                    @error('deskripsi') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
                 </div>
             </div>
 

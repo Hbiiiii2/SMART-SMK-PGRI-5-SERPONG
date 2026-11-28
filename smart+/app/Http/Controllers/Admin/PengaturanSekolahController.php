@@ -55,10 +55,15 @@ class PengaturanSekolahController extends Controller
             'izinkan_absen_tanpa_jadwal',
             'absensi_hari_sabtu',
             'absensi_hari_minggu',
+            'dapodik_auto_sync',
         ] as $boolField) {
             if ($request->has($boolField)) {
                 $data[$boolField] = $request->boolean($boolField);
             }
+        }
+
+        if (array_key_exists('dapodik_token', $data) && blank($data['dapodik_token'])) {
+            unset($data['dapodik_token']);
         }
 
         if ($request->hasFile('logo')) {

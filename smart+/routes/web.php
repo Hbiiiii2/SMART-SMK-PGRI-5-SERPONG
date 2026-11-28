@@ -71,6 +71,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kalender', [KalenderController::class, 'index'])->name('kalender.index');
 });
 
+// Verifikasi Publik QR Code Arsip Rapor Digital
+Route::get('/verifikasi-rapor/{token}', [\App\Http\Controllers\Public\RaporVerificationController::class, 'show'])
+    ->name('rapor.verify');
+
 // --- E-Rapor Akademik Terintegrasi ---
 Route::prefix('erapor')->name('erapor.')->middleware(['auth', 'role:super_admin,admin_sekolah,guru,kepala_sekolah'])->group(function () {
     Route::get('/', [\App\Http\Controllers\Erapor\EraporDashboardController::class, 'index'])
@@ -80,6 +84,8 @@ Route::prefix('erapor')->name('erapor.')->middleware(['auth', 'role:super_admin,
     // Buku Nilai Mapel
     Route::prefix('buku-nilai')->name('buku-nilai.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Erapor\BukuNilaiController::class, 'index'])->name('index');
+        Route::post('/daily-block', [\App\Http\Controllers\Erapor\BukuNilaiController::class, 'storeDailyBlock'])->name('block.store');
+        Route::delete('/daily-block/{block}', [\App\Http\Controllers\Erapor\BukuNilaiController::class, 'destroyDailyBlock'])->name('block.destroy');
         Route::post('/item', [\App\Http\Controllers\Erapor\BukuNilaiController::class, 'storeItem'])->name('item.store');
         Route::delete('/item/{id}', [\App\Http\Controllers\Erapor\BukuNilaiController::class, 'destroyItem'])->name('item.destroy');
         Route::post('/update-score', [\App\Http\Controllers\Erapor\BukuNilaiController::class, 'updateScore'])->name('update-score');
@@ -95,12 +101,13 @@ Route::prefix('erapor')->name('erapor.')->middleware(['auth', 'role:super_admin,
         Route::get('/batch/{id}', [\App\Http\Controllers\Erapor\CbtSyncController::class, 'batchDetail'])->name('batch-detail');
     });
 
-    // Rekapitulasi STS, Peringkat & Ekspor
+    // Leger Raport (Rekapitulasi Nilai, Peringkat, PDF & Ekspor)
     Route::prefix('recap')->name('recap.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Erapor\RecapStsController::class, 'index'])->name('index');
         Route::post('/finalize/{kelas}', [\App\Http\Controllers\Erapor\RecapStsController::class, 'finalizeClass'])
             ->middleware('role:super_admin,admin_sekolah,kepala_sekolah')
             ->name('finalize');
+        Route::get('/print/{kelas}', [\App\Http\Controllers\Erapor\RecapStsController::class, 'printPdf'])->name('print');
         Route::get('/export/{kelas}', [\App\Http\Controllers\Erapor\RecapStsController::class, 'exportExcel'])->name('export');
     });
 
@@ -122,6 +129,7 @@ Route::prefix('erapor')->name('erapor.')->middleware(['auth', 'role:super_admin,
             Route::get('/pengaturan', [\App\Http\Controllers\Erapor\CetakRaporController::class, 'pengaturan'])->name('pengaturan');
             Route::post('/pengaturan', [\App\Http\Controllers\Erapor\CetakRaporController::class, 'updatePengaturan'])->name('update-pengaturan');
             Route::post('/pengaturan/homerooms', [\App\Http\Controllers\Erapor\CetakRaporController::class, 'updateHomerooms'])->name('update-homerooms');
+            Route::post('/arsipkan-kelas', [\App\Http\Controllers\Erapor\CetakRaporController::class, 'archiveClass'])->name('archive-class');
         });
         Route::get('/siswa/{siswa}', [\App\Http\Controllers\Erapor\CetakRaporController::class, 'printSiswa'])->name('siswa');
         Route::get('/kelas/{kelas}', [\App\Http\Controllers\Erapor\CetakRaporController::class, 'printKelas'])->name('kelas');
@@ -144,6 +152,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
     Route::put('/ubah-password', [ProfileController::class, 'updatePassword'])->name('password.update');
 
     Route::resource('guru', GuruController::class);
+    Route::resource('jurusan', \App\Http\Controllers\Admin\JurusanController::class);
+    Route::resource('kelas', \App\Http\Controllers\Admin\RombelController::class)->parameters(['kelas' => 'rombel']);
+    Route::prefix('siswa/dapodik')->name('siswa.dapodik.')->group(function () {
+        Route::get('/', [SiswaController::class, 'dapodikIndex'])->name('index');
+        Route::post('/preview', [SiswaController::class, 'dapodikPreview'])->name('preview');
+        Route::post('/import', [SiswaController::class, 'dapodikImport'])->name('import');
+        Route::get('/export', [SiswaController::class, 'dapodikExport'])->name('export');
+        Route::post('/test-api', [SiswaController::class, 'dapodikTestApi'])->name('test-api');
+        Route::post('/sync-api', [SiswaController::class, 'dapodikSyncApi'])->name('sync-api');
+    });
     Route::get('siswa/kenaikan-kelas', [SiswaController::class, 'kenaikanKelas'])->name('siswa.kenaikan-kelas');
     Route::post('siswa/kenaikan-kelas', [SiswaController::class, 'prosesKenaikanKelas'])->name('siswa.proses-kenaikan-kelas');
     Route::resource('siswa', SiswaController::class);
@@ -186,6 +204,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,ad
 
 Route::prefix('guru')->name('guru.')->middleware(['auth', 'role:guru'])->group(function () {
     Route::get('/dashboard', [GuruDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/kelas-lms', [GuruDashboardController::class, 'showKelasLms'])->name('kelas.show');
     Route::get('/jadwal', [GuruJadwalController::class, 'index'])->name('jadwal.index');
     Route::get('/absensi', [GuruAbsensiController::class, 'index'])->name('absensi.index');
     Route::put('/absensi/{absensiId}/status', [GuruAbsensiController::class, 'updateStatus'])->name('absensi.update-status');

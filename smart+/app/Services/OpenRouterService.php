@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PengaturanSekolah;
 use App\Models\Siswa;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -28,9 +29,11 @@ class OpenRouterService
             return $fallback;
         }
 
-        $systemPrompt = "Kamu adalah asisten resmi Wali Kelas SMP Al Madinah (sekolah Islam berkualitas dengan Kurikulum Merdeka). Tugasmu adalah menyusun CATATAN WALI KELAS resmi yang akan dicetak pada lembar rapor siswa.
+        $schoolName = PengaturanSekolah::first()?->nama_sekolah ?: 'SMK PGRI 5 Serpong';
+
+        $systemPrompt = "Kamu adalah asisten resmi Wali Kelas {$schoolName} (Kurikulum Merdeka). Tugasmu adalah menyusun CATATAN WALI KELAS resmi yang akan dicetak pada lembar rapor siswa.
 Pedoman penulisan:
-1. Tulis 1 sampai 2 kalimat singkat, bernada santun, bijaksana, bernafaskan motivasi islami/akhlak mulia, dan konstruktif.
+1. Tulis 1 sampai 2 kalimat singkat, bernada santun, bijaksana, memotivasi, berkarakter baik, dan konstruktif.
 2. Panjang maksimal 220 karakter agar muat di kotak rapor resmi A4.
 3. Selaraskan dengan capaian nilai rata-rata, peringkat, dan catatan presensi (sakit/izin/alpha).
 4. Berikan langsung teks catatan rapor, TANPA tanda kutip dan TANPA kalimat pembuka.";
@@ -46,7 +49,7 @@ Kehadiran: Sakit {$sakit} hari, Izin {$izin} hari, Alpha/Tanpa Keterangan {$alph
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'HTTP-Referer' => config('app.url', 'http://localhost:8000'),
-                'X-Title' => 'SMP Al Madinah SMART+',
+                'X-Title' => $schoolName . ' SMART+',
                 'Content-Type' => 'application/json',
             ])->timeout(12)->post($baseUrl . '/chat/completions', [
                 'model' => $model,

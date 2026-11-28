@@ -15,6 +15,8 @@ class RiwayatKelasSiswa extends Model
         'siswa_id',
         'tahun_ajaran_id',
         'semester',
+        'rombel_id',
+        'dapodik_anggota_rombel_id',
         'kelas',
         'status',
         'catatan',
@@ -28,5 +30,10 @@ class RiwayatKelasSiswa extends Model
     public function tahunAjaran()
     {
         return $this->belongsTo(TahunAjaran::class);
+    }
+
+    public function rombel()
+    {
+        return $this->belongsTo(Rombel::class, 'rombel_id');
     }
 }

@@ -47,7 +47,7 @@ class RekapController extends Controller
             'endDate' => $dateRange['end'],
             'tab' => $tab,
             'groupBy' => $request->group_by ?? 'kelas',
-            'kelasList' => Siswa::when($tahunAjaranFilter, fn($q) => $q->where('tahun_ajaran_id', $tahunAjaranFilter))->distinct()->pluck('kelas')->sort()->values(),
+            'kelasList' => \App\Models\Rombel::classNames($tahunAjaranFilter ? (int) $tahunAjaranFilter : null),
             'mataPelajarans' => MataPelajaran::all(),
             'gurus' => Guru::with('user')->get(),
             'tahunAjarans' => $tahunAjarans,

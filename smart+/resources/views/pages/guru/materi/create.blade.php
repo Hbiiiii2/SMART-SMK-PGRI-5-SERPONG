@@ -20,6 +20,7 @@
         </div>
         <form action="{{ route('guru.materi.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            <input type="hidden" name="redirect_to" value="{{ old('redirect_to', $redirectTo ?? '') }}">
             <div class="p-6">
                 <div class="mb-5">
                     <label class="mb-2 block text-sm font-semibold text-gray-800 dark:text-white/90">Judul Materi <span class="text-error-500">*</span></label>
@@ -27,13 +28,17 @@
                     @error('judul') <span class="mt-1 block text-sm text-error-500">{{ $message }}</span> @enderror
                 </div>
 
+                @php
+                    $defaultKelas = old('kelas', $selectedKelas ?? '');
+                    $defaultMapelId = old('mata_pelajaran_id', $selectedMapelId ?? '');
+                @endphp
                 <div class="mb-5 flex flex-col gap-6 xl:flex-row">
                     <div class="w-full xl:w-1/2">
                         <label class="mb-2 block text-sm font-semibold text-gray-800 dark:text-white/90">Kelas <span class="text-error-500">*</span></label>
                         <select name="kelas" id="kelas" required class="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition-colors focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-400">
                             <option value="">Pilih Kelas</option>
                             @foreach($kelasOptions as $kelas)
-                                <option value="{{ $kelas }}" {{ old('kelas') == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
+                                <option value="{{ $kelas }}" {{ $defaultKelas == $kelas ? 'selected' : '' }}>{{ $kelas }}</option>
                             @endforeach
                         </select>
                         @error('kelas') <span class="mt-1 block text-sm text-error-500">{{ $message }}</span> @enderror
@@ -44,7 +49,7 @@
                         <select name="mata_pelajaran_id" id="mata_pelajaran_id" required class="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none transition-colors focus:border-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-400">
                             <option value="">Pilih Mata Pelajaran</option>
                             @foreach($mapelOptions as $mapel)
-                                <option value="{{ $mapel->id }}" {{ old('mata_pelajaran_id') == $mapel->id ? 'selected' : '' }}>{{ $mapel->nama }}</option>
+                                <option value="{{ $mapel->id }}" {{ $defaultMapelId == $mapel->id ? 'selected' : '' }}>{{ $mapel->nama }}</option>
                             @endforeach
                         </select>
                         @error('mata_pelajaran_id') <span class="mt-1 block text-sm text-error-500">{{ $message }}</span> @enderror
@@ -103,7 +108,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         const kelasSelect = document.getElementById('kelas');
         const mapelSelect = document.getElementById('mata_pelajaran_id');
-        const oldMapelId = "{{ old('mata_pelajaran_id') }}";
+        const oldMapelId = "{{ $defaultMapelId }}";
 
         function updateMataPelajaran() {
             const kelas = kelasSelect.value;

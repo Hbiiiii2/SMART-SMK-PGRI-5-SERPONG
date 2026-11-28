@@ -78,6 +78,25 @@ class EraporFeatureTest extends TestCase
             'nama_wali_kelas' => $this->guru->nama_lengkap,
             'nip_wali_kelas' => $this->guru->nip,
         ]);
+
+        // Assign default teaching schedule for $this->guru
+        $lokasi = \App\Models\Lokasi::create([
+            'nama' => 'Kampus Utama',
+            'latitude' => -6.2,
+            'longitude' => 106.8,
+            'radius' => 100,
+        ]);
+
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'mata_pelajaran_id' => $this->mapel->id,
+            'guru_id' => $this->guru->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Senin',
+            'jam_mulai' => '07:00',
+            'jam_selesai' => '08:30',
+        ]);
     }
 
     public function test_guest_cannot_access_erapor(): void
@@ -175,8 +194,20 @@ class EraporFeatureTest extends TestCase
             ->get('/erapor/recap?kelas=VII - Ibnu Taimiyah');
 
         $response->assertStatus(200)
-            ->assertSee('Rekapitulasi Nilai STS')
+            ->assertSee('Leger Raport')
+            ->assertSee('Cetak PDF')
             ->assertSee('Budi Santoso');
+
+        // Verify landscape PDF print view renders Leger Raport cleanly
+        $printPdfRes = $this->actingAs($this->teacherUser)
+            ->get('/erapor/recap/print/VII - Ibnu Taimiyah');
+        $printPdfRes->assertStatus(200)
+            ->assertSee('LEGER RAPORT')
+            ->assertSee('Budi Santoso')
+            ->assertSee('Matematika')
+            ->assertSee('Rata-rata Kelas')
+            ->assertSee('data:image/png;base64,')
+            ->assertSee('Wali Kelas');
     }
 
     public function test_export_class_sts_returns_excel_stream(): void
@@ -400,12 +431,12 @@ class EraporFeatureTest extends TestCase
         $this->actingAs($this->teacherUser)
             ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id);
 
-        $stsItem = \App\Models\AssessmentItem::whereHas('component', fn($q) => $q->where('code', 'sts'))->first();
+        $asatItem = \App\Models\AssessmentItem::whereHas('component', fn($q) => $q->where('code', 'asat'))->first();
 
         // Student initial low score = 65
         \App\Models\StudentAssessmentScore::create([
             'siswa_id' => $this->siswa->id,
-            'assessment_item_id' => $stsItem->id,
+            'assessment_item_id' => $asatItem->id,
             'score' => 65.0,
             'source_type' => 'cbt_api',
         ]);
@@ -418,7 +449,7 @@ class EraporFeatureTest extends TestCase
                     [
                         'id' => 999,
                         'exam_external_id' => 'REM-STS-001',
-                        'exam_name' => 'Remedial STS Matematika',
+                        'exam_name' => 'Remedial ASAT Matematika',
                         'student_nisn' => '0098765432',
                         'student_name' => 'Budi Santoso',
                         'class_name' => 'VII - Ibnu Taimiyah',
@@ -436,7 +467,7 @@ class EraporFeatureTest extends TestCase
                 'tahun_ajaran_id' => $this->tahun->id,
                 'semester' => 'Ganjil',
                 'kelas' => 'VII - Ibnu Taimiyah',
-                'target_assessment_item_id' => $stsItem->id,
+                'target_assessment_item_id' => $asatItem->id,
                 'sync_mode' => 'highest',
             ]);
 
@@ -445,7 +476,7 @@ class EraporFeatureTest extends TestCase
         // Score should now be 85.0 (the higher score)
         $this->assertDatabaseHas('student_assessment_scores', [
             'siswa_id' => $this->siswa->id,
-            'assessment_item_id' => $stsItem->id,
+            'assessment_item_id' => $asatItem->id,
             'score' => 85.0,
         ]);
     }
@@ -550,7 +581,7 @@ class EraporFeatureTest extends TestCase
         $printRes = $this->actingAs($this->teacherUser)->get('/erapor/cetak-rapor/siswa/' . $this->siswa->id . '?jenis_rapor=sts');
         $printRes->assertStatus(200)
             ->assertSee('LAPORAN PENILAIAN SUMATIF TENGAH SEMESTER')
-            ->assertSee('SMP AL - MADINAH')
+            ->assertSee('SMK PGRI 5 SERPONG')
             ->assertSee('BUDI SANTOSO');
     }
 
@@ -596,6 +627,24 @@ class EraporFeatureTest extends TestCase
 
     public function test_capaian_kompetensi_can_be_viewed_saved_and_auto_generated(): void
     {
+        $lokasi = \App\Models\Lokasi::create([
+            'nama' => 'Gedung Utama',
+            'latitude' => -6.2,
+            'longitude' => 106.8,
+            'radius' => 100,
+        ]);
+
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'mata_pelajaran_id' => $this->mapel->id,
+            'guru_id' => $this->guru->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Senin',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+        ]);
+
         // 1. View form
         $res = $this->actingAs($this->teacherUser)->get('/erapor/capaian-kompetensi?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id);
         $res->assertStatus(200)
@@ -645,6 +694,202 @@ class EraporFeatureTest extends TestCase
         $this->assertNotNull($summary->capaian_kompetensi);
         $this->assertStringContainsString('Matematika', $summary->capaian_kompetensi);
         $this->assertStringContainsString('telah mencapai tujuan pembelajaran', $summary->capaian_kompetensi);
+    }
+
+    public function test_capaian_kompetensi_is_strictly_scoped_to_assigned_teacher_schedule(): void
+    {
+        $mapel2 = MataPelajaran::create([
+            'nama' => 'Bahasa Indonesia',
+            'kode' => 'BIN',
+        ]);
+
+        $lokasi = \App\Models\Lokasi::create([
+            'nama' => 'Gedung Utama',
+            'latitude' => -6.2,
+            'longitude' => 106.8,
+            'radius' => 100,
+        ]);
+
+        $guruBUser = User::factory()->create(['role' => 'guru']);
+        $guruB = \App\Models\Guru::create([
+            'user_id' => $guruBUser->id,
+            'nip' => '198602022011012002',
+            'nama_lengkap' => 'Guru Bahasa Indonesia',
+            'jenis_kelamin' => 'P',
+        ]);
+
+        $guruCUser = User::factory()->create(['role' => 'guru']);
+        \App\Models\Guru::create([
+            'user_id' => $guruCUser->id,
+            'nip' => '198703032012011003',
+            'nama_lengkap' => 'Guru Tanpa Jadwal',
+            'jenis_kelamin' => 'L',
+        ]);
+
+        $studentLainUser = User::factory()->create(['role' => 'siswa']);
+        $siswaLain = Siswa::create([
+            'user_id' => $studentLainUser->id,
+            'nisn' => '0098765488',
+            'nama_lengkap' => 'Siswa Kelas Sebelah',
+            'jenis_kelamin' => 'P',
+            'kelas' => 'VIII - Al Ghazali',
+            'tahun_ajaran_id' => $this->tahun->id,
+        ]);
+
+        // Guru A teaches Matematika in VII - Ibnu Taimiyah (and is Wali Kelas there)
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'mata_pelajaran_id' => $this->mapel->id,
+            'guru_id' => $this->guru->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Senin',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+        ]);
+
+        // Guru B teaches Bahasa Indonesia in VII - Ibnu Taimiyah and Matematika in VIII - Al Ghazali
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'mata_pelajaran_id' => $mapel2->id,
+            'guru_id' => $guruB->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Selasa',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+        ]);
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VIII - Al Ghazali',
+            'mata_pelajaran_id' => $this->mapel->id,
+            'guru_id' => $guruB->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Rabu',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+        ]);
+
+        // 1. Guru A default view only shows their scheduled class & mapel, plus fixed header metadata
+        $indexRes = $this->actingAs($this->teacherUser)->get('/erapor/capaian-kompetensi');
+        $indexRes->assertStatus(200)
+            ->assertSee('Matematika')
+            ->assertSee('VII - Ibnu Taimiyah')
+            ->assertSee('2026/2027')
+            ->assertDontSee('Bahasa Indonesia')
+            ->assertDontSee('VIII - Al Ghazali')
+            ->assertDontSee('SMP Al Madinah');
+
+        // 2. Guru A cannot GET Guru B's subject in same class (even if Wali Kelas)
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/capaian-kompetensi?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $mapel2->id)
+            ->assertStatus(403);
+
+        // 3. Guru A cannot GET their own subject name in Guru B's class
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/capaian-kompetensi?kelas=VIII - Al Ghazali&mata_pelajaran_id=' . $this->mapel->id)
+            ->assertStatus(403);
+
+        // 4. Guru A cannot POST /save for Guru B's schedule
+        $this->actingAs($this->teacherUser)->post('/erapor/capaian-kompetensi/save', [
+            'mata_pelajaran_id' => $mapel2->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'capaian' => [
+                $this->siswa->id => 'Percobaan input ilegal mapel guru lain.',
+            ],
+        ])->assertStatus(403);
+
+        $this->actingAs($this->teacherUser)->post('/erapor/capaian-kompetensi/save', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'kelas' => 'VIII - Al Ghazali',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'capaian' => [
+                $siswaLain->id => 'Percobaan input ilegal kelas guru lain.',
+            ],
+        ])->assertStatus(403);
+
+        $this->assertDatabaseMissing('subject_grade_summaries', [
+            'siswa_id' => $this->siswa->id,
+            'mata_pelajaran_id' => $mapel2->id,
+        ]);
+        $this->assertDatabaseMissing('subject_grade_summaries', [
+            'siswa_id' => $siswaLain->id,
+            'mata_pelajaran_id' => $this->mapel->id,
+        ]);
+
+        // 5. Guru A cannot POST /auto-generate for Guru B's schedule
+        $this->actingAs($this->teacherUser)->post('/erapor/capaian-kompetensi/auto-generate', [
+            'mata_pelajaran_id' => $mapel2->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+        ])->assertStatus(403);
+
+        // 6. Guru A cannot inject out-of-class student IDs even on their valid schedule POST
+        $this->actingAs($this->teacherUser)->post('/erapor/capaian-kompetensi/save', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'capaian' => [
+                $this->siswa->id => 'Valid untuk siswa di kelas VII - Ibnu Taimiyah.',
+                $siswaLain->id => 'Injected student from another class.',
+            ],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('subject_grade_summaries', [
+            'siswa_id' => $this->siswa->id,
+            'mata_pelajaran_id' => $this->mapel->id,
+            'capaian_kompetensi' => 'Valid untuk siswa di kelas VII - Ibnu Taimiyah.',
+        ]);
+        $this->assertDatabaseMissing('subject_grade_summaries', [
+            'siswa_id' => $siswaLain->id,
+            'mata_pelajaran_id' => $this->mapel->id,
+        ]);
+
+        // 7. Guru C (0 schedules) gets clean empty state on GET, and 403 when targeting a class/mapel
+        $this->actingAs($guruCUser)->get('/erapor/capaian-kompetensi')
+            ->assertStatus(200)
+            ->assertSee('Belum Ada Jadwal Mengajar Terdaftar');
+
+        $this->actingAs($guruCUser)
+            ->get('/erapor/capaian-kompetensi?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id)
+            ->assertStatus(403);
+
+        $this->actingAs($guruCUser)->post('/erapor/capaian-kompetensi/save', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'capaian' => [
+                $this->siswa->id => 'Guru tanpa jadwal mencoba simpan.',
+            ],
+        ])->assertStatus(403);
+
+        // 8. Admin / operator retains full access to all classes & subjects
+        $this->actingAs($this->adminUser)
+            ->get('/erapor/capaian-kompetensi?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $mapel2->id)
+            ->assertStatus(200)
+            ->assertSee('Bahasa Indonesia');
+
+        $this->actingAs($this->adminUser)->post('/erapor/capaian-kompetensi/save', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'kelas' => 'VIII - Al Ghazali',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'capaian' => [
+                $siswaLain->id => 'Disimpan oleh Admin Sekolah.',
+            ],
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('subject_grade_summaries', [
+            'siswa_id' => $siswaLain->id,
+            'mata_pelajaran_id' => $this->mapel->id,
+            'capaian_kompetensi' => 'Disimpan oleh Admin Sekolah.',
+        ]);
     }
 
     public function test_ai_catatan_wali_kelas_endpoint_returns_generated_note(): void
@@ -816,10 +1061,13 @@ class EraporFeatureTest extends TestCase
         \App\Models\AbsensiSiswa::create(['siswa_id' => $this->siswa->id, 'jadwal_id' => $jadwal2->id, 'tanggal' => '2026-10-14', 'status' => 'Alfa']);
         \App\Models\AbsensiSiswa::create(['siswa_id' => $this->siswa->id, 'jadwal_id' => $jadwal1->id, 'tanggal' => '2026-10-15', 'status' => 'Alfa']);
 
-        // STEP 1: Guru opens Buku Nilai to auto-provision assessment items (UH 1-3, Tugas 1-6, Praktek 1-2, Projek 1-2, Portofolio 1-2, STS 1)
+        // STEP 1: Guru opens Buku Nilai to auto-provision NH 1 (Tugas 1, Sumatif Harian 1) & Nilai Murni ASAT
         $bukuNilaiRes = $this->actingAs($this->teacherUser)
             ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id);
-        $bukuNilaiRes->assertStatus(200);
+        $bukuNilaiRes->assertStatus(200)
+            ->assertSee('NILAI HARIAN 1')
+            ->assertSee('Rata-rata')
+            ->assertSee('Nilai Murni ASAT');
 
         $items = \App\Models\AssessmentItem::with('component')
             ->where('mata_pelajaran_id', $this->mapel->id)
@@ -827,38 +1075,27 @@ class EraporFeatureTest extends TestCase
             ->where('semester', 'Ganjil')
             ->get();
 
-        $this->assertCount(16, $items);
+        $this->assertCount(3, $items);
 
-        // STEP 2: Guru inputs scores for Siswa 1 (Budi Santoso) & Siswa 2 (Siti Rahmawati)
-        $budiScores = [
-            'uh' => [1 => 85, 2 => 90, 3 => 88],
-            'tugas' => [1 => 92, 2 => 89, 3 => 94, 4 => 90, 5 => 87, 6 => 91],
-            'praktek' => [1 => 86, 2 => 88],
-            'projek' => [1 => 93, 2 => 95],
-            'portofolio' => [1 => 84, 2 => 86],
-            'sts' => [1 => 90],
-        ];
+        // STEP 2: Guru inputs scores for Siswa 1 (Budi Santoso -> 90.0) & Siswa 2 (Siti Rahmawati -> 80.0)
+        $tugasItem = $items->first(fn ($i) => $i->resolveWeightGroup() === 'tugas');
+        $shItem = $items->first(fn ($i) => $i->resolveWeightGroup() === 'sumatif');
+        $asatItem = $items->first(fn ($i) => $i->resolveWeightGroup() === 'asat');
 
-        foreach ($items as $item) {
-            $code = $item->component->code;
-            $seq = $item->sequence;
-            if (isset($budiScores[$code][$seq])) {
-                $res = $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
-                    'siswa_id' => $this->siswa->id,
-                    'assessment_item_id' => $item->id,
-                    'score' => $budiScores[$code][$seq],
-                ]);
-                $res->assertStatus(200)->assertJson(['success' => true]);
-            }
+        foreach ([
+            [$this->siswa->id, $tugasItem->id, 90],
+            [$this->siswa->id, $shItem->id, 90],
+            [$this->siswa->id, $asatItem->id, 90],
+            [$siswa2->id, $tugasItem->id, 80],
+            [$siswa2->id, $shItem->id, 80],
+            [$siswa2->id, $asatItem->id, 80],
+        ] as [$sid, $iid, $sc]) {
+            $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+                'siswa_id' => $sid,
+                'assessment_item_id' => $iid,
+                'score' => $sc,
+            ])->assertStatus(200)->assertJson(['success' => true]);
         }
-
-        // Input STS score 80 for Siswa 2 so Budi is Rank 1 (90) and Siti is Rank 2 (80), class average = 85.00
-        $stsItem = $items->first(fn ($i) => $i->component->code === 'sts' && $i->sequence === 1);
-        $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
-            'siswa_id' => $siswa2->id,
-            'assessment_item_id' => $stsItem->id,
-            'score' => 80,
-        ])->assertStatus(200);
 
         // STEP 3: Guru inputs Capaian Kompetensi
         $this->actingAs($this->teacherUser)->post('/erapor/capaian-kompetensi/save', [
@@ -923,13 +1160,16 @@ class EraporFeatureTest extends TestCase
         $this->assertStringContainsString('2 Hari', $stsHtml); // 2 Hari Tanpa Keterangan (Alfa)
         $this->assertStringContainsString('Wali Murid', $stsHtml);
 
-        // STEP 7: Operator / Wali Kelas prints Opsi 2: Rapor UAS (Per Siswa)
+        // STEP 7: Operator / Wali Kelas prints Opsi 2: Rapor ASAT/UAS (Per Siswa)
         $uasPrintRes = $this->actingAs($operatorUser)
             ->get('/erapor/cetak-rapor/siswa/' . $this->siswa->id . '?jenis_rapor=uas&semester=Ganjil&tahun_ajaran_id=' . $this->tahun->id);
         $uasPrintRes->assertStatus(200);
         $uasHtml = $uasPrintRes->getContent();
 
-        $this->assertStringContainsString('LAPORAN CAPAIAN HASIL BELAJAR PESERTA DIDIK', $uasHtml);
+        $this->assertStringContainsString('LAPORAN HASIL BELAJAR', $uasHtml);
+        $this->assertStringContainsString('Nilai', $uasHtml);
+        $this->assertStringContainsString('90.0', $uasHtml);
+        $this->assertStringNotContainsString('Formatif', $uasHtml);
         $this->assertStringContainsString('Sangat mahir dalam operasi aljabar dan aritmatika sosial.', $uasHtml);
         $this->assertStringContainsString('Pertahankan prestasi dan teruslah menjadi teladan di kelas.', $uasHtml);
         $this->assertStringContainsString('Peringkat ke-1', $uasHtml);
@@ -1003,7 +1243,7 @@ class EraporFeatureTest extends TestCase
         $cetakGuruRes = $this->actingAs($this->teacherUser)->get('/erapor/cetak-rapor?kelas=VII - Ibnu Taimiyah');
         $cetakGuruRes->assertStatus(200)
             ->assertDontSee('Format & TTD Rapor')
-            ->assertDontSee('Buka Rekap STS untuk Finalisasi');
+            ->assertDontSee('Buka Leger Raport untuk Finalisasi');
 
         $rekapGuruRes = $this->actingAs($this->teacherUser)->get('/erapor/recap?kelas=VII - Ibnu Taimiyah');
         $rekapGuruRes->assertStatus(200)
@@ -1050,6 +1290,525 @@ class EraporFeatureTest extends TestCase
             'semester' => 'Ganjil',
             'status' => 'final',
         ]);
+    }
+
+    public function test_asat_grading_formula_nh1_nh2_sh_avg_and_final_score_with_one_decimal(): void
+    {
+        // Open Buku Nilai to auto-provision NH 1 (Tugas 1, Sumatif Harian 1) & Nilai Murni ASAT
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id)
+            ->assertStatus(200);
+
+        // Add Tugas 2 & UH 1 inside NH 1
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/item', [
+            'weight_group' => 'tugas',
+            'daily_block' => 1,
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'title' => 'Tugas 2',
+        ])->assertRedirect();
+
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/item', [
+            'weight_group' => 'sumatif',
+            'daily_block' => 1,
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'title' => 'Ujian Harian 1',
+        ])->assertRedirect();
+
+        // Add optional NH 2 block
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/daily-block', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+        ])->assertRedirect();
+
+        $items = \App\Models\AssessmentItem::where('mata_pelajaran_id', $this->mapel->id)
+            ->where('tahun_ajaran_id', $this->tahun->id)
+            ->where('semester', 'Ganjil')
+            ->get();
+
+        $nh1Tugas1 = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'tugas' && $i->title === 'Tugas 1');
+        $nh1Tugas2 = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'tugas' && $i->title === 'Tugas 2');
+        $nh1Sh1 = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'sumatif' && $i->title === 'Sumatif Harian 1');
+        $nh1Uh1 = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'sumatif' && $i->title === 'Ujian Harian 1');
+        $nh2Tugas1 = $items->first(fn ($i) => $i->daily_block === 2 && $i->weight_group === 'tugas');
+        $nh2Sh1 = $items->first(fn ($i) => $i->daily_block === 2 && $i->weight_group === 'sumatif');
+        $asatItem = $items->first(fn ($i) => $i->weight_group === 'asat');
+
+        // NH 1: Tugas (80, 90 -> 85.0), Sumatif/UH (70, 80 -> 75.0) => 40%*85 + 60%*75 = 79.0
+        // NH 2: Tugas (85.0), Sumatif/UH (95.0) => 40%*85 + 60%*95 = 91.0
+        // SH avg = (70 + 80 + 95) / 3 = 81.7
+        // ASAT = 85.0 => Final = (79.0 + 91.0 + 85.0) / 3 = 85.0
+        foreach ([
+            [$nh1Tugas1->id, 80],
+            [$nh1Tugas2->id, 90],
+            [$nh1Sh1->id, 70],
+            [$nh1Uh1->id, 80],
+            [$nh2Tugas1->id, 85],
+            [$nh2Sh1->id, 95],
+            [$asatItem->id, 85],
+        ] as [$itemId, $score]) {
+            $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+                'siswa_id' => $this->siswa->id,
+                'assessment_item_id' => $itemId,
+                'score' => $score,
+            ])->assertStatus(200);
+        }
+
+        $summary = \App\Models\SubjectGradeSummary::where('siswa_id', $this->siswa->id)
+            ->where('mata_pelajaran_id', $this->mapel->id)
+            ->first();
+
+        $this->assertNotNull($summary);
+        $this->assertEquals(79.0, $summary->daily_scores['1']['final']);
+        $this->assertEquals(91.0, $summary->daily_scores['2']['final']);
+        $this->assertEquals(81.7, $summary->sh_avg);
+        $this->assertEquals(85.0, $summary->asat_score);
+        $this->assertEquals(85.0, $summary->final_score);
+
+        // Verify clean ASAT/UAS print view renders Nilai Akhir (85.0) + Capaian Kompetensi without Formatif column
+        $printRes = $this->actingAs($this->teacherUser)
+            ->get('/erapor/cetak-rapor/siswa/' . $this->siswa->id . '?jenis_rapor=uas');
+        $printRes->assertStatus(200)
+            ->assertSee('85.0')
+            ->assertSee('Capaian Pembelajaran')
+            ->assertDontSee('Formatif');
+    }
+
+    public function test_uas_print_matches_two_page_format_with_ekskul_keputusan_and_fase(): void
+    {
+        $bd = \App\Models\Jurusan::create([
+            'kode' => 'BD',
+            'singkatan' => 'BD',
+            'nama' => 'Bisnis Digital',
+            'is_aktif' => true,
+        ]);
+
+        $rombelXiBd = \App\Models\Rombel::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+            'nama' => 'XI BD',
+            'tingkat' => 'XI',
+            'jurusan_id' => $bd->id,
+            'kompetensi_keahlian' => 'Bisnis Digital',
+            'is_aktif' => true,
+        ]);
+
+        $siswaBd = Siswa::create([
+            'nisn' => '0088123456',
+            'nipd' => '2425.152',
+            'nama_lengkap' => 'Sifa Faujiah',
+            'jenis_kelamin' => 'P',
+            'kelas' => 'XI BD',
+            'rombel_id' => $rombelXiBd->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'status_siswa' => 'aktif',
+        ]);
+
+        \App\Models\ClassHomeroom::create([
+            'kelas' => 'XI BD',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'guru_id' => $this->guru->id,
+            'nama_wali_kelas' => 'M. Afifuddin Nur, S.Pd',
+            'nip_wali_kelas' => '-',
+        ]);
+
+        \App\Models\SubjectGradeSummary::create([
+            'siswa_id' => $siswaBd->id,
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+            'kelas' => 'XI BD',
+            'asat_score' => 83.0,
+            'final_score' => 83.0,
+            'capaian_kompetensi' => 'Menunjukan penguasaan yang baik dalam Bidang kajian Analisis Data.',
+            'status' => 'final',
+        ]);
+
+        $this->actingAs($this->adminUser)->post(route('erapor.cetak.save-catatan-wali'), [
+            'kelas' => 'XI BD',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+            'catatan' => [
+                $siswaBd->id => 'Ayo, maksimalkan potensimu di semester depan!',
+            ],
+            'ekskul' => [
+                $siswaBd->id => [
+                    ['nama' => 'Tari', 'keterangan' => 'A'],
+                    ['nama' => 'Paskibra', 'keterangan' => 'A'],
+                    ['nama' => '', 'keterangan' => ''],
+                ],
+            ],
+            'keputusan_status' => [
+                $siswaBd->id => '',
+            ],
+            'keputusan_kelas' => [
+                $siswaBd->id => '',
+            ],
+        ])->assertRedirect();
+
+        $res = $this->actingAs($this->adminUser)->get(route('erapor.cetak.siswa', [
+            'siswa' => $siswaBd->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+            'jenis_rapor' => 'uas',
+        ]));
+
+        $res->assertStatus(200)
+            ->assertSee('LAPORAN HASIL BELAJAR')
+            ->assertSee('A. Nilai Akademik')
+            ->assertSee('Capaian Pembelajaran')
+            ->assertSee('Bisnis Digital')
+            ->assertSee('Fase')
+            ->assertSee('F')
+            ->assertSee('uas-page-2')
+            ->assertSee('B. Ekstrakurikuler')
+            ->assertSee('Tari')
+            ->assertSee('Paskibra')
+            ->assertSee('C. Ketidakhadiran')
+            ->assertSee('D. Catatan Wali Kelas')
+            ->assertSee('Ayo, maksimalkan potensimu di semester depan!')
+            ->assertSee('Keputusan :')
+            ->assertSee('Naik ke kelas')
+            ->assertSee('12 (Dua belas)')
+            ->assertSee('Tinggal di kelas')
+            ->assertSee('Orang Tua/Wali,');
+    }
+
+    public function test_cetak_rapor_filter_shows_only_uts_on_ganjil_and_only_uas_on_genap_and_syncs_catatan_to_active_archive(): void
+    {
+        // Default Ganjil filter -> shows only Rapor UTS
+        $ganjilRes = $this->actingAs($this->adminUser)->get('/erapor/cetak-rapor?kelas=VII - Ibnu Taimiyah&tahun_ajaran_id=' . $this->tahun->id);
+        $ganjilRes->assertStatus(200)
+            ->assertSee('Cetak Semua Rapor UTS')
+            ->assertSee('Cetak Rapor UTS')
+            ->assertDontSee('Cetak Semua Rapor UAS')
+            ->assertDontSee('Cetak Rapor UAS');
+
+        // Genap filter -> shows only Rapor UAS
+        $genapRes = $this->actingAs($this->adminUser)->get('/erapor/cetak-rapor?kelas=VII - Ibnu Taimiyah&semester=Genap&tahun_ajaran_id=' . $this->tahun->id);
+        $genapRes->assertStatus(200)
+            ->assertSee('Cetak Semua Rapor UAS')
+            ->assertSee('Cetak Rapor UAS')
+            ->assertDontSee('Cetak Semua Rapor UTS')
+            ->assertDontSee('Cetak Rapor UTS');
+
+        // Archive class for active year Genap first
+        $this->actingAs($this->adminUser)->post(route('erapor.cetak.archive-class'), [
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+            'jenis_rapor' => 'uas',
+        ])->assertRedirect();
+
+        // Update Catatan Wali Kelas & Ekskul AFTER archive was frozen (active year + active student)
+        $this->actingAs($this->teacherUser)->post(route('erapor.cetak.save-catatan-wali'), [
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+            'catatan' => [
+                $this->siswa->id => 'Catatan terbaru langsung tersinkron ke arsip aktif.',
+            ],
+            'ekskul' => [
+                $this->siswa->id => [
+                    ['nama' => 'Robotik', 'keterangan' => 'A'],
+                ],
+            ],
+        ])->assertRedirect();
+
+        // Print UAS -> must reflect the newly saved note & ekstrakurikuler immediately
+        $uasPrint = $this->actingAs($this->adminUser)->get(route('erapor.cetak.siswa', [
+            'siswa' => $this->siswa->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Genap',
+        ]));
+        $uasPrint->assertStatus(200)
+            ->assertSee('LAPORAN HASIL BELAJAR')
+            ->assertSee('Catatan terbaru langsung tersinkron ke arsip aktif.')
+            ->assertSee('Robotik');
+    }
+
+    public function test_partial_nh_block_keeps_40_60_weights_and_empty_nh2_is_ignored(): void
+    {
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id);
+
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/daily-block', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+        ])->assertRedirect();
+
+        $items = \App\Models\AssessmentItem::where('mata_pelajaran_id', $this->mapel->id)
+            ->where('tahun_ajaran_id', $this->tahun->id)
+            ->where('semester', 'Ganjil')
+            ->get();
+
+        $nh1Tugas1 = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'tugas');
+        $asatItem = $items->first(fn ($i) => $i->weight_group === 'asat');
+
+        // Fill only Tugas in NH 1 (80), leave Sumatif empty => 40% * 80 + 60% * 0 = 32.0
+        // Leave NH 2 completely empty => ignored in AVERAGE
+        // ASAT = 90 => Final = (32.0 + 90.0) / 2 = 61.0
+        $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+            'siswa_id' => $this->siswa->id,
+            'assessment_item_id' => $nh1Tugas1->id,
+            'score' => 80,
+        ])->assertStatus(200);
+
+        $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+            'siswa_id' => $this->siswa->id,
+            'assessment_item_id' => $asatItem->id,
+            'score' => 90,
+        ])->assertStatus(200);
+
+        $summary = \App\Models\SubjectGradeSummary::where('siswa_id', $this->siswa->id)
+            ->where('mata_pelajaran_id', $this->mapel->id)
+            ->first();
+
+        $this->assertEquals(32.0, $summary->daily_scores['1']['final']);
+        $this->assertNull($summary->daily_scores['2']['final']);
+        $this->assertEquals(61.0, $summary->final_score);
+    }
+
+    public function test_score_range_descriptions_for_asat_report(): void
+    {
+        $descA = \App\Http\Controllers\Erapor\CetakRaporController::generateDeskripsi('Matematika', 92.5, 'A');
+        $descB = \App\Http\Controllers\Erapor\CetakRaporController::generateDeskripsi('Matematika', 83.0, 'B');
+        $descC = \App\Http\Controllers\Erapor\CetakRaporController::generateDeskripsi('Matematika', 74.5, 'C');
+        $descD = \App\Http\Controllers\Erapor\CetakRaporController::generateDeskripsi('Matematika', 62.0, 'D');
+
+        $this->assertStringContainsString('sangat baik dengan pemahaman materi Matematika', $descA);
+        $this->assertStringContainsString('baik dengan pemahaman materi Matematika', $descB);
+        $this->assertStringContainsString('cukup baik pada materi Matematika', $descC);
+        $this->assertStringContainsString('Memerlukan bimbingan', $descD);
+    }
+
+    public function test_teacher_can_add_and_delete_optional_daily_block_and_recalculates_grades(): void
+    {
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id);
+
+        // Add NH 2
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/daily-block', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+        ])->assertRedirect();
+
+        $items = \App\Models\AssessmentItem::where('mata_pelajaran_id', $this->mapel->id)
+            ->where('tahun_ajaran_id', $this->tahun->id)
+            ->where('semester', 'Ganjil')
+            ->get();
+
+        $nh1Tugas = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'tugas');
+        $nh1Sh = $items->first(fn ($i) => $i->daily_block === 1 && $i->weight_group === 'sumatif');
+        $nh2Tugas = $items->first(fn ($i) => $i->daily_block === 2 && $i->weight_group === 'tugas');
+        $nh2Sh = $items->first(fn ($i) => $i->daily_block === 2 && $i->weight_group === 'sumatif');
+        $asatItem = $items->first(fn ($i) => $i->weight_group === 'asat');
+
+        foreach ([
+            [$nh1Tugas->id, 80],
+            [$nh1Sh->id, 80],
+            [$nh2Tugas->id, 100],
+            [$nh2Sh->id, 100],
+            [$asatItem->id, 90],
+        ] as [$iid, $sc]) {
+            $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+                'siswa_id' => $this->siswa->id,
+                'assessment_item_id' => $iid,
+                'score' => $sc,
+            ])->assertStatus(200);
+        }
+
+        // Before deleting NH 2: (80 + 100 + 90) / 3 = 90.0
+        $summaryBefore = \App\Models\SubjectGradeSummary::where('siswa_id', $this->siswa->id)
+            ->where('mata_pelajaran_id', $this->mapel->id)
+            ->first();
+        $this->assertEquals(90.0, $summaryBefore->final_score);
+
+        // Cannot delete NH 1
+        $this->actingAs($this->teacherUser)->delete('/erapor/buku-nilai/daily-block/1', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+        ])->assertRedirect()->assertSessionHas('error');
+
+        // Delete NH 2 => recalculates to (80 + 90) / 2 = 85.0
+        $this->actingAs($this->teacherUser)->delete('/erapor/buku-nilai/daily-block/2', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+        ])->assertRedirect()->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('assessment_items', [
+            'mata_pelajaran_id' => $this->mapel->id,
+            'daily_block' => 2,
+        ]);
+
+        $summaryAfter = \App\Models\SubjectGradeSummary::where('siswa_id', $this->siswa->id)
+            ->where('mata_pelajaran_id', $this->mapel->id)
+            ->first();
+        $this->assertEquals(85.0, $summaryAfter->final_score);
+    }
+
+    public function test_buku_nilai_filter_and_mutations_are_strictly_scoped_to_teacher_schedule(): void
+    {
+        $mapel2 = MataPelajaran::create([
+            'nama' => 'Bahasa Indonesia',
+            'kode' => 'BIN',
+        ]);
+
+        $lokasi = \App\Models\Lokasi::first();
+
+        $guruBUser = User::factory()->create(['role' => 'guru']);
+        $guruB = \App\Models\Guru::create([
+            'user_id' => $guruBUser->id,
+            'nip' => '198602022011012005',
+            'nama_lengkap' => 'Guru Mapel Lain',
+            'jenis_kelamin' => 'P',
+        ]);
+
+        $guruCUser = User::factory()->create(['role' => 'guru']);
+        \App\Models\Guru::create([
+            'user_id' => $guruCUser->id,
+            'nip' => '198703032012011006',
+            'nama_lengkap' => 'Guru Tanpa Jadwal Buku Nilai',
+            'jenis_kelamin' => 'L',
+        ]);
+
+        $studentLainUser = User::factory()->create(['role' => 'siswa']);
+        $siswaLain = Siswa::create([
+            'user_id' => $studentLainUser->id,
+            'nisn' => '0098765477',
+            'nama_lengkap' => 'Siswa Kelas Sebelah Buku Nilai',
+            'jenis_kelamin' => 'P',
+            'kelas' => 'VIII - Al Ghazali',
+            'tahun_ajaran_id' => $this->tahun->id,
+        ]);
+
+        // Ensure VIII - Al Ghazali also exists in Rombel so admin sees it
+        \App\Models\Rombel::create([
+            'nama' => 'VIII - Al Ghazali',
+            'tingkat' => 'VIII',
+            'tahun_ajaran_id' => $this->tahun->id,
+        ]);
+
+        // Guru B teaches Bahasa Indonesia in VII - Ibnu Taimiyah and Matematika in VIII - Al Ghazali
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'mata_pelajaran_id' => $mapel2->id,
+            'guru_id' => $guruB->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Selasa',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+        ]);
+        \App\Models\Jadwal::create([
+            'tahun_ajaran_id' => $this->tahun->id,
+            'kelas' => 'VIII - Al Ghazali',
+            'mata_pelajaran_id' => $this->mapel->id,
+            'guru_id' => $guruB->id,
+            'lokasi_id' => $lokasi->id,
+            'hari' => 'Rabu',
+            'jam_mulai' => '07:30',
+            'jam_selesai' => '09:00',
+        ]);
+
+        // 1. Guru A GET /erapor/buku-nilai ONLY renders their scheduled class & subject
+        $indexRes = $this->actingAs($this->teacherUser)->get('/erapor/buku-nilai');
+        $indexRes->assertStatus(200)
+            ->assertSee('VII - Ibnu Taimiyah')
+            ->assertSee('Matematika')
+            ->assertDontSee('VIII - Al Ghazali')
+            ->assertDontSee('Bahasa Indonesia');
+
+        // 2. Guru A cannot GET Guru B's (VII - Ibnu Taimiyah, Bahasa Indonesia) or (VIII - Al Ghazali, Matematika)
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $mapel2->id)
+            ->assertStatus(403);
+
+        $this->actingAs($this->teacherUser)
+            ->get('/erapor/buku-nilai?kelas=VIII - Al Ghazali&mata_pelajaran_id=' . $this->mapel->id)
+            ->assertStatus(403);
+
+        // Create AssessmentItems for Matematika and Bahasa Indonesia via admin/Guru B
+        $this->actingAs($guruBUser)->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $mapel2->id)->assertStatus(200);
+        $this->actingAs($guruBUser)->get('/erapor/buku-nilai?kelas=VIII - Al Ghazali&mata_pelajaran_id=' . $this->mapel->id)->assertStatus(200);
+
+        $binItem = \App\Models\AssessmentItem::where('mata_pelajaran_id', $mapel2->id)->firstOrFail();
+        $mtkItem = \App\Models\AssessmentItem::where('mata_pelajaran_id', $this->mapel->id)->firstOrFail();
+
+        // 3. Guru A cannot update-score on Guru B's student ($siswaLain in VIII - Al Ghazali) or Bahasa Indonesia item
+        $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+            'siswa_id' => $siswaLain->id,
+            'assessment_item_id' => $mtkItem->id,
+            'score' => 88,
+        ])->assertStatus(403);
+
+        $this->actingAs($this->teacherUser)->postJson('/erapor/buku-nilai/update-score', [
+            'siswa_id' => $this->siswa->id,
+            'assessment_item_id' => $binItem->id,
+            'score' => 77,
+        ])->assertStatus(403);
+
+        $this->assertDatabaseMissing('student_assessment_scores', [
+            'siswa_id' => $siswaLain->id,
+            'assessment_item_id' => $mtkItem->id,
+        ]);
+        $this->assertDatabaseMissing('student_assessment_scores', [
+            'siswa_id' => $this->siswa->id,
+            'assessment_item_id' => $binItem->id,
+        ]);
+
+        // 4. Guru A cannot storeItem, storeDailyBlock, or syncFromCbt on Bahasa Indonesia
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/item', [
+            'weight_group' => 'tugas',
+            'daily_block' => 1,
+            'mata_pelajaran_id' => $mapel2->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'kelas' => 'VII - Ibnu Taimiyah',
+            'title' => 'Tugas Ilegal BIN',
+        ])->assertStatus(403);
+
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/daily-block', [
+            'mata_pelajaran_id' => $mapel2->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'kelas' => 'VII - Ibnu Taimiyah',
+        ])->assertStatus(403);
+
+        $this->actingAs($this->teacherUser)->post('/erapor/buku-nilai/sync-cbt', [
+            'mata_pelajaran_id' => $mapel2->id,
+            'tahun_ajaran_id' => $this->tahun->id,
+            'semester' => 'Ganjil',
+            'kelas' => 'VII - Ibnu Taimiyah',
+        ])->assertStatus(403);
+
+        // 5. Guru C (0 schedules) sees empty state cleanly on GET, and gets 403 when targeting a class/mapel
+        $this->actingAs($guruCUser)->get('/erapor/buku-nilai')
+            ->assertStatus(200)
+            ->assertSee('Belum Ada Jadwal Mengajar Terdaftar');
+
+        $this->actingAs($guruCUser)
+            ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $this->mapel->id)
+            ->assertStatus(403);
+
+        // 6. Admin retains unrestricted access to all classes & subjects
+        $this->actingAs($this->adminUser)
+            ->get('/erapor/buku-nilai?kelas=VII - Ibnu Taimiyah&mata_pelajaran_id=' . $mapel2->id)
+            ->assertStatus(200)
+            ->assertSee('Bahasa Indonesia');
+
+        $this->actingAs($this->adminUser)
+            ->get('/erapor/buku-nilai?kelas=VIII - Al Ghazali&mata_pelajaran_id=' . $this->mapel->id)
+            ->assertStatus(200)
+            ->assertSee('Siswa Kelas Sebelah Buku Nilai');
     }
 }
 

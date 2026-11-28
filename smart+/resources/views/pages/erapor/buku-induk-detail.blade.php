@@ -47,34 +47,62 @@
                 <svg class="h-5 w-5 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                 Biodata Buku Induk Peserta Didik
             </h3>
+            @php
+                $ayah = $siswa->orangTuas->firstWhere('hubungan', 'ayah');
+                $ibu = $siswa->orangTuas->firstWhere('hubungan', 'ibu');
+                $wali = $siswa->orangTuas->firstWhere('hubungan', 'wali');
+                $profil = $siswa->profil;
+            @endphp
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">NISN (Nomor Induk Siswa Nasional):</span>
-                    <p class="font-mono font-semibold text-gray-800 dark:text-gray-200 text-sm mt-0.5">{{ $siswa->nisn }}</p>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">NIPD / NISN:</span>
+                    <p class="font-mono font-semibold text-gray-800 dark:text-gray-200 text-sm mt-0.5">{{ $siswa->nipd ?? '-' }} / {{ $siswa->nisn ?? '-' }}</p>
                 </div>
                 <div>
                     <span class="text-gray-500 dark:text-gray-400 font-medium">Nama Lengkap:</span>
                     <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm mt-0.5">{{ $siswa->nama_lengkap }}</p>
                 </div>
                 <div>
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">Jenis Kelamin:</span>
-                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki (L)' : 'Perempuan (P)' }}</p>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">NIK Siswa:</span>
+                    <p class="font-mono font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->nik ?? '-' }}</p>
                 </div>
                 <div>
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">Tanggal Lahir:</span>
-                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->tanggal_lahir ? $siswa->tanggal_lahir->format('d F Y') : '-' }}</p>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Jenis Kelamin / Agama:</span>
+                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki (L)' : ($siswa->jenis_kelamin === 'P' ? 'Perempuan (P)' : '-') }} / {{ $siswa->agama ?? '-' }}</p>
                 </div>
                 <div>
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">Kelas Saat Ini / Terakhir:</span>
-                    <p class="font-semibold text-brand-600 dark:text-brand-400 mt-0.5">{{ $siswa->kelas }}</p>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Tempat, Tanggal Lahir:</span>
+                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir ? $siswa->tanggal_lahir->format('d F Y') : '-' }}</p>
                 </div>
                 <div>
-                    <span class="text-gray-500 dark:text-gray-400 font-medium">Tahun Pertama Masuk:</span>
-                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->tahunAjaran?->nama ?? '-' }}</p>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Kelas Saat Ini / Status:</span>
+                    <p class="font-semibold text-brand-600 dark:text-brand-400 mt-0.5">{{ $siswa->rombel?->nama ?? $siswa->kelas ?? '-' }} ({{ $siswa->status_label }})</p>
+                </div>
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Tahun Ajaran / Sekolah Asal:</span>
+                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->tahunAjaran?->nama ?? '-' }} · {{ $profil?->sekolah_asal ?? '-' }}</p>
+                </div>
+                @if($siswa->is_alumni)
+                    <div>
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">Angkatan / Tahun Lulus:</span>
+                        <p class="font-semibold text-amber-700 dark:text-amber-300 mt-0.5">
+                            {{ $siswa->tahun_lulus ?? '-' }}
+                            @if($siswa->tahunAjaranLulus) (TA {{ $siswa->tahunAjaranLulus->nama }}) @endif
+                            @if($siswa->tanggal_keluar) · SK: {{ $siswa->tanggal_keluar->format('d M Y') }} @endif
+                        </p>
+                    </div>
+                    <div>
+                        <span class="text-gray-500 dark:text-gray-400 font-medium">No. Seri Ijazah:</span>
+                        <p class="font-mono font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $profil?->no_seri_ijazah ?? '-' }}</p>
+                    </div>
+                @endif
+                <div>
+                    <span class="text-gray-500 dark:text-gray-400 font-medium">Nama Ayah / Ibu / Wali:</span>
+                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $ayah?->nama ?? '-' }} / {{ $ibu?->nama ?? '-' }} @if($wali?->nama) (Wali: {{ $wali->nama }}) @endif</p>
                 </div>
                 <div class="sm:col-span-2">
                     <span class="text-gray-500 dark:text-gray-400 font-medium">Alamat Tempat Tinggal:</span>
-                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->alamat ?? '-' }}</p>
+                    <p class="font-medium text-gray-700 dark:text-gray-300 mt-0.5">{{ $siswa->alamat ?? $profil?->alamat_jalan ?? '-' }}</p>
                 </div>
             </div>
         </div>
@@ -123,38 +151,67 @@
             @foreach($periods as $idx => $p)
                 @php
                     $stsInfo = $stsSummaries[$p->tahun_ajaran_id . '_' . $p->semester] ?? null;
+                    $arsipSts = ($archives ?? collect())->get("{$p->tahun_ajaran_id}_{$p->semester}_sts");
+                    $arsipUas = ($archives ?? collect())->get("{$p->tahun_ajaran_id}_{$p->semester}_uas");
                 @endphp
-                <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 dark:border-gray-800 dark:bg-gray-800/40 relative">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Periode {{ $idx + 1 }}</span>
-                        @if($p->status === 'alumni' || $p->status === 'lulus')
-                            <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Lulus</span>
-                        @elseif($p->status === 'naik_kelas')
-                            <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Naik Kelas</span>
-                        @elseif($p->status === 'tinggal_kelas')
-                            <span class="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800 dark:bg-red-900/50 dark:text-red-300 border border-red-200 dark:border-red-800">Tinggal</span>
-                        @else
-                            <span class="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Aktif</span>
-                        @endif
-                    </div>
-                    <div class="font-bold text-gray-900 dark:text-white text-sm">
-                        {{ $p->kelas }}
-                    </div>
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                        {{ $p->tahunAjaran?->nama ?? 'Tahun Ajaran' }} (Sem. {{ $p->semester }})
-                    </div>
-                    @if($stsInfo && $stsInfo->average_score !== null)
-                        <div class="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs">
-                            <span class="text-gray-400 dark:text-gray-500">Rata-rata STS:</span>
-                            <span class="font-mono font-bold text-brand-600 dark:text-brand-400">{{ number_format($stsInfo->average_score, 1) }}</span>
+                <div class="rounded-xl border border-gray-200 bg-gray-50/60 p-4 dark:border-gray-800 dark:bg-gray-800/40 relative flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Periode {{ $idx + 1 }}</span>
+                            @if($p->status === 'alumni' || $p->status === 'lulus')
+                                <span class="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 dark:bg-amber-900/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800">Lulus</span>
+                            @elseif($p->status === 'naik_kelas')
+                                <span class="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">Naik Kelas</span>
+                            @elseif($p->status === 'tinggal_kelas')
+                                <span class="rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-800 dark:bg-red-900/50 dark:text-red-300 border border-red-200 dark:border-red-800">Tinggal</span>
+                            @else
+                                <span class="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-semibold text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800">Aktif</span>
+                            @endif
                         </div>
-                        @if($stsInfo->rank)
-                            <div class="flex items-center justify-between text-xs mt-0.5">
-                                <span class="text-gray-400 dark:text-gray-500">Peringkat:</span>
-                                <span class="font-semibold text-purple-600 dark:text-purple-400">Ke-{{ $stsInfo->rank }}</span>
+                        <div class="font-bold text-gray-900 dark:text-white text-sm">
+                            {{ $p->kelas }}
+                        </div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {{ $p->tahunAjaran?->nama ?? 'Tahun Ajaran' }} (Sem. {{ $p->semester }})
+                        </div>
+                        @if($stsInfo && $stsInfo->average_score !== null)
+                            <div class="mt-3 pt-2 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs">
+                                <span class="text-gray-400 dark:text-gray-500">Rata-rata STS:</span>
+                                <span class="font-mono font-bold text-brand-600 dark:text-brand-400">{{ number_format($stsInfo->average_score, 1) }}</span>
                             </div>
+                            @if($stsInfo->rank)
+                                <div class="flex items-center justify-between text-xs mt-0.5">
+                                    <span class="text-gray-400 dark:text-gray-500">Peringkat:</span>
+                                    <span class="font-semibold text-purple-600 dark:text-purple-400">Ke-{{ $stsInfo->rank }}</span>
+                                </div>
+                            @endif
                         @endif
-                    @endif
+                    </div>
+
+                    <div class="mt-3 pt-2.5 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                        <div class="flex flex-wrap gap-1.5 text-[10px]">
+                            <span class="rounded px-1.5 py-0.5 font-semibold {{ $arsipSts ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
+                                {{ $arsipSts ? '✓ Arsip STS v' . $arsipSts->version : 'STS Draf' }}
+                            </span>
+                            <span class="rounded px-1.5 py-0.5 font-semibold {{ $arsipUas ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300' }}">
+                                {{ $arsipUas ? '✓ Arsip UAS v' . $arsipUas->version : 'UAS Draf' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <a href="{{ route('erapor.cetak.siswa', ['siswa' => $siswa->id, 'tahun_ajaran_id' => $p->tahun_ajaran_id, 'semester' => $p->semester, 'jenis_rapor' => 'sts']) }}" target="_blank" class="flex-1 text-center rounded-lg bg-amber-600 px-2 py-1.5 text-[11px] font-semibold text-white hover:bg-amber-700 transition">
+                                Cetak STS
+                            </a>
+                            <a href="{{ route('erapor.cetak.siswa', ['siswa' => $siswa->id, 'tahun_ajaran_id' => $p->tahun_ajaran_id, 'semester' => $p->semester, 'jenis_rapor' => 'uas']) }}" target="_blank" class="flex-1 text-center rounded-lg bg-brand-600 px-2 py-1.5 text-[11px] font-semibold text-white hover:bg-brand-700 transition">
+                                Cetak UAS
+                            </a>
+                            @if($arsipUas || $arsipSts)
+                                @php $verifyArch = $arsipUas ?? $arsipSts; @endphp
+                                <a href="{{ route('rapor.verify', $verifyArch->verification_token) }}" target="_blank" title="Buka Halaman Verifikasi QR" class="rounded-lg border border-emerald-300 bg-emerald-50 px-2 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 transition">
+                                    QR
+                                </a>
+                            @endif
+                        </div>
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -204,7 +261,7 @@
                                         ->where('tahun_ajaran_id', $p->tahun_ajaran_id)
                                         ->where('semester', $p->semester)
                                         ->first();
-                                    $score = $rec?->sts_score ?? $rec?->final_score;
+                                    $score = $rec?->final_score ?? $rec?->asat_score ?? $rec?->sts_score;
                                     if ($score !== null) {
                                         $subjectScores[] = (float) $score;
                                     }

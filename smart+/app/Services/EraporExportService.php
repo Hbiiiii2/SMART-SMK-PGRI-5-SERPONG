@@ -37,7 +37,7 @@ class EraporExportService
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(12);
         $sheet->getStyle('A3')->getFont()->setSize(10)->setItalic(true);
 
-        $subjects = MataPelajaran::orderBy('nama')->get();
+        $subjects = MataPelajaran::forClass($kelas, $tahunAjaranId, $semester);
 
         $historicalStudentIds = \App\Models\RiwayatKelasSiswa::where('kelas', $kelas)
             ->where('tahun_ajaran_id', $tahunAjaranId)
@@ -105,15 +105,17 @@ class EraporExportService
             $sheet->setCellValueExplicit('B' . $currentRow, (string) ($siswa->nisn ?? '-'), DataType::TYPE_STRING);
             $sheet->setCellValue('C' . $currentRow, $siswa->nama_lengkap);
 
-            // Fetch student STS scores per mapel
+            // Fetch student effective scores per mapel
             $gradeSummaries = SubjectGradeSummary::where('siswa_id', $siswa->id)
                 ->where('tahun_ajaran_id', $tahunAjaranId)
                 ->where('semester', $semester)
-                ->pluck('sts_score', 'mata_pelajaran_id');
+                ->get()
+                ->keyBy('mata_pelajaran_id');
 
             foreach ($subjects as $mapel) {
                 $colLetter = $subjectColMap[$mapel->id];
-                $val = $gradeSummaries[$mapel->id] ?? null;
+                $rec = $gradeSummaries->get($mapel->id);
+                $val = $rec ? ($rec->final_score ?? $rec->asat_score ?? $rec->sts_score) : null;
                 if ($val !== null) {
                     $sheet->setCellValue($colLetter . $currentRow, (float) $val);
                 } else {
@@ -195,12 +197,22 @@ class EraporExportService
         $sheet->getStyle('A4:A6')->getFont()->setBold(true);
         $sheet->getStyle('E4:E6')->getFont()->setBold(true);
 
-        // Fetch distinct academic periods
+        // Fetch distinct academic periods chronologically
         $periods = \App\Models\RiwayatKelasSiswa::where('siswa_id', $siswa->id)
             ->with('tahunAjaran')
-            ->orderBy('tahun_ajaran_id')
-            ->orderBy('semester')
-            ->get();
+            ->get()
+            ->filter(function ($p) {
+                $k = strtolower(trim((string) $p->kelas));
+                return $k !== '' && !str_starts_with($k, 'alumni') && !str_starts_with($k, 'lulus');
+            })
+            ->sortBy(function ($p) {
+                $start = $p->tahunAjaran?->tanggal_mulai
+                    ? \Carbon\Carbon::parse($p->tahunAjaran->tanggal_mulai)->format('Y-m-d')
+                    : ($p->tahunAjaran?->nama ?? '9999');
+                $semOrd = strtolower((string) $p->semester) === 'ganjil' ? '1' : '2';
+                return "{$start}_{$semOrd}";
+            })
+            ->values();
 
         if ($periods->isEmpty()) {
             $activeYear = TahunAjaran::where('is_aktif', true)->first();
@@ -244,7 +256,7 @@ class EraporExportService
         $sheet->getStyle($headerRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
         // Fetch Grades
-        $subjects = MataPelajaran::orderBy('nama')->get();
+        $subjects = MataPelajaran::forStudentHistory($siswa, $periods);
         $allSummaries = SubjectGradeSummary::where('siswa_id', $siswa->id)->get();
 
         $currentRow = $row + 1;
@@ -261,7 +273,7 @@ class EraporExportService
                     ->where('semester', $pInfo['semester'])
                     ->first();
 
-                $val = $rec?->sts_score ?? $rec?->final_score;
+                $val = $rec?->final_score ?? $rec?->asat_score ?? $rec?->sts_score;
                 if ($val !== null) {
                     $sheet->setCellValue($pInfo['col'] . $currentRow, (float) $val);
                     $subjectScores[] = (float) $val;

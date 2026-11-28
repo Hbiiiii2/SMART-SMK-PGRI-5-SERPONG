@@ -12,7 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withSchedule(function ($schedule) {
-        $schedule->command('attendance:mark-alpha')->dailyAt('17:00');
+        $schedule->command('attendance:mark-alpha')
+            ->everyFiveMinutes()
+            ->timezone('Asia/Jakarta')
+            ->withoutOverlapping();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');

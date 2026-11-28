@@ -88,6 +88,12 @@
         ])
     @endif
 
+    @include('pages.guru.partials.lms-class-cards', [
+        'lmsClassCards' => $lmsClassCards ?? collect(),
+        'guru' => $guru ?? null,
+        'todayName' => $todayName ?? 'Senin',
+    ])
+
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] col-span-full">
             <div class="flex items-center justify-between mb-4">

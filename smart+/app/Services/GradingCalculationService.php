@@ -19,12 +19,12 @@ class GradingCalculationService
      * - Score of 0 is valid.
      * - Returns null if no valid scores are present (status "Belum ada nilai").
      */
-    public function calculateComponentAverage(array $scores, int $decimals = 2): ?float
+    public function calculateComponentAverage(array $scores, int $decimals = 1): ?float
     {
         $validScores = [];
 
         foreach ($scores as $score) {
-            if ($score !== null && is_numeric($score)) {
+            if ($score !== null && $score !== '' && is_numeric($score)) {
                 $val = (float) $score;
                 if ($val >= 0 && $val <= 100) {
                     $validScores[] = $val;
@@ -41,7 +41,9 @@ class GradingCalculationService
     }
 
     /**
-     * Recalculate a student's subject grade summary for a given period
+     * Recalculate a student's subject grade summary for a given period using
+     * dynamic Nilai Harian (NH 1..n: 40% Tugas + 60% Sumatif/Projek/UH),
+     * Rata-rata SH, Nilai Murni ASAT, and Nilai Akhir = AVERAGE(NH 1..n, ASAT).
      */
     public function recalculateSubjectGrade(
         int $siswaId,
@@ -49,13 +51,13 @@ class GradingCalculationService
         int $tahunAjaranId,
         string $semester = 'Ganjil'
     ): SubjectGradeSummary {
-        // Fetch components
-        $components = AssessmentComponent::where('is_active', true)->get()->keyBy('code');
-
-        // Fetch all assessment items for this subject and period
-        $items = AssessmentItem::where('mata_pelajaran_id', $mataPelajaranId)
+        $items = AssessmentItem::with('component')
+            ->where('mata_pelajaran_id', $mataPelajaranId)
             ->where('tahun_ajaran_id', $tahunAjaranId)
             ->where('semester', $semester)
+            ->orderBy('daily_block')
+            ->orderBy('assessment_component_id')
+            ->orderBy('sequence')
             ->get();
 
         $itemIds = $items->pluck('id');
@@ -63,68 +65,77 @@ class GradingCalculationService
             ->whereIn('assessment_item_id', $itemIds)
             ->pluck('score', 'assessment_item_id');
 
-        $componentScores = [
-            'uh' => [],
-            'tugas' => [],
-            'praktek' => [],
-            'projek' => [],
-            'portofolio' => [],
-            'sts' => [],
-        ];
+        $blockScores = [];
+        $allTugasScores = [];
+        $allSumatifScores = [];
+        $allAsatScores = [];
 
         foreach ($items as $item) {
-            $code = $item->component?->code ?? 'tugas';
-            if (isset($componentScores[$code])) {
-                $componentScores[$code][] = $scoresByItemId[$item->id] ?? null;
+            $group = $item->resolveWeightGroup();
+            $score = $scoresByItemId[$item->id] ?? null;
+
+            if ($group === 'asat') {
+                $allAsatScores[] = $score;
+                continue;
+            }
+
+            $block = $item->resolveDailyBlock() ?? 1;
+            if (!isset($blockScores[$block])) {
+                $blockScores[$block] = ['tugas' => [], 'sumatif' => []];
+            }
+
+            if ($group === 'tugas') {
+                $blockScores[$block]['tugas'][] = $score;
+                $allTugasScores[] = $score;
+            } else {
+                $blockScores[$block]['sumatif'][] = $score;
+                $allSumatifScores[] = $score;
             }
         }
 
-        $uhAvg = $this->calculateComponentAverage($componentScores['uh']);
-        $tugasAvg = $this->calculateComponentAverage($componentScores['tugas']);
-        $praktekAvg = $this->calculateComponentAverage($componentScores['praktek']);
-        $projekAvg = $this->calculateComponentAverage($componentScores['projek']);
-        $portofolioAvg = $this->calculateComponentAverage($componentScores['portofolio']);
-        $stsScore = $this->calculateComponentAverage($componentScores['sts']);
+        ksort($blockScores);
 
-        // Determine completion status
-        $filledComponents = 0;
-        foreach ([$uhAvg, $tugasAvg, $praktekAvg, $projekAvg, $portofolioAvg, $stsScore] as $val) {
-            if ($val !== null) {
-                $filledComponents++;
+        $dailyScores = [];
+        $finalParts = [];
+
+        foreach ($blockScores as $blockNum => $groups) {
+            $blockTugasAvg = $this->calculateComponentAverage($groups['tugas'], 1);
+            $blockSumatifAvg = $this->calculateComponentAverage($groups['sumatif'], 1);
+
+            $blockFinal = null;
+            if ($blockTugasAvg !== null || $blockSumatifAvg !== null) {
+                $blockFinal = round((0.40 * ($blockTugasAvg ?? 0.0)) + (0.60 * ($blockSumatifAvg ?? 0.0)), 1);
+                $finalParts[] = $blockFinal;
             }
+
+            $dailyScores[(string) $blockNum] = [
+                'tugas_avg' => $blockTugasAvg,
+                'sumatif_avg' => $blockSumatifAvg,
+                'final' => $blockFinal,
+            ];
         }
+
+        $tugasAvg = $this->calculateComponentAverage($allTugasScores, 1);
+        $shAvg = $this->calculateComponentAverage($allSumatifScores, 1);
+        $asatScore = $this->calculateComponentAverage($allAsatScores, 1);
+
+        if ($asatScore !== null) {
+            $finalParts[] = $asatScore;
+        }
+
+        $finalScore = !empty($finalParts)
+            ? round(array_sum($finalParts) / count($finalParts), 1)
+            : null;
+
+        $hasDaily = collect($dailyScores)->contains(fn ($d) => $d['final'] !== null);
+        $hasAsat = $asatScore !== null;
 
         $status = 'belum_ada_nilai';
-        if ($filledComponents > 0 && $filledComponents < 3) {
-            $status = 'belum_lengkap';
-        } elseif ($filledComponents >= 3) {
+        if ($hasDaily && $hasAsat) {
             $status = 'siap_ditinjau';
+        } elseif ($hasDaily || $hasAsat) {
+            $status = 'belum_lengkap';
         }
-
-        // Weighted final score calculation (if configured)
-        // Default PRD weight: UH 20%, Tugas 20%, Praktek 15%, Projek 15%, Portofolio 10%, STS 20%
-        $activeWeights = [];
-        $weightedSum = 0;
-        $totalWeight = 0;
-
-        $compVals = [
-            'uh' => $uhAvg,
-            'tugas' => $tugasAvg,
-            'praktek' => $praktekAvg,
-            'projek' => $projekAvg,
-            'portofolio' => $portofolioAvg,
-            'sts' => $stsScore,
-        ];
-
-        foreach ($compVals as $code => $avgVal) {
-            if ($avgVal !== null && isset($components[$code])) {
-                $weight = $components[$code]->default_weight;
-                $weightedSum += ($avgVal * $weight);
-                $totalWeight += $weight;
-            }
-        }
-
-        $finalScore = $totalWeight > 0 ? round($weightedSum / $totalWeight, 2) : null;
 
         $siswa = Siswa::find($siswaId);
 
@@ -137,12 +148,13 @@ class GradingCalculationService
             ],
             [
                 'kelas' => $siswa?->kelas,
-                'uh_avg' => $uhAvg,
+                'uh_avg' => $shAvg,
                 'tugas_avg' => $tugasAvg,
-                'praktek_avg' => $praktekAvg,
-                'projek_avg' => $projekAvg,
-                'portofolio_avg' => $portofolioAvg,
-                'sts_score' => $stsScore,
+                'projek_avg' => $shAvg,
+                'daily_scores' => $dailyScores,
+                'sh_avg' => $shAvg,
+                'asat_score' => $asatScore,
+                'sts_score' => $asatScore,
                 'final_score' => $finalScore,
                 'status' => $status,
             ]
@@ -150,7 +162,7 @@ class GradingCalculationService
     }
 
     /**
-     * Recalculate Class STS Summaries and Competition Ranking (Excel RANK.EQ style)
+     * Recalculate Class STS/ASAT Summaries and Competition Ranking (Excel RANK.EQ style)
      */
     public function recalculateClassSTS(string $kelas, int $tahunAjaranId, string $semester = 'Ganjil'): void
     {
@@ -170,7 +182,8 @@ class GradingCalculationService
             return;
         }
 
-        $totalSubjectsCount = MataPelajaran::count();
+        $classSubjectsCount = MataPelajaran::forClass($kelas, $tahunAjaranId, $semester)->count();
+        $totalSubjectsCount = $classSubjectsCount > 0 ? $classSubjectsCount : MataPelajaran::count();
         $studentAverages = [];
 
         foreach ($students as $siswa) {
@@ -178,18 +191,19 @@ class GradingCalculationService
                 ->where('tahun_ajaran_id', $tahunAjaranId)
                 ->where('semester', $semester)
                 ->where(function ($q) {
-                    $q->whereNotNull('sts_score')
-                      ->orWhereNotNull('final_score');
+                    $q->whereNotNull('final_score')
+                      ->orWhereNotNull('asat_score')
+                      ->orWhereNotNull('sts_score');
                 })
                 ->get();
 
             $effectiveScores = $summaries
-                ->map(fn($s) => $s->sts_score ?? $s->final_score)
-                ->filter(fn($v) => $v !== null);
+                ->map(fn ($s) => $s->final_score ?? $s->asat_score ?? $s->sts_score)
+                ->filter(fn ($v) => $v !== null);
 
             $completedCount = $effectiveScores->count();
-            $totalSts = $completedCount > 0 ? (float) $effectiveScores->sum() : null;
-            $avgSts = $completedCount > 0 ? round($totalSts / $completedCount, 2) : null;
+            $totalSts = $completedCount > 0 ? round((float) $effectiveScores->sum(), 1) : null;
+            $avgSts = $completedCount > 0 ? round($totalSts / $completedCount, 1) : null;
 
             $stsSummary = StudentStsSummary::updateOrCreate(
                 [

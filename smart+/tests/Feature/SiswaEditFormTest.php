@@ -27,11 +27,19 @@ class SiswaEditFormTest extends TestCase
             'is_aktif' => true,
         ]);
 
+        $rombel = \App\Models\Rombel::create([
+            'tahun_ajaran_id' => $tahunAjaran->id,
+            'semester' => 'Ganjil',
+            'nama' => 'XI-RPL-1',
+            'tingkat' => 'XI',
+            'is_aktif' => true,
+        ]);
+
         // Submit tanggal lahir dalam format DD-MM-YYYY saat tambah siswa
         $this->actingAs($admin)->post(route('admin.siswa.store'), [
             'nisn' => '0081234567',
             'nama_lengkap' => 'Budi Santoso',
-            'kelas' => 'XI-RPL-1',
+            'rombel_id' => $rombel->id,
             'jenis_kelamin' => 'L',
             'tanggal_lahir' => '14-05-2008',
             'alamat' => 'Jl. Raya Serpong No. 12',
@@ -44,6 +52,8 @@ class SiswaEditFormTest extends TestCase
 
         $siswa = Siswa::with('user')->where('nisn', '0081234567')->firstOrFail();
         $this->assertSame('2008-05-14', $siswa->tanggal_lahir?->format('Y-m-d'));
+        $this->assertSame('XI-RPL-1', $siswa->kelas);
+        $this->assertSame($rombel->id, $siswa->rombel_id);
 
         $response = $this->actingAs($admin)->get(route('admin.siswa.edit', $siswa));
 
@@ -54,14 +64,15 @@ class SiswaEditFormTest extends TestCase
             ->assertSee('name="email" value="budi.santoso@smkpgri5.sch.id"', false)
             ->assertSee('name="nisn" value="0081234567"', false)
             ->assertSee('name="nama_lengkap" value="Budi Santoso"', false)
-            ->assertSee('name="kelas" value="XI-RPL-1"', false)
+            ->assertSee('name="rombel_id"', false)
+            ->assertSee('XI-RPL-1', false)
             ->assertSee('Jl. Raya Serpong No. 12', false);
 
         // Uji tanggal ambigu (04-07-2008 = 4 Juli 2008, bukan 7 April) tetap akurat
         $this->actingAs($admin)->put(route('admin.siswa.update', $siswa), [
             'nisn' => '0081234567',
             'nama_lengkap' => 'Budi Santoso Updated',
-            'kelas' => 'XI-RPL-1',
+            'rombel_id' => $rombel->id,
             'jenis_kelamin' => 'L',
             'tanggal_lahir' => '04-07-2008',
             'alamat' => 'Jl. Raya Serpong No. 12',

@@ -18,11 +18,20 @@
             @method('PUT')
 
             <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div class="md:col-span-2">
+                <div>
                     <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Nama Sekolah <span class="text-error-500">*</span></label>
                     <input type="text" name="nama_sekolah" value="{{ old('nama_sekolah', $pengaturan->nama_sekolah ?? '') }}"
                         class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
                     @error('nama_sekolah')
+                        <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">NPSN Sekolah (Dapodik)</label>
+                    <input type="text" name="npsn" value="{{ old('npsn', $pengaturan->npsn ?? '') }}" placeholder="Contoh: 20603318"
+                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm font-mono text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                    @error('npsn')
                         <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
                     @enderror
                 </div>
@@ -300,6 +309,53 @@
                         @error('batas_akun_per_perangkat')
                             <p class="mt-1 text-sm text-error-500">{{ $message }}</p>
                         @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 rounded-xl border border-gray-200 bg-gray-50/70 p-5 dark:border-gray-800 dark:bg-gray-900/50">
+                <div class="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Integrasi Dapodik WebService API (Opsional)</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Siapkan koneksi ke aplikasi Dapodik lokal (port 5774 / tunnel) untuk sinkronisasi otomatis peserta didik dan rombel.</p>
+                    </div>
+                    <a href="{{ route('admin.siswa.dapodik.index') }}" class="text-xs font-semibold text-brand-500 hover:text-brand-600">Buka Hub Dapodik &rarr;</a>
+                </div>
+
+                <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">URL WebService Dapodik</label>
+                        <input type="url" name="dapodik_url" value="{{ old('dapodik_url', $pengaturan->dapodik_url ?? '') }}" placeholder="http://192.168.1.10:5774"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        @error('dapodik_url') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Semester ID Dapodik</label>
+                        <input type="text" name="dapodik_semester_id" value="{{ old('dapodik_semester_id', $pengaturan->dapodik_semester_id ?? '') }}" placeholder="Contoh: 20261"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-mono text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        @error('dapodik_semester_id') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Bearer Token WebService Dapodik
+                            @if(!empty($pengaturan->dapodik_token))
+                                <span class="text-xs text-emerald-600">(Token tersimpan, kosongkan jika tidak diubah)</span>
+                            @endif
+                        </label>
+                        <input type="password" name="dapodik_token" value="" autocomplete="new-password" placeholder="Masukkan token dari Pengaturan WebService Dapodik"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90" />
+                        @error('dapodik_token') <p class="mt-1 text-sm text-error-500">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="flex items-center pt-6">
+                        <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                            <input type="hidden" name="dapodik_auto_sync" value="0">
+                            <input type="checkbox" name="dapodik_auto_sync" value="1" {{ old('dapodik_auto_sync', $pengaturan->dapodik_auto_sync ?? false) ? 'checked' : '' }}
+                                class="h-4 w-4 rounded border-gray-300 text-brand-500" />
+                            Aktifkan Sinkronisasi Terjadwal Dapodik
+                        </label>
                     </div>
                 </div>
             </div>

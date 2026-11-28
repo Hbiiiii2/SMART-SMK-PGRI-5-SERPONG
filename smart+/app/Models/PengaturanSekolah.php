@@ -14,6 +14,7 @@ class PengaturanSekolah extends Model
 
     protected $fillable = [
         'nama_sekolah',
+        'npsn',
         'alamat_sekolah',
         'no_telepon_sekolah',
         'email_sekolah',
@@ -36,6 +37,11 @@ class PengaturanSekolah extends Model
         'maks_akurasi_gps_meter',
         'mode_deteksi_perangkat_bersama',
         'batas_akun_per_perangkat',
+        'dapodik_url',
+        'dapodik_token',
+        'dapodik_semester_id',
+        'dapodik_auto_sync',
+        'dapodik_last_sync_at',
     ];
 
     protected $casts = [
@@ -49,6 +55,9 @@ class PengaturanSekolah extends Model
         'absensi_hari_minggu' => 'boolean',
         'maks_akurasi_gps_meter' => 'integer',
         'batas_akun_per_perangkat' => 'integer',
+        'dapodik_token' => 'encrypted',
+        'dapodik_auto_sync' => 'boolean',
+        'dapodik_last_sync_at' => 'datetime',
     ];
 
     public static function current(): self
@@ -106,5 +115,28 @@ class PengaturanSekolah extends Model
         }
 
         return false;
+    }
+
+    public function getGpsAlphaCutoff(Carbon $date): Carbon
+    {
+        $terlambatMenit = (int) ($this->toleransi_terlambat_menit ?? 15);
+        $alphaRaw = (int) ($this->toleransi_alpha_menit ?? 30);
+        $alphaMenit = $alphaRaw > $terlambatMenit ? $alphaRaw : ($terlambatMenit + max(15, $alphaRaw));
+
+        return Carbon::parse($date->toDateString() . ' ' . ($this->jam_masuk ?: '07:00:00'), 'Asia/Jakarta')
+            ->addMinutes($alphaMenit);
+    }
+
+    public function getRfidAlphaCutoff(Carbon $date): Carbon
+    {
+        return Carbon::parse($date->toDateString() . ' ' . ($this->jam_pulang ?: '15:00:00'), 'Asia/Jakarta')
+            ->addMinutes((int) ($this->toleransi_alpha_menit ?? 30));
+    }
+
+    public function getEffectiveAlphaCutoffForRole(string $role, Carbon $date): Carbon
+    {
+        return $this->allowsGpsForRole($role)
+            ? $this->getGpsAlphaCutoff($date)
+            : $this->getRfidAlphaCutoff($date);
     }
 }

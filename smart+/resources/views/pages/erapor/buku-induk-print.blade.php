@@ -221,7 +221,7 @@
 <!-- Action Toolbar (hidden on print) -->
 <div class="no-print">
     <div>
-        <strong>SMP Al Madinah</strong> — Pratinjau Lembar Cetak Transkrip Buku Induk Siswa
+        <strong>{{ $schoolSettings?->nama_sekolah ?? 'SMKS PGRI 5 Serpong' }}</strong> — Pratinjau Lembar Cetak Transkrip Buku Induk Siswa
     </div>
     <div>
         <button onclick="window.print()">🖨️ Cetak Dokumen</button>
@@ -237,14 +237,14 @@
                 @if(!empty($schoolSettings?->logo))
                     <img src="{{ asset('storage/' . $schoolSettings->logo) }}" alt="Logo">
                 @else
-                    <div style="font-weight: bold; font-size: 24pt;">AM</div>
+                    <div style="font-weight: bold; font-size: 20pt;">PGRI</div>
                 @endif
             </td>
             <td class="kop-text">
-                <h4>YAYASAN KELUARGA BESAR MASYARAKAT BANTEN (KKMB)</h4>
-                <h2>SMP AL - MADINAH ISLAMIC CENTER</h2>
-                <p>{{ $schoolSettings?->alamat_sekolah ?? 'JL. PUSPITA RAYA BLOK L1 No.IA Sektor III.2 BSD City' }}</p>
-                <p>Telp: {{ $schoolSettings?->no_telepon_sekolah ?? '08970555677' }} | Email: {{ $schoolSettings?->email_sekolah ?? 'smpamickkmb@gmail.com' }}</p>
+                <h4>{{ $schoolSettings?->npsn ? 'NPSN: ' . $schoolSettings->npsn : 'YAYASAN PEMBINA LEMBAGA PENDIDIKAN PGRI' }}</h4>
+                <h2>{{ strtoupper($schoolSettings?->nama_sekolah ?? 'SMKS PGRI 5 SERPONG') }}</h2>
+                <p>{{ $schoolSettings?->alamat_sekolah ?? 'Kec. Serpong, Kota Tangerang Selatan, Banten' }}</p>
+                <p>Telp: {{ $schoolSettings?->no_telepon_sekolah ?? '-' }} | Email: {{ $schoolSettings?->email_sekolah ?? '-' }}</p>
             </td>
         </tr>
     </table>
@@ -257,6 +257,11 @@
     </div>
 
     <!-- Identitas Peserta Didik -->
+    @php
+        $ayah = $siswa->orangTuas->firstWhere('hubungan', 'ayah');
+        $ibu = $siswa->orangTuas->firstWhere('hubungan', 'ibu');
+        $profil = $siswa->profil;
+    @endphp
     <table class="biodata-table">
         <tr>
             <td class="biodata-label">Nama Peserta Didik</td>
@@ -264,23 +269,31 @@
             <td class="biodata-val">{{ strtoupper($siswa->nama_lengkap) }}</td>
             <td class="biodata-label">Kelas Terakhir</td>
             <td class="biodata-colon">:</td>
-            <td class="biodata-val">{{ $siswa->kelas }}</td>
+            <td class="biodata-val">{{ $siswa->rombel?->nama ?? $siswa->kelas ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="biodata-label">NISN</td>
+            <td class="biodata-label">NIPD / NISN</td>
             <td class="biodata-colon">:</td>
-            <td class="biodata-val">{{ $siswa->nisn }}</td>
+            <td class="biodata-val">{{ $siswa->nipd ?? '-' }} / {{ $siswa->nisn ?? '-' }}</td>
             <td class="biodata-label">Status Siswa</td>
             <td class="biodata-colon">:</td>
-            <td class="biodata-val">{{ $siswa->is_alumni ? 'ALUMNI (LULUS)' : 'AKTIF' }}</td>
+            <td class="biodata-val">{{ strtoupper($siswa->status_label) }}</td>
         </tr>
         <tr>
-            <td class="biodata-label">Jenis Kelamin</td>
+            <td class="biodata-label">Tempat, Tgl Lahir</td>
             <td class="biodata-colon">:</td>
-            <td class="biodata-val">{{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</td>
-            <td class="biodata-label">Tahun Masuk</td>
+            <td class="biodata-val">{{ $siswa->tempat_lahir ?? '-' }}, {{ $siswa->tanggal_lahir?->format('d-m-Y') ?? '-' }}</td>
+            <td class="biodata-label">Agama / JK</td>
             <td class="biodata-colon">:</td>
-            <td class="biodata-val">{{ $siswa->tahunAjaran?->nama ?? '-' }}</td>
+            <td class="biodata-val">{{ $siswa->agama ?? '-' }} / {{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : ($siswa->jenis_kelamin === 'P' ? 'Perempuan' : '-') }}</td>
+        </tr>
+        <tr>
+            <td class="biodata-label">Sekolah Asal</td>
+            <td class="biodata-colon">:</td>
+            <td class="biodata-val">{{ $profil?->sekolah_asal ?? '-' }}</td>
+            <td class="biodata-label">Orang Tua</td>
+            <td class="biodata-colon">:</td>
+            <td class="biodata-val">{{ $ayah?->nama ?? '-' }} / {{ $ibu?->nama ?? '-' }}</td>
         </tr>
     </table>
 
@@ -316,7 +329,7 @@
                                 ->where('tahun_ajaran_id', $p->tahun_ajaran_id)
                                 ->where('semester', $p->semester)
                                 ->first();
-                            $val = $rec?->sts_score ?? $rec?->final_score;
+                            $val = $rec?->final_score ?? $rec?->asat_score ?? $rec?->sts_score;
                             if ($val !== null) {
                                 $scores[] = (float) $val;
                             }

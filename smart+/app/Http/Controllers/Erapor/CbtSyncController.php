@@ -21,7 +21,7 @@ class CbtSyncController extends Controller
     {
         $activeYear = TahunAjaran::where('is_aktif', true)->first() ?? TahunAjaran::latest()->first();
         $subjects = MataPelajaran::orderBy('nama')->get();
-        $classes = Siswa::select('kelas')->distinct()->pluck('kelas');
+        $classes = \App\Models\Rombel::classNames($activeYear?->id);
 
         $batches = ImportBatch::with('mataPelajaran', 'importer')
             ->latest()

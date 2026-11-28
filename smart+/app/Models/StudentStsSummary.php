@@ -20,6 +20,9 @@ class StudentStsSummary extends Model
         'total_subjects_count',
         'status',
         'catatan_wali_kelas',
+        'ekstrakurikuler',
+        'keputusan_status',
+        'keputusan_kelas',
     ];
 
     protected $casts = [
@@ -28,6 +31,7 @@ class StudentStsSummary extends Model
         'rank' => 'integer',
         'completed_subjects_count' => 'integer',
         'total_subjects_count' => 'integer',
+        'ekstrakurikuler' => 'array',
     ];
 
     public function siswa()

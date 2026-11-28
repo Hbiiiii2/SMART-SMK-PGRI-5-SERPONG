@@ -35,17 +35,30 @@
             <div class="mb-6 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <h3 class="mb-4 flex items-center gap-3 text-lg font-semibold text-gray-800 dark:text-white/90">
                     <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-500 text-sm font-bold text-white">1</span>
-                    Pilih Tahun Ajaran Baru
+                    Pilih Tahun Ajaran Baru &amp; Info Kelulusan
                 </h3>
-                <div class="max-w-md">
-                    <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Ajaran Tujuan <span class="text-error-500">*</span></label>
-                    <select name="tahun_ajaran_tujuan" required
-                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
-                        <option value="">-- Pilih Tahun Ajaran --</option>
-                        @foreach($tahunAjarans as $ta)
-                            <option value="{{ $ta->id }}">{{ $ta->nama }} {{ $ta->is_aktif ? '(Aktif)' : '' }}</option>
-                        @endforeach
-                    </select>
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Ajaran Tujuan <span class="text-error-500">*</span></label>
+                        <select name="tahun_ajaran_tujuan" required
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
+                            <option value="">-- Pilih Tahun Ajaran --</option>
+                            @foreach($tahunAjarans as $ta)
+                                <option value="{{ $ta->id }}">{{ $ta->nama }} {{ $ta->is_aktif ? '(Aktif)' : '' }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tahun Lulus / Angkatan (Bila ada yang Lulus)</label>
+                        <input type="number" name="tahun_lulus" min="2000" max="2100" placeholder="Otomatis dari TA asal (misal: 2027)"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30">
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Dipakai untuk pengelompokan Alumni Angkatan di Buku Induk.</p>
+                    </div>
+                    <div>
+                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">Tanggal SK Kelulusan (Opsional)</label>
+                        <input type="date" name="tanggal_kelulusan"
+                            class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+                    </div>
                 </div>
             </div>
 

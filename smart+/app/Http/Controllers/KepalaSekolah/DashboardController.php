@@ -20,6 +20,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $today = Carbon::now('Asia/Jakarta')->toDateString();
+        app(AttendanceService::class)->runLazyAutoMarkIfNeeded();
         $viewData = \App\Services\CacheService::dashboardMonitoring($today);
 
         return view('pages.kepala-sekolah.dashboard', array_merge($viewData, [
@@ -308,7 +309,7 @@ class DashboardController extends Controller
             return $s;
         });
 
-        $kelasList = Siswa::distinct()->pluck('kelas')->sort()->values();
+        $kelasList = \App\Models\Rombel::classNames();
 
         return view('pages.kepala-sekolah.monitoring-siswa', [
             'title' => 'Monitoring Siswa',

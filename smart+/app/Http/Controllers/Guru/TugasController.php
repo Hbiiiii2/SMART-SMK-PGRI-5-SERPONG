@@ -6,27 +6,53 @@ use App\Http\Controllers\Controller;
 use App\Models\Jadwal;
 use App\Models\Tugas;
 use App\Models\PengumpulanTugas;
+use App\Services\GuruLmsCardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class TugasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $guruId = auth()->user()->guru->id;
-        $tugas = Tugas::where('guru_id', $guruId)->with('mataPelajaran')->latest()->get();
-        return view('pages.guru.tugas.index', compact('tugas'));
+        $selectedKelas = trim((string) $request->query('kelas', '')) ?: null;
+        $selectedMapelId = $request->filled('mata_pelajaran_id') ? (int) $request->query('mata_pelajaran_id') : null;
+
+        $query = Tugas::where('guru_id', $guruId)
+            ->with('mataPelajaran')
+            ->withCount('pengumpulanTugas');
+
+        if ($selectedKelas) {
+            $query->where('kelas', $selectedKelas);
+        }
+        if ($selectedMapelId) {
+            $query->where('mata_pelajaran_id', $selectedMapelId);
+        }
+
+        $tugas = $query->latest()->get();
+        $lmsClassCards = app(GuruLmsCardService::class)->buildClassCards($guruId);
+
+        return view('pages.guru.tugas.index', compact('tugas', 'lmsClassCards', 'selectedKelas', 'selectedMapelId'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $guruId = auth()->user()->guru->id;
         $jadwals = Jadwal::where('guru_id', $guruId)->with('mataPelajaran')->get();
-        
-        $kelasOptions = $jadwals->pluck('kelas')->unique();
-        $mapelOptions = $jadwals->pluck('mataPelajaran')->unique('id');
 
-        return view('pages.guru.tugas.create', compact('kelasOptions', 'mapelOptions'));
+        $kelasOptions = $jadwals->pluck('kelas')->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values();
+        $mapelOptions = $jadwals->pluck('mataPelajaran')->unique('id')->values();
+        $selectedKelas = $request->query('kelas');
+        $selectedMapelId = $request->query('mata_pelajaran_id');
+        $redirectTo = $request->query('redirect_to');
+
+        return view('pages.guru.tugas.create', compact(
+            'kelasOptions',
+            'mapelOptions',
+            'selectedKelas',
+            'selectedMapelId',
+            'redirectTo'
+        ));
     }
 
     public function store(Request $request)
@@ -55,7 +81,7 @@ class TugasController extends Controller
             'tipe_pengumpulan.*' => 'in:link_url,file'
         ]);
 
-        $tugasData = $request->except(['file_lampiran', 'tipe_pengumpulan']);
+        $tugasData = $request->except(['file_lampiran', 'tipe_pengumpulan', 'redirect_to']);
         $tugasData['tipe_pengumpulan'] = implode(',', $request->tipe_pengumpulan);
         $tugas = new Tugas($tugasData);
         $tugas->guru_id = auth()->user()->guru->id;
@@ -67,7 +93,18 @@ class TugasController extends Controller
 
         $tugas->save();
 
-        return redirect()->route('guru.tugas.index')->with('success', 'Tugas berhasil ditambahkan.');
+        if ($request->input('redirect_to') === 'kelas') {
+            return redirect()->route('guru.kelas.show', [
+                'kelas' => $tugas->kelas,
+                'mata_pelajaran_id' => $tugas->mata_pelajaran_id,
+                'tab' => 'tugas',
+            ])->with('success', 'Tugas berhasil ditambahkan ke kelas.');
+        }
+
+        return redirect()->route('guru.tugas.index', [
+            'kelas' => $tugas->kelas,
+            'mata_pelajaran_id' => $tugas->mata_pelajaran_id,
+        ])->with('success', 'Tugas berhasil ditambahkan.');
     }
 
     public function show(Tugas $tugas)
