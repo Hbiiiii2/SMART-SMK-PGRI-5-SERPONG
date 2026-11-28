@@ -1,0 +1,3551 @@
+{
+    "tahun_ajaran": "2026/2027",
+    "source": "daftar_peserta_didik_dapodik_26-27.xlsx",
+    "total": 443,
+    "students": [
+        {
+            "nama": "ABDUL RAHMAN BAIHAKI",
+            "nis": "2627.001",
+            "nisn": "0113765921",
+            "kelas": "X AK",
+            "email": "2627.001@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ABI MANYU",
+            "nis": "2627.002",
+            "nisn": "3105128346",
+            "kelas": "X AK",
+            "email": "2627.002@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ADITTIA DARMA SIWA",
+            "nis": "2627.003",
+            "nisn": "0119178301",
+            "kelas": "X AK",
+            "email": "2627.003@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALISAH ZAFIRAH",
+            "nis": "2627.004",
+            "nisn": "0116951803",
+            "kelas": "X AK",
+            "email": "2627.004@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AUFA TAQIYUDIN DAMARA",
+            "nis": "2627.005",
+            "nisn": "0104671900",
+            "kelas": "X AK",
+            "email": "2627.005@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DAFFA ARYA DINATA",
+            "nis": "2627.006",
+            "nisn": "0114712578",
+            "kelas": "X AK",
+            "email": "2627.006@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DAFFA TIRTA ABDILLAH",
+            "nis": "2627.007",
+            "nisn": "3118567428",
+            "kelas": "X AK",
+            "email": "2627.007@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DWI APRIANI",
+            "nis": "2627.008",
+            "nisn": "0104597505",
+            "kelas": "X AK",
+            "email": "2627.008@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FANNYA ADELLIA MARSYA",
+            "nis": "2627.009",
+            "nisn": "0114798618",
+            "kelas": "X AK",
+            "email": "2627.009@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "INTANIA PUTRI BARUS",
+            "nis": "2627.010",
+            "nisn": "0102532831",
+            "kelas": "X AK",
+            "email": "2627.010@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IRFAN ALIYANSYAH",
+            "nis": "2627.011",
+            "nisn": "0112848981",
+            "kelas": "X AK",
+            "email": "2627.011@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IRVAN MAULANA",
+            "nis": "2627.012",
+            "nisn": "0104770352",
+            "kelas": "X AK",
+            "email": "2627.012@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ISHFA FADHILATUL JANNAH",
+            "nis": "2627.013",
+            "nisn": "3113074019",
+            "kelas": "X AK",
+            "email": "2627.013@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "M. MAULANA YUSUF",
+            "nis": "2627.014",
+            "nisn": "3097748081",
+            "kelas": "X AK",
+            "email": "2627.014@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MALIK ABDUL GANI",
+            "nis": "2627.015",
+            "nisn": "0105484683",
+            "kelas": "X AK",
+            "email": "2627.015@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD MARUDIN HIMAWAN",
+            "nis": "2627.018",
+            "nisn": "0118565675",
+            "kelas": "X AK",
+            "email": "2627.018@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ALFARIZI AZZAM",
+            "nis": "2627.016",
+            "nisn": "3110283151",
+            "kelas": "X AK",
+            "email": "2627.016@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ICHWANIYANSYAH",
+            "nis": "2627.017",
+            "nisn": "0102914869",
+            "kelas": "X AK",
+            "email": "2627.017@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD RIZQI PRAKASA",
+            "nis": "2627.019",
+            "nisn": "0106216379",
+            "kelas": "X AK",
+            "email": "2627.019@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAEEMA IBTIHAL ARAFAH",
+            "nis": "2627.020",
+            "nisn": "3110830436",
+            "kelas": "X AK",
+            "email": "2627.020@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NURIL GIBRAN",
+            "nis": "2627.021",
+            "nisn": "0117675766",
+            "kelas": "X AK",
+            "email": "2627.021@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUTRI AYU PRASTIKA",
+            "nis": "2627.022",
+            "nisn": "0122318741",
+            "kelas": "X AK",
+            "email": "2627.022@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAIHAN ALFANZA FABIAN",
+            "nis": "2627.023",
+            "nisn": "0113448223",
+            "kelas": "X AK",
+            "email": "2627.023@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAMADHANI",
+            "nis": "2627.024",
+            "nisn": "0102386166",
+            "kelas": "X AK",
+            "email": "2627.024@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SABRINA SARAS WATI SUTISNA",
+            "nis": "2627.025",
+            "nisn": "3105268573",
+            "kelas": "X AK",
+            "email": "2627.025@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAHRUL RAMADAN",
+            "nis": "2627.026",
+            "nisn": "3088229420",
+            "kelas": "X AK",
+            "email": "2627.026@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SARAH DYAH MEILIA",
+            "nis": "2627.027",
+            "nisn": "0101702183",
+            "kelas": "X AK",
+            "email": "2627.027@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SARTIKA AFRILIA",
+            "nis": "2627.028",
+            "nisn": "0112052518",
+            "kelas": "X AK",
+            "email": "2627.028@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SHEREEN MONICA",
+            "nis": "2627.029",
+            "nisn": "0106523121",
+            "kelas": "X AK",
+            "email": "2627.029@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SIFA PUTRI AULIA",
+            "nis": "2627.030",
+            "nisn": "0108538634",
+            "kelas": "X AK",
+            "email": "2627.030@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI MAULIDA",
+            "nis": "2627.031",
+            "nisn": "0105699549",
+            "kelas": "X AK",
+            "email": "2627.031@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI NAILATU RAMADANI",
+            "nis": "2627.032",
+            "nisn": "0103209294",
+            "kelas": "X AK",
+            "email": "2627.032@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "WIWIN",
+            "nis": "0119136089",
+            "nisn": "0119136089",
+            "kelas": "X AK",
+            "email": "0119136089@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "YATHA GIOFANI",
+            "nis": "2627.034",
+            "nisn": "3115812879",
+            "kelas": "X AK",
+            "email": "2627.034@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZHILLAN ALIF FADHILAH",
+            "nis": "2627.035",
+            "nisn": "3113595322",
+            "kelas": "X AK",
+            "email": "2627.035@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZIYAN GILANG SAPUTRA",
+            "nis": "2627.036",
+            "nisn": "0103465126",
+            "kelas": "X AK",
+            "email": "2627.036@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMANDA JUANITA",
+            "nis": "2627.037",
+            "nisn": "0109031280",
+            "kelas": "X BD",
+            "email": "2627.037@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMRI CHOIRUDIN",
+            "nis": "2627.038",
+            "nisn": "0111410329",
+            "kelas": "X BD",
+            "email": "2627.038@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AZKA AZHAR",
+            "nis": "2627.039",
+            "nisn": "0108073193",
+            "kelas": "X BD",
+            "email": "2627.039@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BRANANTIO ERFANSYAH",
+            "nis": "2627.040",
+            "nisn": "0105939641",
+            "kelas": "X BD",
+            "email": "2627.040@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CINDY LUTFI FITRIANI",
+            "nis": "2627.041",
+            "nisn": "0114948257",
+            "kelas": "X BD",
+            "email": "2627.041@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DAFFA ZAKI AZHAR",
+            "nis": "2627.042",
+            "nisn": "0119255809",
+            "kelas": "X BD",
+            "email": "2627.042@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DAHLIA ANGRAINI",
+            "nis": "2627.043",
+            "nisn": "0115249715",
+            "kelas": "X BD",
+            "email": "2627.043@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEDE SETIAWAN",
+            "nis": "2627.044",
+            "nisn": "0102463701",
+            "kelas": "X BD",
+            "email": "2627.044@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEWI RAHMAWATI",
+            "nis": "2627.081",
+            "nisn": "3113649799",
+            "kelas": "X BD",
+            "email": "2627.081@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FIRLY SYAYYID ULWAAN",
+            "nis": "2627.045",
+            "nisn": "3110681382",
+            "kelas": "X BD",
+            "email": "2627.045@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JONATHAN FIRRIZKHI",
+            "nis": "2627.046",
+            "nisn": "0108826725",
+            "kelas": "X BD",
+            "email": "2627.046@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KRESNA",
+            "nis": "2627.047",
+            "nisn": "0108245079",
+            "kelas": "X BD",
+            "email": "2627.047@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MARIO MUZAKI PERDANA",
+            "nis": "2627.048",
+            "nisn": "0105098353",
+            "kelas": "X BD",
+            "email": "2627.048@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MELATI APRILIA",
+            "nis": "2627.049",
+            "nisn": "3114589935",
+            "kelas": "X BD",
+            "email": "2627.049@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MOCHAMAD RAMZI FAHLEVI",
+            "nis": "2627.050",
+            "nisn": "3107587975",
+            "kelas": "X BD",
+            "email": "2627.050@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD ANDRIAN",
+            "nis": "2627.052",
+            "nisn": "0109695264",
+            "kelas": "X BD",
+            "email": "2627.052@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD IRFAN",
+            "nis": "2627.051",
+            "nisn": "0117987714",
+            "kelas": "X BD",
+            "email": "2627.051@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FAHRI",
+            "nis": "2627.053",
+            "nisn": "0112653550",
+            "kelas": "X BD",
+            "email": "2627.053@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FAREL",
+            "nis": "2627.054",
+            "nisn": "0118234405",
+            "kelas": "X BD",
+            "email": "2627.054@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FIKRI AZIZI",
+            "nis": "2627.055",
+            "nisn": "3109368469",
+            "kelas": "X BD",
+            "email": "2627.055@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ILHAM RIFA'I",
+            "nis": "2627.056",
+            "nisn": "0107876383",
+            "kelas": "X BD",
+            "email": "2627.056@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD MARDIANSYAH",
+            "nis": "2627.057",
+            "nisn": "0104444146",
+            "kelas": "X BD",
+            "email": "2627.057@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD RENDY",
+            "nis": "2627.058",
+            "nisn": "0103349851",
+            "kelas": "X BD",
+            "email": "2627.058@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ZILDJIAN ANWAR",
+            "nis": "2627.059",
+            "nisn": "0109014032",
+            "kelas": "X BD",
+            "email": "2627.059@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAFIRA MAHARANI",
+            "nis": "2627.060",
+            "nisn": "0105854804",
+            "kelas": "X BD",
+            "email": "2627.060@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NOVITA PUTRI PRIHANDINI",
+            "nis": "2627.061",
+            "nisn": "0108732003",
+            "kelas": "X BD",
+            "email": "2627.061@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAFAEL PUTRA MAHENDRA",
+            "nis": "2627.062",
+            "nisn": "0114233123",
+            "kelas": "X BD",
+            "email": "2627.062@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAHMAT PRATAMA AFANDYANTO",
+            "nis": "2627.063",
+            "nisn": "0114536796",
+            "kelas": "X BD",
+            "email": "2627.063@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIZKI ADI KURNIAWAN",
+            "nis": "2627.064",
+            "nisn": "0106469398",
+            "kelas": "X BD",
+            "email": "2627.064@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIZKI ANDI SAPUTRA",
+            "nis": "2627.065",
+            "nisn": "0117755488",
+            "kelas": "X BD",
+            "email": "2627.065@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIZQI FIRMANSYAH",
+            "nis": "2627.066",
+            "nisn": "3116897696",
+            "kelas": "X BD",
+            "email": "2627.066@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAFIRA MAULIDA",
+            "nis": "2627.067",
+            "nisn": "0116005461",
+            "kelas": "X BD",
+            "email": "2627.067@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAVA LAURA OKTA AMINAH",
+            "nis": "2627.068",
+            "nisn": "3111594769",
+            "kelas": "X BD",
+            "email": "2627.068@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SULTAN RADITYA FATIH",
+            "nis": "2627.069",
+            "nisn": "0118767471",
+            "kelas": "X BD",
+            "email": "2627.069@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TITA RIANTI",
+            "nis": "2627.070",
+            "nisn": "0119144746",
+            "kelas": "X BD",
+            "email": "2627.070@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "WAHYU FIRMANSYAH",
+            "nis": "2627.071",
+            "nisn": "0095577257",
+            "kelas": "X BD",
+            "email": "2627.071@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ADIS ARDILLA ADELIA",
+            "nis": "2627.073",
+            "nisn": "0106788998",
+            "kelas": "X MP 1",
+            "email": "2627.073@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AHMAD SAUKI SAPUTRA",
+            "nis": "2627.074",
+            "nisn": "0096725731",
+            "kelas": "X MP 1",
+            "email": "2627.074@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALFACHREZA ILHAM",
+            "nis": "2627.075",
+            "nisn": "0104901472",
+            "kelas": "X MP 1",
+            "email": "2627.075@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALTAMIS AQHAR BIMAZAFRI",
+            "nis": "2627.076",
+            "nisn": "0115411344",
+            "kelas": "X MP 1",
+            "email": "2627.076@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANNISA AULIA ANZANY",
+            "nis": "2627.077",
+            "nisn": "0104487783",
+            "kelas": "X MP 1",
+            "email": "2627.077@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BIMA MARDHA ALZAID SAFWAN",
+            "nis": "2627.078",
+            "nisn": "0101727450",
+            "kelas": "X MP 1",
+            "email": "2627.078@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CINDI TRI NURAINI",
+            "nis": "2627.079",
+            "nisn": "0098882931",
+            "kelas": "X MP 1",
+            "email": "2627.079@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DESTI PUJA SARI",
+            "nis": "2627.080",
+            "nisn": "3117859904",
+            "kelas": "X MP 1",
+            "email": "2627.080@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ELENA DIARA ELSAPUTRI",
+            "nis": "2627.082",
+            "nisn": "3108054777",
+            "kelas": "X MP 1",
+            "email": "2627.082@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FADEL MALIK AL MARI",
+            "nis": "2627.083",
+            "nisn": "0107886968",
+            "kelas": "X MP 1",
+            "email": "2627.083@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FADHILAH ZAHRA LUBIS",
+            "nis": "2627.084",
+            "nisn": "0101068481",
+            "kelas": "X MP 1",
+            "email": "2627.084@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IKMAL NUR APRIANSYAH",
+            "nis": "2627.085",
+            "nisn": "3113498576",
+            "kelas": "X MP 1",
+            "email": "2627.085@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IQBAL RIZQULLAH",
+            "nis": "2627.086",
+            "nisn": "0112154794",
+            "kelas": "X MP 1",
+            "email": "2627.086@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JANNIE ARETHA UTAMI",
+            "nis": "2627.087",
+            "nisn": "0116518851",
+            "kelas": "X MP 1",
+            "email": "2627.087@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JULIANA SAPUTRA",
+            "nis": "2627.088",
+            "nisn": "0114352402",
+            "kelas": "X MP 1",
+            "email": "2627.088@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LABIB AZIZY",
+            "nis": "2627.089",
+            "nisn": "3108398721",
+            "kelas": "X MP 1",
+            "email": "2627.089@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LANI OKTAVIANI",
+            "nis": "2627.090",
+            "nisn": "0097198273",
+            "kelas": "X MP 1",
+            "email": "2627.090@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LAURA NIKEN SANTIKA",
+            "nis": "2627.091",
+            "nisn": "0114089754",
+            "kelas": "X MP 1",
+            "email": "2627.091@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MAURA ADINDA SALSABILLA",
+            "nis": "2627.092",
+            "nisn": "3119096180",
+            "kelas": "X MP 1",
+            "email": "2627.092@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MEISYA RASMI WIJAYA",
+            "nis": "2627.093",
+            "nisn": "0111605379",
+            "kelas": "X MP 1",
+            "email": "2627.093@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD AFRIANSAH",
+            "nis": "2627.094",
+            "nisn": "0114928374",
+            "kelas": "X MP 1",
+            "email": "2627.094@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ADITYA PRANDANA",
+            "nis": "2627.095",
+            "nisn": null,
+            "kelas": "X MP 1",
+            "email": "2627.095@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FAKHRI",
+            "nis": "2627.096",
+            "nisn": "3110793720",
+            "kelas": "X MP 1",
+            "email": "2627.096@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NABILA KHOIRUNNISA",
+            "nis": "2627.097",
+            "nisn": "0116483380",
+            "kelas": "X MP 1",
+            "email": "2627.097@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAILLA RAMADHANI",
+            "nis": "2627.098",
+            "nisn": "0105436768",
+            "kelas": "X MP 1",
+            "email": "2627.098@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAZRIL ILHAM",
+            "nis": "2627.099",
+            "nisn": "0092899016",
+            "kelas": "X MP 1",
+            "email": "2627.099@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAFA KHAIRUL IKHWAN",
+            "nis": "2627.100",
+            "nisn": "0119502453",
+            "kelas": "X MP 1",
+            "email": "2627.100@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAKA DWI SUNARDI",
+            "nis": "2627.101",
+            "nisn": "3102923005",
+            "kelas": "X MP 1",
+            "email": "2627.101@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RANDI ARDIANSYAH",
+            "nis": "2627.103",
+            "nisn": "0101575309",
+            "kelas": "X MP 1",
+            "email": "2627.103@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "REFAN",
+            "nis": "2627.102",
+            "nisn": "0112010805",
+            "kelas": "X MP 1",
+            "email": "2627.102@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIO OKTAVIANSYAH",
+            "nis": "2627.104",
+            "nisn": "0103684855",
+            "kelas": "X MP 1",
+            "email": "2627.104@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAFA JULIANA",
+            "nis": "2627.105",
+            "nisn": "0111404682",
+            "kelas": "X MP 1",
+            "email": "2627.105@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SALAM KUSUMA WARDANI",
+            "nis": "2627.106",
+            "nisn": "3115799460",
+            "kelas": "X MP 1",
+            "email": "2627.106@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SERLI APRILIA KHASANAH",
+            "nis": "2627.107",
+            "nisn": "0106896812",
+            "kelas": "X MP 1",
+            "email": "2627.107@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "VIONA SALSABILA",
+            "nis": "2627.108",
+            "nisn": "0097969560",
+            "kelas": "X MP 1",
+            "email": "2627.108@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZAHRA TUS'SITA",
+            "nis": "2627.072",
+            "nisn": "0115548584",
+            "kelas": "X MP 1",
+            "email": "2627.072@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "APRILLIA",
+            "nis": "2627.109",
+            "nisn": "0104722571",
+            "kelas": "X MP 2",
+            "email": "2627.109@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AUFA INGRI ALYUDISTIRA",
+            "nis": "2627.110",
+            "nisn": "0104105068",
+            "kelas": "X MP 2",
+            "email": "2627.110@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AYATA",
+            "nis": "2627.111",
+            "nisn": "0105395215",
+            "kelas": "X MP 2",
+            "email": "2627.111@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AYRA NURMA MAHARANI",
+            "nis": "2627.112",
+            "nisn": "0103879468",
+            "kelas": "X MP 2",
+            "email": "2627.112@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CITRA MENTARI SUSENO",
+            "nis": "2627.113",
+            "nisn": "0115381567",
+            "kelas": "X MP 2",
+            "email": "2627.113@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DHANNU DERMAWAN BUKKY",
+            "nis": "2627.114",
+            "nisn": "3116481655",
+            "kelas": "X MP 2",
+            "email": "2627.114@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DHENASYA PUTRY",
+            "nis": "2627.115",
+            "nisn": "0102048122",
+            "kelas": "X MP 2",
+            "email": "2627.115@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DITA ANITA RIYANI",
+            "nis": "2627.116",
+            "nisn": "0108123515",
+            "kelas": "X MP 2",
+            "email": "2627.116@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FATIMATUZZAHRA",
+            "nis": "2627.117",
+            "nisn": "3118602243",
+            "kelas": "X MP 2",
+            "email": "2627.117@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HABIL MIRALDI",
+            "nis": "2627.118",
+            "nisn": "3105861996",
+            "kelas": "X MP 2",
+            "email": "2627.118@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JAHWA HERDIAN DINI",
+            "nis": "2627.119",
+            "nisn": "0115349963",
+            "kelas": "X MP 2",
+            "email": "2627.119@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JALU APRIANSYAH",
+            "nis": "2627.120",
+            "nisn": "3118696669",
+            "kelas": "X MP 2",
+            "email": "2627.120@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JUNITA",
+            "nis": "2627.121",
+            "nisn": "0119096741",
+            "kelas": "X MP 2",
+            "email": "2627.121@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KHOLIFATUL SA'DIAH",
+            "nis": "2627.122",
+            "nisn": "3115206664",
+            "kelas": "X MP 2",
+            "email": "2627.122@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LIBY VANESA NURMAULIDA",
+            "nis": "2627.123",
+            "nisn": "0119580325",
+            "kelas": "X MP 2",
+            "email": "2627.123@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MAURRA HANIFHAH RAMADHANIEA",
+            "nis": "2627.124",
+            "nisn": "0109754854",
+            "kelas": "X MP 2",
+            "email": "2627.124@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MEYDA ZAHRA SHAFIRA",
+            "nis": "2627.125",
+            "nisn": "0119006440",
+            "kelas": "X MP 2",
+            "email": "2627.125@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ALPIANSYAH",
+            "nis": "2627.126",
+            "nisn": "3113847492",
+            "kelas": "X MP 2",
+            "email": "2627.126@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD DAVI SIRHAN",
+            "nis": "2627.127",
+            "nisn": "0105893612",
+            "kelas": "X MP 2",
+            "email": "2627.127@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD RAFKIAN SAPUTRA",
+            "nis": "2627.128",
+            "nisn": "0102645216",
+            "kelas": "X MP 2",
+            "email": "2627.128@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAYSICHA RHIYOLANDA ARUMMAWARNI",
+            "nis": "2627.129",
+            "nisn": "3107760496",
+            "kelas": "X MP 2",
+            "email": "2627.129@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NOVITA SARI",
+            "nis": "2627.130",
+            "nisn": "0104703183",
+            "kelas": "X MP 2",
+            "email": "2627.130@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NUKE PARADILA",
+            "nis": "2627.131",
+            "nisn": "0113329565",
+            "kelas": "X MP 2",
+            "email": "2627.131@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAFA MANELLA PUTRA",
+            "nis": "2627.132",
+            "nisn": "0109208095",
+            "kelas": "X MP 2",
+            "email": "2627.132@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RENO ADERO SIREGAR",
+            "nis": "2627.133",
+            "nisn": "0111462828",
+            "kelas": "X MP 2",
+            "email": "2627.133@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIDWAN",
+            "nis": "2627.134",
+            "nisn": "0092836244",
+            "kelas": "X MP 2",
+            "email": "2627.134@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIVALDO HIDAYAT",
+            "nis": "2627.135",
+            "nisn": "0119093273",
+            "kelas": "X MP 2",
+            "email": "2627.135@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIZKI ALLYANSYAH",
+            "nis": "2627.136",
+            "nisn": "0109377387",
+            "kelas": "X MP 2",
+            "email": "2627.136@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SATRIA",
+            "nis": "2627.137",
+            "nisn": "3103604191",
+            "kelas": "X MP 2",
+            "email": "2627.137@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SENNA RIZKIYANTO",
+            "nis": "2627.138",
+            "nisn": "0107020471",
+            "kelas": "X MP 2",
+            "email": "2627.138@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI AUMI FITRIAH",
+            "nis": "2627.139",
+            "nisn": "0103030162",
+            "kelas": "X MP 2",
+            "email": "2627.139@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SYAHIRA SELOMITA",
+            "nis": "2627.140",
+            "nisn": "0106629098",
+            "kelas": "X MP 2",
+            "email": "2627.140@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TIA SAPUTRA",
+            "nis": "2627.141",
+            "nisn": "0102903430",
+            "kelas": "X MP 2",
+            "email": "2627.141@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TUBAGUS MAULANA MUNANDAR",
+            "nis": "2627.142",
+            "nisn": "0109319042",
+            "kelas": "X MP 2",
+            "email": "2627.142@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ULINNUHA",
+            "nis": "2627.143",
+            "nisn": "3118798177",
+            "kelas": "X MP 2",
+            "email": "2627.143@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "YESSA MAULIDIA YUSUF",
+            "nis": "2627.144",
+            "nisn": "0105573327",
+            "kelas": "X MP 2",
+            "email": "2627.144@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AAS MAULIDA",
+            "nis": "2526.001",
+            "nisn": "0107797188",
+            "kelas": "XI AK 1",
+            "email": "2526.001@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALISSA",
+            "nis": "2526.002",
+            "nisn": "0084264426",
+            "kelas": "XI AK 1",
+            "email": "2526.002@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMELIA NOVIANTI",
+            "nis": "2526.003",
+            "nisn": "0106644299",
+            "kelas": "XI AK 1",
+            "email": "2526.003@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMELIA PUTRI",
+            "nis": "2526.004",
+            "nisn": "0096890961",
+            "kelas": "XI AK 1",
+            "email": "2526.004@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANDIKA RULLAILLIKA",
+            "nis": "2526.005",
+            "nisn": "3095763773",
+            "kelas": "XI AK 1",
+            "email": "2526.005@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ARZAH DALFIRA",
+            "nis": "2526.006",
+            "nisn": "0099115393",
+            "kelas": "XI AK 1",
+            "email": "2526.006@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AULIA SEFTRIANI",
+            "nis": "2526.007",
+            "nisn": "3093949337",
+            "kelas": "XI AK 1",
+            "email": "2526.007@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AURA KANIYA ANJELI PURBA",
+            "nis": "2526.008",
+            "nisn": "0103915294",
+            "kelas": "XI AK 1",
+            "email": "2526.008@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BILQIS REGINA PUTRI",
+            "nis": "2526.009",
+            "nisn": "0113233281",
+            "kelas": "XI AK 1",
+            "email": "2526.009@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BINTANG NUR WAHYU HARAHAP",
+            "nis": "2526.010",
+            "nisn": "0091772047",
+            "kelas": "XI AK 1",
+            "email": "2526.010@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DIAH MAHARANI",
+            "nis": "2526.011",
+            "nisn": "0108059274",
+            "kelas": "XI AK 1",
+            "email": "2526.011@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DYAH ISNAFA'IZAH KAYLANA",
+            "nis": "2526.012",
+            "nisn": "0102357078",
+            "kelas": "XI AK 1",
+            "email": "2526.012@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ELZA VEROLAN",
+            "nis": "2526.013",
+            "nisn": "0097321303",
+            "kelas": "XI AK 1",
+            "email": "2526.013@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "EQSA AFTA PUTRI",
+            "nis": "2526.014",
+            "nisn": "0099762357",
+            "kelas": "XI AK 1",
+            "email": "2526.014@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FITRIA RAHMADANI",
+            "nis": "2526.015",
+            "nisn": "0105330148",
+            "kelas": "XI AK 1",
+            "email": "2526.015@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "GILBRAM GALUH SAMUDRA",
+            "nis": "2526.016",
+            "nisn": "0094041071",
+            "kelas": "XI AK 1",
+            "email": "2526.016@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IZAB KHIROM AL FURQON",
+            "nis": "2526.017",
+            "nisn": "0103340749",
+            "kelas": "XI AK 1",
+            "email": "2526.017@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KEREN VERA OCTAVIA HASIBUAN",
+            "nis": "2526.018",
+            "nisn": "0093359702",
+            "kelas": "XI AK 1",
+            "email": "2526.018@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD AKBAR RAMADHAN",
+            "nis": "2526.020",
+            "nisn": "0099071313",
+            "kelas": "XI AK 1",
+            "email": "2526.020@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD MUKHLIS",
+            "nis": "2526.021",
+            "nisn": "0099049779",
+            "kelas": "XI AK 1",
+            "email": "2526.021@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ALFAHRI",
+            "nis": "2526.022",
+            "nisn": "0079481060",
+            "kelas": "XI AK 1",
+            "email": "2526.022@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NASYA AURA SAFANA",
+            "nis": "2526.155",
+            "nisn": "0103881806",
+            "kelas": "XI AK 1",
+            "email": "2526.155@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NURHADI",
+            "nis": "2526.023",
+            "nisn": "0106828624",
+            "kelas": "XI AK 1",
+            "email": "2526.023@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NURISMAYA",
+            "nis": "2526.024",
+            "nisn": "0093755047",
+            "kelas": "XI AK 1",
+            "email": "2526.024@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUAN NUR NORINSIUS ARITONANG",
+            "nis": "2526.025",
+            "nisn": "0098568822",
+            "kelas": "XI AK 1",
+            "email": "2526.025@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAKA JOAN PRATAMA",
+            "nis": "2526.026",
+            "nisn": "0091931615",
+            "kelas": "XI AK 1",
+            "email": "2526.026@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAZANDRA ALBAHY TRISNA",
+            "nis": "2526.157",
+            "nisn": "0103189295",
+            "kelas": "XI AK 1",
+            "email": "2526.157@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "REFY WAHYUNI",
+            "nis": "2526.027",
+            "nisn": "0107842169",
+            "kelas": "XI AK 1",
+            "email": "2526.027@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TASYA AMANDA",
+            "nis": "2526.028",
+            "nisn": "0097620619",
+            "kelas": "XI AK 1",
+            "email": "2526.028@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZAENAL ARIFIN ICHWAN",
+            "nis": "2526.029",
+            "nisn": "0092326429",
+            "kelas": "XI AK 1",
+            "email": "2526.029@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ADRISTI GRAHITA RAHMAH",
+            "nis": "2526.030",
+            "nisn": "0091565105",
+            "kelas": "XI AK 2",
+            "email": "2526.030@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ARREHAN RAMADHAN",
+            "nis": "0097301571",
+            "nisn": "0097301571",
+            "kelas": "XI AK 2",
+            "email": "0097301571@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BAGAS BAHTIAR",
+            "nis": "2526.032",
+            "nisn": "0104819515",
+            "kelas": "XI AK 2",
+            "email": "2526.032@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BUNGA PUTRI VALENCIA",
+            "nis": "2526.156",
+            "nisn": "0096338271",
+            "kelas": "XI AK 2",
+            "email": "2526.156@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DHIMAS ADHITYA RAMADHANY",
+            "nis": "2526.033",
+            "nisn": "0093721474",
+            "kelas": "XI AK 2",
+            "email": "2526.033@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ELDA NUR FITA SARI",
+            "nis": "2526.034",
+            "nisn": "0093403423",
+            "kelas": "XI AK 2",
+            "email": "2526.034@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FIKY FERNANDO",
+            "nis": "2526.035",
+            "nisn": "3108601239",
+            "kelas": "XI AK 2",
+            "email": "2526.035@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HAIDAR FAUZI SETIAWAN",
+            "nis": "2526.036",
+            "nisn": "0095357140",
+            "kelas": "XI AK 2",
+            "email": "2526.036@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IBNU ROSIT AL ANSORI",
+            "nis": "2526.037",
+            "nisn": "3090757511",
+            "kelas": "XI AK 2",
+            "email": "2526.037@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JUANITA MEYLANI PUTRI",
+            "nis": "2526.158",
+            "nisn": "0106245266",
+            "kelas": "XI AK 2",
+            "email": "2526.158@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LIVIA ADISTA ANJANI",
+            "nis": "2526.038",
+            "nisn": "0105262547",
+            "kelas": "XI AK 2",
+            "email": "2526.038@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "M. NOVAL NUR RIFKI",
+            "nis": "2526.042",
+            "nisn": "0101718951",
+            "kelas": "XI AK 2",
+            "email": "2526.042@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MARIK IBRAHIM",
+            "nis": "2526.039",
+            "nisn": "0098237331",
+            "kelas": "XI AK 2",
+            "email": "2526.039@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MARTIN DWI GUNAWAN",
+            "nis": "2526.040",
+            "nisn": "0091691906",
+            "kelas": "XI AK 2",
+            "email": "2526.040@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD FADLI SAWALLUDIN",
+            "nis": "2526.044",
+            "nisn": "3092656621",
+            "kelas": "XI AK 2",
+            "email": "2526.044@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD LUFILAH FAUZAN",
+            "nis": "2526.043",
+            "nisn": "3098738238",
+            "kelas": "XI AK 2",
+            "email": "2526.043@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FARDHAN PRASETYAN",
+            "nis": "2526.045",
+            "nisn": "0099390895",
+            "kelas": "XI AK 2",
+            "email": "2526.045@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD IBNU REZKY",
+            "nis": "2526.046",
+            "nisn": "0099998653",
+            "kelas": "XI AK 2",
+            "email": "2526.046@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD JAUHARI PIRDAUS",
+            "nis": "2526.041",
+            "nisn": "0096330850",
+            "kelas": "XI AK 2",
+            "email": "2526.041@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD RHEVANZA",
+            "nis": "2526.047",
+            "nisn": "0104350549",
+            "kelas": "XI AK 2",
+            "email": "2526.047@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NUR ALFIANSYAH ZAM-ZAM SETIAWAN",
+            "nis": "2526.048",
+            "nisn": "0088013183",
+            "kelas": "XI AK 2",
+            "email": "2526.048@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAFFI ADRIANSYAH",
+            "nis": "2526.049",
+            "nisn": "0103632450",
+            "kelas": "XI AK 2",
+            "email": "2526.049@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SALWA DARMAWAN",
+            "nis": "2526.050",
+            "nisn": "0098220416",
+            "kelas": "XI AK 2",
+            "email": "2526.050@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SANDY SAPUTRA",
+            "nis": "2526.051",
+            "nisn": "0085518732",
+            "kelas": "XI AK 2",
+            "email": "2526.051@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SINTIYA SARI",
+            "nis": "2526.053",
+            "nisn": "0097242877",
+            "kelas": "XI AK 2",
+            "email": "2526.053@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SYAUKI MUBAROK",
+            "nis": "2526.052",
+            "nisn": "0094600626",
+            "kelas": "XI AK 2",
+            "email": "2526.052@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TAUFIQUR ROHMAN",
+            "nis": "2526.054",
+            "nisn": "0097121446",
+            "kelas": "XI AK 2",
+            "email": "2526.054@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZEVANA MAYLAFFAYZA",
+            "nis": "2526.055",
+            "nisn": "0099782564",
+            "kelas": "XI AK 2",
+            "email": "2526.055@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZORA AYU NUGROHO",
+            "nis": "2526.056",
+            "nisn": "0101733517",
+            "kelas": "XI AK 2",
+            "email": "2526.056@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AHMAD MUJAQSYAH",
+            "nis": "2526.057",
+            "nisn": "0102773020",
+            "kelas": "XI BD",
+            "email": "2526.057@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AIRA CALISTA FITRI",
+            "nis": "2526.058",
+            "nisn": "0095480634",
+            "kelas": "XI BD",
+            "email": "2526.058@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALDI",
+            "nis": "2526.059",
+            "nisn": "0091122212",
+            "kelas": "XI BD",
+            "email": "2526.059@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMELIA WIDIA LESTARI",
+            "nis": "2526.060",
+            "nisn": "0107728519",
+            "kelas": "XI BD",
+            "email": "2526.060@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANGEL RAMADHANI YUSUP",
+            "nis": "2526.061",
+            "nisn": "0091082522",
+            "kelas": "XI BD",
+            "email": "2526.061@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CHALISTI PUTRI ANGGRAENI",
+            "nis": "2526.062",
+            "nisn": "0106637772",
+            "kelas": "XI BD",
+            "email": "2526.062@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ERFAN ARDIANSYAH",
+            "nis": "2526.063",
+            "nisn": "0108138293",
+            "kelas": "XI BD",
+            "email": "2526.063@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FAHRI FADILAH",
+            "nis": "2526.064",
+            "nisn": "0091162494",
+            "kelas": "XI BD",
+            "email": "2526.064@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FAIRUZ NUR GHIFARI",
+            "nis": "2526.065",
+            "nisn": "0101515778",
+            "kelas": "XI BD",
+            "email": "2526.065@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FANI FADILA",
+            "nis": "2526.066",
+            "nisn": "0103746985",
+            "kelas": "XI BD",
+            "email": "2526.066@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FARHAN ARDIAN PUTRA",
+            "nis": "2526.067",
+            "nisn": "0153331284",
+            "kelas": "XI BD",
+            "email": "2526.067@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "GRAHA ADI PUTRA",
+            "nis": "2526.068",
+            "nisn": "0109520604",
+            "kelas": "XI BD",
+            "email": "2526.068@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MAULANA RAMDANI",
+            "nis": "2526.069",
+            "nisn": "0107547968",
+            "kelas": "XI BD",
+            "email": "2526.069@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MOHAMAD FAUZAN AZZILLAH",
+            "nis": "2526.074",
+            "nisn": "0091487091",
+            "kelas": "XI BD",
+            "email": "2526.074@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD AKBAR",
+            "nis": "2526.070",
+            "nisn": "0108149304",
+            "kelas": "XI BD",
+            "email": "2526.070@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD IKHWAN FATUROHMAN",
+            "nis": "2526.075",
+            "nisn": "0104782788",
+            "kelas": "XI BD",
+            "email": "2526.075@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD AKBAR YUDA",
+            "nis": "2526.071",
+            "nisn": "0105676340",
+            "kelas": "XI BD",
+            "email": "2526.071@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD DZAKI AKBARULLAH",
+            "nis": "2526.072",
+            "nisn": "0109970566",
+            "kelas": "XI BD",
+            "email": "2526.072@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD ERWIN SYAHYADI",
+            "nis": "2526.073",
+            "nisn": "0097781966",
+            "kelas": "XI BD",
+            "email": "2526.073@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUTRI WAHYUNI",
+            "nis": "2526.077",
+            "nisn": "0103176676",
+            "kelas": "XI BD",
+            "email": "2526.077@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIO MEDIAWAN PUTRA PRATAMA",
+            "nis": "2526.078",
+            "nisn": "0104616079",
+            "kelas": "XI BD",
+            "email": "2526.078@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIZKY ADITYA",
+            "nis": "2526.079",
+            "nisn": "0105693522",
+            "kelas": "XI BD",
+            "email": "2526.079@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAEPUL MURHAD",
+            "nis": "2526.080",
+            "nisn": "0082996526",
+            "kelas": "XI BD",
+            "email": "2526.080@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SALFA NURHIDAYAH",
+            "nis": "2526.081",
+            "nisn": "0106524570",
+            "kelas": "XI BD",
+            "email": "2526.081@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SALSABILLA PUTRI ERIYASTUTI",
+            "nis": "2526.082",
+            "nisn": "0085178291",
+            "kelas": "XI BD",
+            "email": "2526.082@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI MASITOH",
+            "nis": "2526.083",
+            "nisn": "3090676661",
+            "kelas": "XI BD",
+            "email": "2526.083@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI SOLIHAT",
+            "nis": "2526.084",
+            "nisn": "0106589367",
+            "kelas": "XI BD",
+            "email": "2526.084@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SYABILLA ADISTY",
+            "nis": "2526.085",
+            "nisn": "0105562994",
+            "kelas": "XI BD",
+            "email": "2526.085@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "URAY JANUAR BINTAN PRASETYA",
+            "nis": "2526.086",
+            "nisn": "0108897130",
+            "kelas": "XI BD",
+            "email": "2526.086@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZAHRA",
+            "nis": "2526.087",
+            "nisn": "0093676316",
+            "kelas": "XI BD",
+            "email": "2526.087@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ADITYA ALI",
+            "nis": "2526.088",
+            "nisn": "0107326854",
+            "kelas": "XI MP 1",
+            "email": "2526.088@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALFINO SATRIA NUGRAHA",
+            "nis": "2526.090",
+            "nisn": "0108642482",
+            "kelas": "XI MP 1",
+            "email": "2526.090@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALISYA CALISTA FITRI",
+            "nis": "2526.089",
+            "nisn": "0093379128",
+            "kelas": "XI MP 1",
+            "email": "2526.089@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BERLIAN RAINA RATU CALOSA",
+            "nis": "2526.091",
+            "nisn": "0104747433",
+            "kelas": "XI MP 1",
+            "email": "2526.091@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FARIS ARIZKI RAHMAN",
+            "nis": "2526.092",
+            "nisn": "0103625202",
+            "kelas": "XI MP 1",
+            "email": "2526.092@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "IRA RAMADHANI",
+            "nis": "2526.093",
+            "nisn": "0109994660",
+            "kelas": "XI MP 1",
+            "email": "2526.093@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JALILAH",
+            "nis": "2526.094",
+            "nisn": "0073829733",
+            "kelas": "XI MP 1",
+            "email": "2526.094@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KEYLA AURELIA MAHENDRA",
+            "nis": "2526.096",
+            "nisn": "0096969506",
+            "kelas": "XI MP 1",
+            "email": "2526.096@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KHARINA PERMATA",
+            "nis": "2526.097",
+            "nisn": "0109598029",
+            "kelas": "XI MP 1",
+            "email": "2526.097@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LAILATUSOLIHAH YASA",
+            "nis": "2526.098",
+            "nisn": "0092339004",
+            "kelas": "XI MP 1",
+            "email": "2526.098@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "LUNA OKTAVIANA",
+            "nis": "2526.099",
+            "nisn": "0102717719",
+            "kelas": "XI MP 1",
+            "email": "2526.099@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD NUR ARDIYANSYAH",
+            "nis": "2526.100",
+            "nisn": "0098447052",
+            "kelas": "XI MP 1",
+            "email": "2526.100@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD VIQRI AL-QORNI",
+            "nis": "2526.101",
+            "nisn": "0104898692",
+            "kelas": "XI MP 1",
+            "email": "2526.101@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD SYAFIQ AT-TAUHIDY",
+            "nis": "2526.102",
+            "nisn": "0106666386",
+            "kelas": "XI MP 1",
+            "email": "2526.102@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NABILLA",
+            "nis": "2526.103",
+            "nisn": "0097980144",
+            "kelas": "XI MP 1",
+            "email": "2526.103@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NADIA ANUGGRAH RAMADANI",
+            "nis": "2526.104",
+            "nisn": "0099162981",
+            "kelas": "XI MP 1",
+            "email": "2526.104@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NADIA NUR SEPTI",
+            "nis": "2526.105",
+            "nisn": "0102232928",
+            "kelas": "XI MP 1",
+            "email": "2526.105@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NEYSHA PELYSHA",
+            "nis": "2526.106",
+            "nisn": "3108630152",
+            "kelas": "XI MP 1",
+            "email": "2526.106@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NURINNISA LIYANA ZAHIRAH",
+            "nis": "2526.107",
+            "nisn": "0106952783",
+            "kelas": "XI MP 1",
+            "email": "2526.107@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAFA IMAM FIRMANSYAH",
+            "nis": "2526.108",
+            "nisn": "0105999100",
+            "kelas": "XI MP 1",
+            "email": "2526.108@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RESYA WINANDA",
+            "nis": "2526.109",
+            "nisn": "0104713739",
+            "kelas": "XI MP 1",
+            "email": "2526.109@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "REZKY ADI KUSUMA",
+            "nis": "2526.110",
+            "nisn": "0093343443",
+            "kelas": "XI MP 1",
+            "email": "2526.110@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RHIDO SAPUTRA",
+            "nis": "2526.111",
+            "nisn": "3104569788",
+            "kelas": "XI MP 1",
+            "email": "2526.111@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SABILAH MUZAIRA",
+            "nis": "2526.112",
+            "nisn": "0093123317",
+            "kelas": "XI MP 1",
+            "email": "2526.112@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAFIRA PUTRI",
+            "nis": "2526.113",
+            "nisn": "0102547975",
+            "kelas": "XI MP 1",
+            "email": "2526.113@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SALWA ILMIRA SUJANA",
+            "nis": "2526.114",
+            "nisn": "3105510394",
+            "kelas": "XI MP 1",
+            "email": "2526.114@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SHAFA PUTRI MELANI",
+            "nis": "2526.115",
+            "nisn": "0095683237",
+            "kelas": "XI MP 1",
+            "email": "2526.115@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SHEPTI AULYA",
+            "nis": "2526.116",
+            "nisn": "0109846563",
+            "kelas": "XI MP 1",
+            "email": "2526.116@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI ANISYA AULIA PUTRY",
+            "nis": "2526.117",
+            "nisn": "0101649960",
+            "kelas": "XI MP 1",
+            "email": "2526.117@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SYIFA LUTHFIYAH",
+            "nis": "2526.118",
+            "nisn": "3107441185",
+            "kelas": "XI MP 1",
+            "email": "2526.118@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZAHROTU SYITA",
+            "nis": "2526.119",
+            "nisn": "0102480118",
+            "kelas": "XI MP 1",
+            "email": "2526.119@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZAHROTUSSYIFA PUTRI RAMADHANI",
+            "nis": "2526.120",
+            "nisn": "0097651104",
+            "kelas": "XI MP 1",
+            "email": "2526.120@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AINI DHIA AQILLAH",
+            "nis": "2526.121",
+            "nisn": "0108935637",
+            "kelas": "XI MP 2",
+            "email": "2526.121@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALIKA RAHMANIA PUTRI",
+            "nis": "2526.122",
+            "nisn": "0097267847",
+            "kelas": "XI MP 2",
+            "email": "2526.122@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AULIA",
+            "nis": "2526.123",
+            "nisn": "0099653018",
+            "kelas": "XI MP 2",
+            "email": "2526.123@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AULIA ZAHRA PUTRI SUNARYA",
+            "nis": "2526.125",
+            "nisn": "0106648163",
+            "kelas": "XI MP 2",
+            "email": "2526.125@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CHALISTA PUTRI ANGGRAENI",
+            "nis": "2526.126",
+            "nisn": "0106620198",
+            "kelas": "XI MP 2",
+            "email": "2526.126@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEDE NOVILIA",
+            "nis": "2526.127",
+            "nisn": "0091254249",
+            "kelas": "XI MP 2",
+            "email": "2526.127@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEWI ANJANI",
+            "nis": "2526.128",
+            "nisn": "0102803396",
+            "kelas": "XI MP 2",
+            "email": "2526.128@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEWI NUR FEBRIYANDI",
+            "nis": "2526.129",
+            "nisn": "0106134173",
+            "kelas": "XI MP 2",
+            "email": "2526.129@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DINI ANIYANTI",
+            "nis": "2526.131",
+            "nisn": "0109000266",
+            "kelas": "XI MP 2",
+            "email": "2526.131@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FAHIRA QOLBIAH",
+            "nis": "2526.132",
+            "nisn": "3103498076",
+            "kelas": "XI MP 2",
+            "email": "2526.132@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "GALIH SATRIA ARTA BINTANG",
+            "nis": "2526.133",
+            "nisn": "0092588474",
+            "kelas": "XI MP 2",
+            "email": "2526.133@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "GUSTI ASAEPI PANUNTUN",
+            "nis": "2526.134",
+            "nisn": "0096799390",
+            "kelas": "XI MP 2",
+            "email": "2526.134@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HUMAIDI RAHMAN",
+            "nis": "2526.135",
+            "nisn": "0099362505",
+            "kelas": "XI MP 2",
+            "email": "2526.135@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JESSIKA SUTHIO",
+            "nis": "2526.136",
+            "nisn": "0102008910",
+            "kelas": "XI MP 2",
+            "email": "2526.136@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KISTY LOURENSIA SISWANTO",
+            "nis": "2526.137",
+            "nisn": "0107048021",
+            "kelas": "XI MP 2",
+            "email": "2526.137@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MARCELA MAULINA DEVI",
+            "nis": "2526.138",
+            "nisn": "0093257094",
+            "kelas": "XI MP 2",
+            "email": "2526.138@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD RIZKY",
+            "nis": "2526.139",
+            "nisn": "0096925800",
+            "kelas": "XI MP 2",
+            "email": "2526.139@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MULKI SULAIMAN",
+            "nis": "2526.140",
+            "nisn": "0105316108",
+            "kelas": "XI MP 2",
+            "email": "2526.140@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUTRI ANDRIYANI",
+            "nis": "2526.141",
+            "nisn": "0105948996",
+            "kelas": "XI MP 2",
+            "email": "2526.141@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUTRI AWALLIYA AFRILLIYANI",
+            "nis": "2526.142",
+            "nisn": "0102974439",
+            "kelas": "XI MP 2",
+            "email": "2526.142@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "QUROTUL AENI",
+            "nis": "2526.143",
+            "nisn": "0105603176",
+            "kelas": "XI MP 2",
+            "email": "2526.143@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RENATA",
+            "nis": "2526.144",
+            "nisn": "0099656814",
+            "kelas": "XI MP 2",
+            "email": "2526.144@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "REVANNO APRILIAN GUNAWAN",
+            "nis": "2526.145",
+            "nisn": "0106734705",
+            "kelas": "XI MP 2",
+            "email": "2526.145@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAFITRI",
+            "nis": "2526.146",
+            "nisn": "0107584434",
+            "kelas": "XI MP 2",
+            "email": "2526.146@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SINDI OLIVIA",
+            "nis": "2526.147",
+            "nisn": "0107220137",
+            "kelas": "XI MP 2",
+            "email": "2526.147@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI ADIRA KANAYA",
+            "nis": "2526.148",
+            "nisn": "0104170540",
+            "kelas": "XI MP 2",
+            "email": "2526.148@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SITI KIRANA",
+            "nis": "2526.149",
+            "nisn": "0091230359",
+            "kelas": "XI MP 2",
+            "email": "2526.149@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SYAHDA AL GHINA",
+            "nis": "2526.150",
+            "nisn": "0097135024",
+            "kelas": "XI MP 2",
+            "email": "2526.150@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TASYA JESIKA",
+            "nis": "2526.151",
+            "nisn": "0101095389",
+            "kelas": "XI MP 2",
+            "email": "2526.151@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZAHWA NUR RAHMATYA",
+            "nis": "2526.152",
+            "nisn": "3105238261",
+            "kelas": "XI MP 2",
+            "email": "2526.152@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMELIA",
+            "nis": "2425.001",
+            "nisn": "3107608244",
+            "kelas": "XII AK",
+            "email": "2425.001@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Arestu Agung",
+            "nis": "2425.003",
+            "nisn": "0096986270",
+            "kelas": "XII AK",
+            "email": "2425.003@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DIKI RAMDANI WIGUNA",
+            "nis": "2425.004",
+            "nisn": "3086296112",
+            "kelas": "XII AK",
+            "email": "2425.004@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DONA ALIZA ANDRIYANI",
+            "nis": "2425.005",
+            "nisn": "0081222461",
+            "kelas": "XII AK",
+            "email": "2425.005@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DUTA KAFATUL SYAHDAN",
+            "nis": "2425.006",
+            "nisn": "0097188333",
+            "kelas": "XII AK",
+            "email": "2425.006@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FITRI WULANSARI",
+            "nis": "2425.007",
+            "nisn": "0098628088",
+            "kelas": "XII AK",
+            "email": "2425.007@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Gofar",
+            "nis": "2425.008",
+            "nisn": "0089852884",
+            "kelas": "XII AK",
+            "email": "2425.008@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JESSIKA",
+            "nis": "2425.009",
+            "nisn": "0092186566",
+            "kelas": "XII AK",
+            "email": "2425.009@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KHANTI DEWI",
+            "nis": "2425.01",
+            "nisn": "0087517154",
+            "kelas": "XII AK",
+            "email": "2425.01@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MEYSA NUR AFRIYANITA",
+            "nis": "2425.016",
+            "nisn": "3086280023",
+            "kelas": "XII AK",
+            "email": "2425.016@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MOHAMAD VANSHERR HUBEIS",
+            "nis": "2425.015",
+            "nisn": "0093227991",
+            "kelas": "XII AK",
+            "email": "2425.015@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Muhamad Gunawan",
+            "nis": "2425.012",
+            "nisn": "0098151338",
+            "kelas": "XII AK",
+            "email": "2425.012@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD HAMZAH",
+            "nis": "2425.013",
+            "nisn": "3098724414",
+            "kelas": "XII AK",
+            "email": "2425.013@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD AIDIL FITRA",
+            "nis": "2425.011",
+            "nisn": "0085317551",
+            "kelas": "XII AK",
+            "email": "2425.011@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD IRVEL",
+            "nis": "2425.014",
+            "nisn": "3094165175",
+            "kelas": "XII AK",
+            "email": "2425.014@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAZLA DEYANA WIJAYA",
+            "nis": "2425.16",
+            "nisn": "0098843031",
+            "kelas": "XII AK",
+            "email": "2425.16@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NAZWA PUTRI FEBRIYANI",
+            "nis": "2425.018",
+            "nisn": "0098561775",
+            "kelas": "XII AK",
+            "email": "2425.018@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NIKEN AZZAHRA",
+            "nis": "2425.019",
+            "nisn": "3096484578",
+            "kelas": "XII AK",
+            "email": "2425.019@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NIKO SATRIO ANDRA PANGESTU",
+            "nis": "2425.02",
+            "nisn": "0095075336",
+            "kelas": "XII AK",
+            "email": "2425.02@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "OTNIEL KORNELIUS WIJAYA",
+            "nis": "2425.021",
+            "nisn": "0081384740",
+            "kelas": "XII AK",
+            "email": "2425.021@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Putri Aprilia",
+            "nis": "2425.022",
+            "nisn": "0092059891",
+            "kelas": "XII AK",
+            "email": "2425.022@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Rayraka Prima Jaka Rahmanda",
+            "nis": "2425.157",
+            "nisn": "0097252742",
+            "kelas": "XII AK",
+            "email": "2425.157@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIFKI HILMAN",
+            "nis": "2425.023",
+            "nisn": "0085056887",
+            "kelas": "XII AK",
+            "email": "2425.023@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIFQY PUTRA ARDHANI",
+            "nis": "2425.024",
+            "nisn": "0084761019",
+            "kelas": "XII AK",
+            "email": "2425.024@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Rizky Kurniawan",
+            "nis": "2425.025",
+            "nisn": "0083437753",
+            "kelas": "XII AK",
+            "email": "2425.025@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Salsabil Putri Aprillia",
+            "nis": "2425.026",
+            "nisn": "0095228812",
+            "kelas": "XII AK",
+            "email": "2425.026@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Sazkia Nisa Bela",
+            "nis": "2425.027",
+            "nisn": "0089947122",
+            "kelas": "XII AK",
+            "email": "2425.027@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Shyfa Nuraisa",
+            "nis": "2425.028",
+            "nisn": "0087975450",
+            "kelas": "XII AK",
+            "email": "2425.028@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Sulthoni Rahmat",
+            "nis": "2425.029",
+            "nisn": "0098633329",
+            "kelas": "XII AK",
+            "email": "2425.029@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SURYA DININGRAT",
+            "nis": "2425.03",
+            "nisn": "0079638431",
+            "kelas": "XII AK",
+            "email": "2425.03@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TORIKOL MAHDI",
+            "nis": "2425.031",
+            "nisn": "0083233218",
+            "kelas": "XII AK",
+            "email": "2425.031@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Tri Pujianti",
+            "nis": "2425.032",
+            "nisn": "0086826678",
+            "kelas": "XII AK",
+            "email": "2425.032@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Vincent Faishal Maulana",
+            "nis": "2425.033",
+            "nisn": "0075709183",
+            "kelas": "XII AK",
+            "email": "2425.033@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Viola Citra Ismalia",
+            "nis": "2425.034",
+            "nisn": "0099647641",
+            "kelas": "XII AK",
+            "email": "2425.034@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "YAYAN KAMILAH",
+            "nis": "2425.035",
+            "nisn": "3099961806",
+            "kelas": "XII AK",
+            "email": "2425.035@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZASKIA ANASTASA",
+            "nis": "2425.036",
+            "nisn": "3090452557",
+            "kelas": "XII AK",
+            "email": "2425.036@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZHASTYA LENI DIANA",
+            "nis": "2425.037",
+            "nisn": "0095859498",
+            "kelas": "XII AK",
+            "email": "2425.037@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Ade Ismail",
+            "nis": "2425.114",
+            "nisn": "0079283344",
+            "kelas": "XII BD",
+            "email": "2425.114@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AHMAD FAQIH SYAMIL",
+            "nis": "2425.115",
+            "nisn": "0089707961",
+            "kelas": "XII BD",
+            "email": "2425.115@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AHMAD FAUZAN",
+            "nis": "2425.116",
+            "nisn": "3090781083",
+            "kelas": "XII BD",
+            "email": "2425.116@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALIA RAHADATUL AISY",
+            "nis": "2425.117",
+            "nisn": "0092674174",
+            "kelas": "XII BD",
+            "email": "2425.117@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALIF FANSYAH",
+            "nis": "2425.118",
+            "nisn": "0073189854",
+            "kelas": "XII BD",
+            "email": "2425.118@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALQUEENA FAATIHAH GUNAWAN",
+            "nis": "2425.119",
+            "nisn": "0082807916",
+            "kelas": "XII BD",
+            "email": "2425.119@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANDRI",
+            "nis": "2425.12",
+            "nisn": "0085122135",
+            "kelas": "XII BD",
+            "email": "2425.12@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANGLING DARMA",
+            "nis": "2425.121",
+            "nisn": "0089396057",
+            "kelas": "XII BD",
+            "email": "2425.121@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CHESA ELVANIA",
+            "nis": "2425.123",
+            "nisn": "0085573503",
+            "kelas": "XII BD",
+            "email": "2425.123@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DAN'NIS",
+            "nis": "2425.158",
+            "nisn": "0087604753",
+            "kelas": "XII BD",
+            "email": "2425.158@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Elvira Farhana Basyarahil",
+            "nis": "2425.124",
+            "nisn": "0092391483",
+            "kelas": "XII BD",
+            "email": "2425.124@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Ferra Amalia",
+            "nis": "2425.125",
+            "nisn": "0088339098",
+            "kelas": "XII BD",
+            "email": "2425.125@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HAGI LUDIRA",
+            "nis": "2425.126",
+            "nisn": "3087933897",
+            "kelas": "XII BD",
+            "email": "2425.126@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HOIRUL KAMELIA",
+            "nis": "2425.127",
+            "nisn": "0082393543",
+            "kelas": "XII BD",
+            "email": "2425.127@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JASKIA ANANDA",
+            "nis": "2425.128",
+            "nisn": "0089621724",
+            "kelas": "XII BD",
+            "email": "2425.128@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "JUNITA AULIA",
+            "nis": "2425.129",
+            "nisn": "3085369234",
+            "kelas": "XII BD",
+            "email": "2425.129@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD RENDI",
+            "nis": "2425.133",
+            "nisn": "0097386965",
+            "kelas": "XII BD",
+            "email": "2425.133@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Muhamad Yusuf",
+            "nis": "2425.136",
+            "nisn": "0085888805",
+            "kelas": "XII BD",
+            "email": "2425.136@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FAUZAN",
+            "nis": "2425.131",
+            "nisn": "0099572121",
+            "kelas": "XII BD",
+            "email": "2425.131@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Muhammad Raihan",
+            "nis": "2425.134",
+            "nisn": "3095738472",
+            "kelas": "XII BD",
+            "email": "2425.134@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD VIDYANSYAH",
+            "nis": "2425.135",
+            "nisn": "0077344501",
+            "kelas": "XII BD",
+            "email": "2425.135@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUTIARA SAFIRA",
+            "nis": "2425.137",
+            "nisn": "0079898508",
+            "kelas": "XII BD",
+            "email": "2425.137@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Nurul Aini",
+            "nis": "2425.138",
+            "nisn": "0095215415",
+            "kelas": "XII BD",
+            "email": "2425.138@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NURUL MULYANAH",
+            "nis": "2425.139",
+            "nisn": "0092352733",
+            "kelas": "XII BD",
+            "email": "2425.139@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUTRI ALISA",
+            "nis": "2425.14",
+            "nisn": "0095986846",
+            "kelas": "XII BD",
+            "email": "2425.14@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "REGITA RIZKI AMALIA",
+            "nis": "2425.141",
+            "nisn": "0089800117",
+            "kelas": "XII BD",
+            "email": "2425.141@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RINI NOPITA",
+            "nis": "2425.142",
+            "nisn": "0093074252",
+            "kelas": "XII BD",
+            "email": "2425.142@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Rio Saputra",
+            "nis": "2425.143",
+            "nisn": "0095596680",
+            "kelas": "XII BD",
+            "email": "2425.143@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Riovalri Hamid",
+            "nis": "2425.144",
+            "nisn": "0078496297",
+            "kelas": "XII BD",
+            "email": "2425.144@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Riska Pitri Yeni",
+            "nis": "2425.145",
+            "nisn": "0078376369",
+            "kelas": "XII BD",
+            "email": "2425.145@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIZKI",
+            "nis": "2425.146",
+            "nisn": "0091293122",
+            "kelas": "XII BD",
+            "email": "2425.146@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Sakinah Tunnufus",
+            "nis": "2425.147",
+            "nisn": "3098650573",
+            "kelas": "XII BD",
+            "email": "2425.147@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SALSABILA RAMADANIA",
+            "nis": "2425.148",
+            "nisn": "0089745981",
+            "kelas": "XII BD",
+            "email": "2425.148@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Satria Putra Dwijaya",
+            "nis": "2425.149",
+            "nisn": "0092059682",
+            "kelas": "XII BD",
+            "email": "2425.149@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Sayyid Shiyam",
+            "nis": "2425.15",
+            "nisn": "3092149270",
+            "kelas": "XII BD",
+            "email": "2425.15@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SIFA AULIA",
+            "nis": "2425.151",
+            "nisn": "3095865945",
+            "kelas": "XII BD",
+            "email": "2425.151@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Sifa Faujiah",
+            "nis": "2425.152",
+            "nisn": "0105374688",
+            "kelas": "XII BD",
+            "email": "2425.152@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Sifa Nur Riskiya Sopa",
+            "nis": "2425.153",
+            "nisn": "0091447197",
+            "kelas": "XII BD",
+            "email": "2425.153@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SYIFA NUR FADHILAH",
+            "nis": "2425.154",
+            "nisn": "0088103594",
+            "kelas": "XII BD",
+            "email": "2425.154@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ADELIA RAMADANI",
+            "nis": "2425.039",
+            "nisn": "0083455063",
+            "kelas": "XII MP 1",
+            "email": "2425.039@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AHMAD NATA SAPUTRA",
+            "nis": "2425.04",
+            "nisn": "0086509326",
+            "kelas": "XII MP 1",
+            "email": "2425.04@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALIFA MAULIDIAH",
+            "nis": "2425.041",
+            "nisn": "0095941569",
+            "kelas": "XII MP 1",
+            "email": "2425.041@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALMAIRA ANASTASYA",
+            "nis": "2425.042",
+            "nisn": "0094331791",
+            "kelas": "XII MP 1",
+            "email": "2425.042@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Alya friskandardini",
+            "nis": "2425.043",
+            "nisn": "0097300265",
+            "kelas": "XII MP 1",
+            "email": "2425.043@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALYA KIASATINA PUTRI",
+            "nis": "2425.044",
+            "nisn": "3090461180",
+            "kelas": "XII MP 1",
+            "email": "2425.044@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANABELLA AURELL",
+            "nis": "2425.045",
+            "nisn": "0098510826",
+            "kelas": "XII MP 1",
+            "email": "2425.045@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ANDIKA PANGESTU",
+            "nis": "2425.038",
+            "nisn": "0097388017",
+            "kelas": "XII MP 1",
+            "email": "2425.038@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Clara Julistya",
+            "nis": "2425.046",
+            "nisn": "3094603485",
+            "kelas": "XII MP 1",
+            "email": "2425.046@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "CLARISA WIJAYA",
+            "nis": "2425.047",
+            "nisn": "0094242177",
+            "kelas": "XII MP 1",
+            "email": "2425.047@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEA FEBRIYANTI",
+            "nis": "2425.048",
+            "nisn": "0098442496",
+            "kelas": "XII MP 1",
+            "email": "2425.048@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DEO VINKO HATI SAMUDRA",
+            "nis": "2425.049",
+            "nisn": "0093585084",
+            "kelas": "XII MP 1",
+            "email": "2425.049@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DIAZ LUTH ALIF",
+            "nis": "2425.051",
+            "nisn": "0088638670",
+            "kelas": "XII MP 1",
+            "email": "2425.051@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "FATUR RISKI",
+            "nis": "2425.052",
+            "nisn": "0088869478",
+            "kelas": "XII MP 1",
+            "email": "2425.052@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HAFITRI",
+            "nis": "2425.053",
+            "nisn": "0085982677",
+            "kelas": "XII MP 1",
+            "email": "2425.053@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Hanifa Hilyani",
+            "nis": "2425.054",
+            "nisn": "3108352114",
+            "kelas": "XII MP 1",
+            "email": "2425.054@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KEVIN HERMAWAN",
+            "nis": "2425.055",
+            "nisn": "3095736848",
+            "kelas": "XII MP 1",
+            "email": "2425.055@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Maulida Nisa Mubarokah",
+            "nis": "2425.06",
+            "nisn": "0091552754",
+            "kelas": "XII MP 1",
+            "email": "2425.06@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MENTARI",
+            "nis": "2425.061",
+            "nisn": "3074201099",
+            "kelas": "XII MP 1",
+            "email": "2425.061@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD REYHAN",
+            "nis": "2425.059",
+            "nisn": "0076329465",
+            "kelas": "XII MP 1",
+            "email": "2425.059@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Muhammad Andika Raya",
+            "nis": "2425.058",
+            "nisn": "0094353709",
+            "kelas": "XII MP 1",
+            "email": "2425.058@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NUR ALI YANAH",
+            "nis": "2425.062",
+            "nisn": "0091386816",
+            "kelas": "XII MP 1",
+            "email": "2425.062@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "OKTA AULIA ZAHRANI",
+            "nis": "2425.063",
+            "nisn": "0094774559",
+            "kelas": "XII MP 1",
+            "email": "2425.063@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "PUJIYANTI",
+            "nis": "2425.064",
+            "nisn": "3090188240",
+            "kelas": "XII MP 1",
+            "email": "2425.064@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "QORI DECMI SAFITRI",
+            "nis": "2425.065",
+            "nisn": "0081986280",
+            "kelas": "XII MP 1",
+            "email": "2425.065@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAYHAN JUNIANSYAH FAJRIN",
+            "nis": "2425.066",
+            "nisn": "0093325476",
+            "kelas": "XII MP 1",
+            "email": "2425.066@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RIFKY SEPYANTO RAMADHAN",
+            "nis": "2425.068",
+            "nisn": "0098747888",
+            "kelas": "XII MP 1",
+            "email": "2425.068@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAFITRI OKTAFIA",
+            "nis": "2425.069",
+            "nisn": "3086535835",
+            "kelas": "XII MP 1",
+            "email": "2425.069@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SAKILA RAMADHANI",
+            "nis": "2425.07",
+            "nisn": "3097770107",
+            "kelas": "XII MP 1",
+            "email": "2425.07@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Saskya Hidayanti Putri",
+            "nis": "2425.071",
+            "nisn": "0097368748",
+            "kelas": "XII MP 1",
+            "email": "2425.071@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SELI SEFIYANI",
+            "nis": "2425.072",
+            "nisn": "0059042870",
+            "kelas": "XII MP 1",
+            "email": "2425.072@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SELVY ELLAURA",
+            "nis": "2425.073",
+            "nisn": "0095060995",
+            "kelas": "XII MP 1",
+            "email": "2425.073@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SILVI ANGGRAENI AHMADI",
+            "nis": "2425.074",
+            "nisn": "3092380285",
+            "kelas": "XII MP 1",
+            "email": "2425.074@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "TYA USLIHA",
+            "nis": "2425.075",
+            "nisn": "0089305649",
+            "kelas": "XII MP 1",
+            "email": "2425.075@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ZALFA KAIZA ZAHARA",
+            "nis": "2425.076",
+            "nisn": "0094835916",
+            "kelas": "XII MP 1",
+            "email": "2425.076@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ADIPATI RANGGA RAMADHANI",
+            "nis": "2425.077",
+            "nisn": "3082434015",
+            "kelas": "XII MP 2",
+            "email": "2425.077@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALFADSYAH",
+            "nis": "2425.078",
+            "nisn": "3081793042",
+            "kelas": "XII MP 2",
+            "email": "2425.078@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ALYA NURSYAFA",
+            "nis": "2425.08",
+            "nisn": "0082853818",
+            "kelas": "XII MP 2",
+            "email": "2425.08@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMALLIA EKA FEBRIYANDI",
+            "nis": "2425.082",
+            "nisn": "0099022444",
+            "kelas": "XII MP 2",
+            "email": "2425.082@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "AMANDA PUTRI",
+            "nis": "2425.081",
+            "nisn": "0106152878",
+            "kelas": "XII MP 2",
+            "email": "2425.081@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ARDIANSYAH PANGESTU",
+            "nis": "2425.083",
+            "nisn": "0089858992",
+            "kelas": "XII MP 2",
+            "email": "2425.083@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "BARKAH MAULANA",
+            "nis": "2425.084",
+            "nisn": "3092725607",
+            "kelas": "XII MP 2",
+            "email": "2425.084@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DAVINA MAILA FAIZA",
+            "nis": "2425.086",
+            "nisn": "0093627103",
+            "kelas": "XII MP 2",
+            "email": "2425.086@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "DIMAS ILMIYANDI",
+            "nis": "2425.156",
+            "nisn": "0082929466",
+            "kelas": "XII MP 2",
+            "email": "2425.156@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "EKA PUSPITA SARI",
+            "nis": "2425.087",
+            "nisn": "0094991328",
+            "kelas": "XII MP 2",
+            "email": "2425.087@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "ELGA YUNITA PUTRI",
+            "nis": "2425.088",
+            "nisn": "0088799496",
+            "kelas": "XII MP 2",
+            "email": "2425.088@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Elza Zahara Putri",
+            "nis": "2425.089",
+            "nisn": "0083608516",
+            "kelas": "XII MP 2",
+            "email": "2425.089@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Haira Alisya Putri",
+            "nis": "2425.09",
+            "nisn": "0094570256",
+            "kelas": "XII MP 2",
+            "email": "2425.09@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Hartati",
+            "nis": "2425.091",
+            "nisn": "0072270174",
+            "kelas": "XII MP 2",
+            "email": "2425.091@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HASYEMI RAPSANJANI",
+            "nis": "2425.092",
+            "nisn": "0092345679",
+            "kelas": "XII MP 2",
+            "email": "2425.092@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "HERMANSYAH",
+            "nis": "2425.093",
+            "nisn": "0085279682",
+            "kelas": "XII MP 2",
+            "email": "2425.093@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Hesti Yasifa",
+            "nis": "2425.094",
+            "nisn": "3099690869",
+            "kelas": "XII MP 2",
+            "email": "2425.094@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "KARISA",
+            "nis": "2425.095",
+            "nisn": "0084455318",
+            "kelas": "XII MP 2",
+            "email": "2425.095@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Kayla Putri Firman",
+            "nis": "2425.096",
+            "nisn": "0081196250",
+            "kelas": "XII MP 2",
+            "email": "2425.096@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Maulidia Putri",
+            "nis": "2425.1",
+            "nisn": "0096857233",
+            "kelas": "XII MP 2",
+            "email": "2425.1@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MEYLANI PUTRI LESTARI",
+            "nis": "2425.101",
+            "nisn": "0096079734",
+            "kelas": "XII MP 2",
+            "email": "2425.101@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD ADAM SAPUTRA",
+            "nis": "2425.097",
+            "nisn": "0081061915",
+            "kelas": "XII MP 2",
+            "email": "2425.097@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Muhamad Fahri",
+            "nis": "2425.102",
+            "nisn": "0083010831",
+            "kelas": "XII MP 2",
+            "email": "2425.102@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD FAIS AFRIZAL",
+            "nis": "2425.103",
+            "nisn": "0091579560",
+            "kelas": "XII MP 2",
+            "email": "2425.103@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMAD RIDHO SETIYAWAN",
+            "nis": "2425.099",
+            "nisn": "0106193453",
+            "kelas": "XII MP 2",
+            "email": "2425.099@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "MUHAMMAD FAJAR SYIDIK",
+            "nis": "2425.098",
+            "nisn": "0099039282",
+            "kelas": "XII MP 2",
+            "email": "2425.098@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NIKEN AYU",
+            "nis": "2425.104",
+            "nisn": "3093815517",
+            "kelas": "XII MP 2",
+            "email": "2425.104@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "NUR HABIBAH",
+            "nis": "2425.105",
+            "nisn": "0091907888",
+            "kelas": "XII MP 2",
+            "email": "2425.105@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Pipih Muspiroh",
+            "nis": "2425.161",
+            "nisn": "0089902544",
+            "kelas": "XII MP 2",
+            "email": "2425.161@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAHMA WULANDARI",
+            "nis": "2425.106",
+            "nisn": "0096078127",
+            "kelas": "XII MP 2",
+            "email": "2425.106@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RAHMAT HIDAYATULLOH",
+            "nis": "2425.107",
+            "nisn": "3087440334",
+            "kelas": "XII MP 2",
+            "email": "2425.107@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RESTU SALSA PRILIANA",
+            "nis": "2425.108",
+            "nisn": "0092817317",
+            "kelas": "XII MP 2",
+            "email": "2425.108@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RINA RAMADANI",
+            "nis": "2425.109",
+            "nisn": "0089396376",
+            "kelas": "XII MP 2",
+            "email": "2425.109@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "RISKA AMELIA",
+            "nis": "2425.11",
+            "nisn": "0077309135",
+            "kelas": "XII MP 2",
+            "email": "2425.11@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SEFIA LAILA RAMADHANI",
+            "nis": "2425.111",
+            "nisn": "3083935422",
+            "kelas": "XII MP 2",
+            "email": "2425.111@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "SILVA ANGGRAENI AHMADI",
+            "nis": "2425.112",
+            "nisn": "3097771919",
+            "kelas": "XII MP 2",
+            "email": "2425.112@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        },
+        {
+            "nama": "Siti Aulia",
+            "nis": "2425.113",
+            "nisn": "0096818232",
+            "kelas": "XII MP 2",
+            "email": "2425.113@smkpgri5serpong.sch.id",
+            "tahun_ajaran": "2026/2027"
+        }
+    ]
+}

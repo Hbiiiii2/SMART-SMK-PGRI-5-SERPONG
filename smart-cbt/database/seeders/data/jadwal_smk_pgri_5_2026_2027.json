@@ -1,0 +1,2820 @@
+{
+    "tahun_ajaran": "2026\/2027",
+    "total_jp": 598,
+    "total_blocks": 288,
+    "classes": [
+        "X AK",
+        "X MP 1",
+        "X MP 2",
+        "X BD",
+        "XI AK 1",
+        "XI AK 2",
+        "XI MP 1",
+        "XI MP 2",
+        "XI BD",
+        "XII AK",
+        "XII MP 1",
+        "XII MP 2",
+        "XII BD"
+    ],
+    "subjects": [
+        {
+            "kode": "A.01",
+            "nama": "Pendidikan Agama Islam & Budi Pekerti"
+        },
+        {
+            "kode": "A.02",
+            "nama": "Pendidikan Pancasila"
+        },
+        {
+            "kode": "A.03",
+            "nama": "Bahasa Indonesia"
+        },
+        {
+            "kode": "A.04",
+            "nama": "Penjaskes"
+        },
+        {
+            "kode": "A.05",
+            "nama": "Sejarah"
+        },
+        {
+            "kode": "A.06",
+            "nama": "Seni Budaya"
+        },
+        {
+            "kode": "B.01",
+            "nama": "Matematika"
+        },
+        {
+            "kode": "B.02",
+            "nama": "Bahasa Inggris"
+        },
+        {
+            "kode": "B.03",
+            "nama": "Informatika"
+        },
+        {
+            "kode": "B.04",
+            "nama": "Ilmu Pengetahuan Alam dan Sosial (IPAS)"
+        },
+        {
+            "kode": "06",
+            "nama": "Kreativitas, Inovasi dan Kewirausahaan"
+        },
+        {
+            "kode": "08",
+            "nama": "Mata Pelajaran Pilihan"
+        },
+        {
+            "kode": "08-DG",
+            "nama": "Mapel Pilihan (Desain Grafis)"
+        },
+        {
+            "kode": "09-BTQ",
+            "nama": "Mulok (Baca Tulis Al-Qur'an)"
+        },
+        {
+            "kode": "09-PS",
+            "nama": "Mulok (Pencak Silat)"
+        },
+        {
+            "kode": "AKL-A1",
+            "nama": "Lingkup Kerja pada Bidang AKL & Etika Profesi"
+        },
+        {
+            "kode": "AKL-A2",
+            "nama": "Perbankan Dasar"
+        },
+        {
+            "kode": "AKL-A3",
+            "nama": "Keselamatan dan Kesehatan Kerja Lingkungan Hidup (K3LH)"
+        },
+        {
+            "kode": "AKL-A9",
+            "nama": "Akuntansi Dasar"
+        },
+        {
+            "kode": "AKL-A15",
+            "nama": "Aplikasi Pengolah Angka\/Spreadsheet"
+        },
+        {
+            "kode": "AKL-B1",
+            "nama": "Akuntansi Perusahaan Jasa, Dagang & Manufaktur"
+        },
+        {
+            "kode": "AKL-B3-AK",
+            "nama": "Akuntansi Keuangan"
+        },
+        {
+            "kode": "AKL-B3-KP",
+            "nama": "Akuntansi Berbasis Komputer (MYOB\/Accurate)"
+        },
+        {
+            "kode": "AKL-B4",
+            "nama": "Administrasi Perpajakan"
+        },
+        {
+            "kode": "AKL-B6",
+            "nama": "Penyusunan Laporan Keuangan"
+        },
+        {
+            "kode": "AKL-B7",
+            "nama": "Audit Dasar"
+        },
+        {
+            "kode": "AKL-B15",
+            "nama": "Akuntansi Pemerintahan\/Lembaga"
+        },
+        {
+            "kode": "AKL-B23",
+            "nama": "Projek Berbasis Dunia Kerja"
+        },
+        {
+            "kode": "MP-A3",
+            "nama": "Dokumen Berbasis Digital"
+        },
+        {
+            "kode": "MP-A4-S",
+            "nama": "Sistem Informasi dan Komunikasi Organisasi"
+        },
+        {
+            "kode": "MP-A4-T",
+            "nama": "Teknik Dasar Perkantoran di Bidang MPLB"
+        },
+        {
+            "kode": "MP-A5",
+            "nama": "Teknik Dasar Aktivitas Perkantoran"
+        },
+        {
+            "kode": "MP-A6",
+            "nama": "Peralatan dan Aplikasi Teknologi Perkantoran"
+        },
+        {
+            "kode": "MP-B2",
+            "nama": "Pengelolaan Administrasi Umum"
+        },
+        {
+            "kode": "MP-B3",
+            "nama": "Komunikasi di Tempat Kerja"
+        },
+        {
+            "kode": "MP-B4",
+            "nama": "Pengelolaan Kearsipan"
+        },
+        {
+            "kode": "MP-B5-RP",
+            "nama": "Pengelolaan Rapat\/Pertemuan"
+        },
+        {
+            "kode": "MP-B5-TP",
+            "nama": "Teknologi Perkantoran"
+        },
+        {
+            "kode": "MP-B6",
+            "nama": "Pelayanan kepada Kolega dan Pelanggan"
+        },
+        {
+            "kode": "BD-A1",
+            "nama": "Proses Bisnis Bidang Pemasaran"
+        },
+        {
+            "kode": "BD-A2",
+            "nama": "Pemasaran Barang dan Jasa"
+        },
+        {
+            "kode": "BD-A3",
+            "nama": "Berkomunikasi dengan Pelanggan"
+        },
+        {
+            "kode": "BD-A4",
+            "nama": "Perilaku Konsumen"
+        },
+        {
+            "kode": "BD-A5",
+            "nama": "Pelayanan Penjualan"
+        },
+        {
+            "kode": "BD-B1",
+            "nama": "Digital Advertising"
+        },
+        {
+            "kode": "BD-B3",
+            "nama": "Content Marketing"
+        },
+        {
+            "kode": "BD-B6",
+            "nama": "Customer Relationship Management (CRM)"
+        },
+        {
+            "kode": "BD-B9",
+            "nama": "Search Engine Optimization (SEO)"
+        },
+        {
+            "kode": "BD-B10",
+            "nama": "Search Engine Marketing (SEM)"
+        },
+        {
+            "kode": "BD-B12",
+            "nama": "E-Commerce"
+        },
+        {
+            "kode": "BD-B13",
+            "nama": "Branding"
+        }
+    ],
+    "schedule_blocks": [
+        {
+            "kelas": "X AK",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 4
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Senin",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 1
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 3
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 1
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Selasa",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-A1",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 3
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Rabu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "RH",
+            "subject_kode": "A.04",
+            "jp": 3
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-A3",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Kamis",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-A9",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 3
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "AF",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Jumat",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "DY",
+            "subject_kode": "A.06",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 1
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SJ",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "AR",
+            "subject_kode": "AKL-A15",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Sabtu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "X AK",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "MK",
+            "subject_kode": "AKL-A2",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 4
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Senin",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Senin",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DY",
+            "subject_kode": "A.06",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "RH",
+            "subject_kode": "A.04",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:50:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A3",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "16:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A4-S",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 4
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AF",
+            "subject_kode": "09-BTQ",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "AF",
+            "subject_kode": "09-BTQ",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "SJ",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A4-S",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A5",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A5",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-A4-T",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-A6",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-A4-T",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Senin",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SJ",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A3",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "RH",
+            "subject_kode": "A.04",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "DY",
+            "subject_kode": "A.06",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 3
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "13:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-A4-T",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "13:30:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-A6",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A4-S",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A5",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-A5",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 4
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 1
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 2
+        },
+        {
+            "kelas": "X MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 3
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Senin",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "RH",
+            "subject_kode": "A.04",
+            "jp": 3
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-A3",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Selasa",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "16:50:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-A4",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Selasa",
+            "jam_mulai": "16:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-A5",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "WS",
+            "subject_kode": "B.03",
+            "jp": 3
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "EY",
+            "subject_kode": "B.04",
+            "jp": 4
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-A1",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-A1",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-A2",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 4
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DY",
+            "subject_kode": "A.06",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "DY",
+            "subject_kode": "A.06",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "SJ",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-A3",
+            "jp": 1
+        },
+        {
+            "kelas": "X BD",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-A3",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "HM",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B3-KP",
+            "jp": 4
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B1",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B1",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "DY",
+            "subject_kode": "08-DG",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Kamis",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-B15",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Jumat",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "MK",
+            "subject_kode": "AKL-B3-AK",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "MK",
+            "subject_kode": "AKL-B3-AK",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 4
+        },
+        {
+            "kelas": "XI AK 1",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "AR",
+            "subject_kode": "AKL-B4",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Senin",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Selasa",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B3-KP",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B3-KP",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "HM",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DY",
+            "subject_kode": "08-DG",
+            "jp": 3
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 4
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B3-KP",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "MK",
+            "subject_kode": "AKL-B3-AK",
+            "jp": 4
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-B15",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-B15",
+            "jp": 1
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B1",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Sabtu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "AR",
+            "subject_kode": "AKL-B4",
+            "jp": 2
+        },
+        {
+            "kelas": "XI AK 2",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "FY",
+            "subject_kode": "MP-B6",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 4
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B2",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B2",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "HM",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 4
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DY",
+            "subject_kode": "08-DG",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B4",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B5-RP",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B5-RP",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B5-TP",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B3",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B3",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Senin",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Senin",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "HM",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B4",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "13:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "13:30:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "FY",
+            "subject_kode": "MP-B6",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DY",
+            "subject_kode": "08-DG",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B5-RP",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B2",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "IW",
+            "subject_kode": "B.02",
+            "jp": 4
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:50:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "16:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DY",
+            "subject_kode": "08-DG",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B3",
+            "jp": 3
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B5-TP",
+            "jp": 1
+        },
+        {
+            "kelas": "XI MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B5-TP",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "IW",
+            "subject_kode": "BD-B3",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DY",
+            "subject_kode": "08-DG",
+            "jp": 3
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Senin",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "RD",
+            "subject_kode": "A.04",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "HM",
+            "subject_kode": "A.05",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-B13",
+            "jp": 3
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:50:00",
+            "teacher_code": "AS",
+            "subject_kode": "BD-B6",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Selasa",
+            "jam_mulai": "16:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "YL",
+            "subject_kode": "BD-B1",
+            "jp": 4
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Rabu",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SJ",
+            "subject_kode": "09-BTQ",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "PO",
+            "subject_kode": "A.03",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Kamis",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-B13",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "06",
+            "jp": 3
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Jumat",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-B13",
+            "jp": 3
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XI BD",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "DH",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B1",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-B23",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Selasa",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-B23",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NF",
+            "subject_kode": "AKL-B23",
+            "jp": 1
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Rabu",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AR",
+            "subject_kode": "AKL-B7",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "DH",
+            "subject_kode": "AKL-B1",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Kamis",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "DS",
+            "subject_kode": "09-PS",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "MA",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "DH",
+            "subject_kode": "08",
+            "jp": 4
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AR",
+            "subject_kode": "AKL-B7",
+            "jp": 2
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "MK",
+            "subject_kode": "AKL-B6",
+            "jp": 4
+        },
+        {
+            "kelas": "XII AK",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "DS",
+            "subject_kode": "09-PS",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "ES",
+            "subject_kode": "MP-B5-RP",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B2",
+            "jp": 4
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Selasa",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "WS",
+            "subject_kode": "08",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B4",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Rabu",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B6",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "MA",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B5-TP",
+            "jp": 4
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "WS",
+            "subject_kode": "08",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "WS",
+            "subject_kode": "08",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B4",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "ES",
+            "subject_kode": "MP-B3",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 1",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Senin",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B2",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "YL",
+            "subject_kode": "MP-B2",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B4",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "ES",
+            "subject_kode": "MP-B5-RP",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "ES",
+            "subject_kode": "MP-B3",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NP",
+            "subject_kode": "MP-B4",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "DS",
+            "subject_kode": "09-PS",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B6",
+            "jp": 2
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "WS",
+            "subject_kode": "08",
+            "jp": 4
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B5-TP",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "NB",
+            "subject_kode": "MP-B5-TP",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "MA",
+            "subject_kode": "A.03",
+            "jp": 3
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XII MP 2",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Senin",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "YL",
+            "subject_kode": "08",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Senin",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-B9",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Senin",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Senin",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "YS",
+            "subject_kode": "A.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Senin",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "IW",
+            "subject_kode": "BD-B12",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Selasa",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "AF",
+            "subject_kode": "A.01",
+            "jp": 3
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Selasa",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Selasa",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-B9",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Selasa",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-B9",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Selasa",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "YL",
+            "subject_kode": "08",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Rabu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:00:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Rabu",
+            "jam_mulai": "14:00:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-B10",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Rabu",
+            "jam_mulai": "15:00:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "IW",
+            "subject_kode": "BD-B12",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Rabu",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "IW",
+            "subject_kode": "BD-B12",
+            "jp": 3
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Kamis",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "HM",
+            "subject_kode": "BD-B10",
+            "jp": 3
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Kamis",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Kamis",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "NS",
+            "subject_kode": "B.01",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Kamis",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "DS",
+            "subject_kode": "09-PS",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Jumat",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-B13",
+            "jp": 3
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Jumat",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:30:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Jumat",
+            "jam_mulai": "15:50:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "AS",
+            "subject_kode": "06",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Jumat",
+            "jam_mulai": "16:20:00",
+            "jam_selesai": "17:20:00",
+            "teacher_code": "FY",
+            "subject_kode": "BD-B13",
+            "jp": 2
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Sabtu",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "14:30:00",
+            "teacher_code": "SH",
+            "subject_kode": "B.02",
+            "jp": 3
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Sabtu",
+            "jam_mulai": "14:30:00",
+            "jam_selesai": "15:00:00",
+            "teacher_code": "MA",
+            "subject_kode": "A.03",
+            "jp": 1
+        },
+        {
+            "kelas": "XII BD",
+            "hari": "Sabtu",
+            "jam_mulai": "15:20:00",
+            "jam_selesai": "16:20:00",
+            "teacher_code": "MA",
+            "subject_kode": "A.03",
+            "jp": 2
+        }
+    ]
+}
